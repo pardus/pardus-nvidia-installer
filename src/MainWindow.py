@@ -26,26 +26,28 @@ class MainWindow(object):
         self.ui_gpu_model_label = self.getUI("ui_gpu_model_label")
         self.ui_gpu_pciid_label = self.getUI("ui_gpu_pciid_label")
 
-        lspci_command = "lspci -nn | grep -i NVIDIA | sed -n 's/.*\[\(.*\)\].*/[\\1]/p'"
-        self.device_id = subprocess.getoutput(lspci_command)[1:-1].split(":")[1].upper()
-        print(self.device_id)
-        print(type(self.device_id))
+        lspci_command = "lspci -nn | grep VGA"
+        self.device_id = subprocess.getoutput(lspci_command).split(":")[-1][0:4].upper()
+        print("device id : ", self.device_id)
+
         with open(os.path.dirname(__file__) + "/../data/nvidia-pci.yaml", "r") as f:
             self.nvidia_devices = list(yaml.safe_load_all(f))[0]["nvidia"]
 
         self.supported_driver = self.fun_find_driver()
+        print(self.supported_driver)
         self.ui_gpu_brand_label.set_label("Nvidia Corporation")
         self.ui_gpu_model_label.set_label(self.supported_driver["name"])
-        self.ui_gpu_pciid_label.set_label(self.supported_driver["pci"])
+        self.ui_gpu_pciid_label.set_label(str(self.supported_driver["pci"]))
         self.ui_main_window.show_all()
 
     def getUI(self, object_name):
         return self.gtk_builder.get_object(object_name)
 
     def fun_find_driver(self):
+        supported_driver = {}
         for drivers in self.nvidia_devices:
             for driver in self.nvidia_devices[drivers]:
-                pci = driver["pci"]
+                pci = str(driver["pci"])
                 if pci == self.device_id:
                     supported_driver = {"driver": drivers}
                     supported_driver.update(driver)
