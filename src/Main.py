@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import gi
 import sys
 
@@ -53,5 +54,6 @@ class Application(Gtk.Application):
         return 0
 
 
-app = Application()
-app.run(sys.argv)
+if __name__ == '__main__':
+    app = Application()
+    app.run(sys.argv)
