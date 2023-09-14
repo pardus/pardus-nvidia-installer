@@ -196,7 +196,6 @@
                           <object class="GtkLabel" id="ui_proprietary_driver_name_label">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="halign">start</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -208,7 +207,6 @@
                           <object class="GtkLabel" id="ui_proprietary_driver_version_label">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="halign">start</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
