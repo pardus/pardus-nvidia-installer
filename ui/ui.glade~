@@ -62,7 +62,6 @@
             <property name="can-focus">False</property>
             <property name="orientation">vertical</property>
             <property name="spacing">13</property>
-            <property name="homogeneous">True</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
@@ -78,6 +77,17 @@
                 <property name="expand">False</property>
                 <property name="fill">False</property>
                 <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="ui_cur_selected_drv_label">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
               </packing>
             </child>
             <child>
@@ -139,10 +149,11 @@
                           <object class="GtkLabel" id="ui_opensource_driver_label">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="halign">start</property>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
                             <property name="position">2</property>
                           </packing>
                         </child>
@@ -159,7 +170,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -169,6 +180,7 @@
                 <property name="receives-default">False</property>
                 <property name="active">True</property>
                 <property name="draw-indicator">True</property>
+                <property name="group">ui_opensource_driver_radio_button</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
@@ -196,6 +208,7 @@
                           <object class="GtkLabel" id="ui_proprietary_driver_name_label">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="halign">start</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -207,6 +220,7 @@
                           <object class="GtkLabel" id="ui_proprietary_driver_version_label">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="halign">start</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -220,8 +234,8 @@
                             <property name="can-focus">False</property>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
                             <property name="position">2</property>
                           </packing>
                         </child>
@@ -238,11 +252,49 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">3</property>
               </packing>
             </child>
             <child>
-              <placeholder/>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">end</property>
+                <property name="spacing">13</property>
+                <property name="baseline-position">bottom</property>
+                <child>
+                  <object class="GtkButton" id="ui_apply_chg_button">
+                    <property name="label" translatable="yes">Apply Changes</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <property name="image-position">right</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="ui_cancel_button">
+                    <property name="label" translatable="yes">Cancel</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">False</property>
+                <property name="position">4</property>
+              </packing>
             </child>
           </object>
           <packing>
