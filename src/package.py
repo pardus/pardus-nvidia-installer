@@ -1,4 +1,8 @@
+import gi
+import os
 import apt
+import subprocess
+from gi.repository import GLib, Gio
 
 cache = apt.Cache()
 
@@ -13,3 +17,7 @@ def get_pkg_info(package_name: str):
         name = pkg.versions[0].raw_description
 
     return {"ver": version, "name": name}
+
+
+def pkg_test():
+    cache.update()

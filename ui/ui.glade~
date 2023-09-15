@@ -277,6 +277,19 @@
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkLockButton">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="text-lock" translatable="yes">Locked</property>
+                    <property name="text-unlock" translatable="yes">Unlocked</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkButton" id="ui_cancel_button">
                     <property name="label" translatable="yes">Cancel</property>
                     <property name="visible">True</property>

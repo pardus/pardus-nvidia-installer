@@ -4,12 +4,15 @@ import apt
 import yaml
 import nvidia
 import package
+import subprocess
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, GObject
+gi.require_version("Polkit", "1.0")
+from gi.repository import Gtk, GObject, Polkit, GLib
+
 
 cache = apt.Cache()
-
+act_id = "org.freedesktop.packagekit.package-install"
 
 drivers = {"current": "nvidia-driver", "470": "nvidia-tesla-470-driver"}
 
@@ -40,6 +43,23 @@ class MainWindow(object):
 
         self.ui_apply_btn = self.getUI("ui_apply_chg_button")
         self.ui_cancel_btn = self.getUI("ui_cancel_button")
+        self.lock_btn = self.getUI("lock_btn")
+
+        self.root_permission = None
+        if Polkit:
+            try:
+                self.root_permission = Polkit.Permission.new_sync(act_id, None, None)
+            except GLib.GError:
+                pass
+
+        if self.root_permission is not None:
+            self.root_permission.connect(
+                "notify::allowed", self.on_root_permission_changed
+            )
+
+        self.lock_btn.connect("notify::permission", self.on_root_permission_changed)
+        prem = Polkit.Permission.new_sync(act_id, None, None)
+        self.lock_btn.set_permission(prem)
 
         self.ui_os_drv_rb.connect("toggled", self.on_drv_toggled, "nouveau")
         self.ui_nv_drv_rb.connect(
@@ -140,3 +160,14 @@ class MainWindow(object):
 
     def fun_is_driver_in_use(self, driver: str):
         return self.nvidia_device["cur_driver"] == driver
+
+    def on_root_permission_changed(self, permission, blank):
+        permission = self.lock_btn.get_permission()
+        try:
+            if permission:
+                allowed = permission.get_allowed()
+                if allowed:
+                    package.pkg_test()
+
+        except GLib.GError:
+            print("now allowed")
