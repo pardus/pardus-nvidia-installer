@@ -5,13 +5,31 @@ import apt
 import sys
 import subprocess
 from gi.repository import GLib, Gio
-
-cache = apt.Cache()
+from package_progress import CustomAcquireProgress, CustomInstallProgress
 
 
 def update():
+    cache = apt.Cache()
     cache.update()
-    # res = subprocess.getoutput("apt update")
+
+
+def install(package_names):
+    cache = apt.Cache()
+    cache.update()
+    cache.open()
+
+    for package_name in package_names:
+        if not cache[package_name].is_installed:
+            pkg = cache[package_name]
+            pkg.mark_install()
+    try:
+        acq_prs = CustomAcquireProgress()
+        ins_prs = CustomInstallProgress()
+        cache.commit(acq_prs, ins_prs)
+        print(f"package {package_name} installed successfully")
+
+    except Exception as e:
+        print(f"error occured while installing package. err: {e}")
 
 
 def main():
@@ -19,11 +37,15 @@ def main():
     if len(args) > 1:
         if args[1] == "update":
             update()
+        if args[1] == "install":
+            install([args[2]])
+
     else:
         print("no argument passed on")
 
 
 def get_pkg_info(package_name: str):
+    cache = apt.Cache()
     pkg = cache[package_name]
     if pkg.is_installed:
         version = pkg.installed.version

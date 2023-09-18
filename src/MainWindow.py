@@ -8,6 +8,7 @@ import subprocess
 
 gi.require_version("Gtk", "3.0")
 gi.require_version("Polkit", "1.0")
+from states import pkg_ins_progress, PackageProgressState
 from gi.repository import Gtk, GObject, Polkit, GLib
 
 
@@ -19,6 +20,9 @@ drivers = {"current": "nvidia-driver", "470": "nvidia-tesla-470-driver"}
 
 class MainWindow(object):
     def __init__(self, application):
+        pkg_ins_progress = PackageProgressState()
+        pkg_ins_progress.add_observer(self.on_progress_state_changed)
+
         self.ui_interface_file = os.path.dirname(__file__) + "/../ui/ui.glade"
         try:
             self.gtk_builder = Gtk.Builder.new_from_file(self.ui_interface_file)
@@ -43,12 +47,29 @@ class MainWindow(object):
 
         self.ui_apply_btn = self.getUI("ui_apply_chg_button")
         self.ui_cancel_btn = self.getUI("ui_cancel_button")
+        self.lock_btn = self.getUI("lock_btn")
+        self.ui_status_label = self.getUI("ui_status_label")
+
+        self.root_permission = None
+        if Polkit:
+            try:
+                self.root_permission = Polkit.Permission.new_sync(act_id, None, None)
+            except GLib.GError:
+                pass
+
+        if self.root_permission is not None:
+            self.root_permission.connect(
+                "notify::allowed", self.on_root_permission_changed
+            )
+
+        self.lock_btn.connect("notify::permission", self.on_root_permission_changed)
+        prem = Polkit.Permission.new_sync(act_id, None, None)
+        self.lock_btn.set_permission(prem)
 
         self.ui_os_drv_rb.connect("toggled", self.on_drv_toggled, "nouveau")
         self.ui_nv_drv_rb.connect(
             "toggled", self.on_drv_toggled, "Nvidia Proprietary Driver"
         )
-        self.ui_apply_btn.connect("clicked", self.on_apply_changes)
 
         self.ui_main_window.set_application(application)
         self.ui_main_window.set_title("Pardus Nvidia Installer")
@@ -93,6 +114,7 @@ class MainWindow(object):
         markup = self.fun_make_label_markup(
             "Description", "Proprietary Driver", color="dodgerblue"
         )
+
         self.ui_nv_drv_lbl.set_markup(markup)
 
     def getUI(self, object_name: str):
@@ -145,19 +167,35 @@ class MainWindow(object):
     def fun_is_driver_in_use(self, driver: str):
         return self.nvidia_device["cur_driver"] == driver
 
-    def on_apply_changes(self, button):
-        print("qwe")
-        cur_path = os.path.dirname(__file__)
-        pkg_file = "/package.py"
+    def on_progress_state_changed(value):
+        lbl_txt = f"xx Installing: %{value}"
+        print(lbl_txt)
+        # self.ui_status_label.set_label(lbl_txt)
 
-        def pkexec_cb(src, cdn):
-            print("callback pkexec")
+    def on_root_permission_changed(self, permission, blank):
+        permission = self.lock_btn.get_permission()
+        try:
+            if permission:
+                allowed = permission.get_allowed()
+                if allowed:
+                    cur_path = os.path.dirname(__file__)
+                    pkg_file = "/package.py"
 
-        pid, _, _, _ = GLib.spawn_async(
-            ["/usr/bin/pkexec", cur_path + pkg_file, "update"],
-            flags=GLib.SPAWN_SEARCH_PATH
-            | GLib.SPAWN_LEAVE_DESCRIPTORS_OPEN
-            | GLib.SPAWN_DO_NOT_REAP_CHILD,
-        )
+                    def pkexec_cb(src, cdn):
+                        print("callback pkexec")
 
-        GLib.child_watch_add(GLib.PRIORITY_DEFAULT, pid, pkexec_cb)
+                    pid, _, _, _ = GLib.spawn_async(
+                        [
+                            "/usr/bin/pkexec",
+                            cur_path + pkg_file,
+                            "install",
+                            "htop",
+                        ],
+                        flags=GLib.SPAWN_SEARCH_PATH
+                        | GLib.SPAWN_LEAVE_DESCRIPTORS_OPEN
+                        | GLib.SPAWN_DO_NOT_REAP_CHILD,
+                    )
+
+                    GLib.child_watch_add(GLib.PRIORITY_DEFAULT, pid, pkexec_cb)
+        except GLib.GError:
+            print("now allowed")
