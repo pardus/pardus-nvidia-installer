@@ -1,10 +1,26 @@
+#!//usr/bin/env python3
 import gi
 import os
 import apt
+import sys
 import subprocess
 from gi.repository import GLib, Gio
 
 cache = apt.Cache()
+
+
+def update():
+    cache.update()
+    # res = subprocess.getoutput("apt update")
+
+
+def main():
+    args = sys.argv
+    if len(args) > 1:
+        if args[1] == "update":
+            update()
+    else:
+        print("no argument passed on")
 
 
 def get_pkg_info(package_name: str):
@@ -19,5 +35,5 @@ def get_pkg_info(package_name: str):
     return {"ver": version, "name": name}
 
 
-def pkg_test():
-    cache.update()
+if __name__ == "__main__":
+    main()

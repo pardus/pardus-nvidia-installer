@@ -12,7 +12,7 @@ from gi.repository import Gtk, GObject, Polkit, GLib
 
 
 cache = apt.Cache()
-act_id = "org.freedesktop.packagekit.package-install"
+act_id = "tr.org.pardus.pkexec.pardus-nvidia-installer"
 
 drivers = {"current": "nvidia-driver", "470": "nvidia-tesla-470-driver"}
 
@@ -43,28 +43,12 @@ class MainWindow(object):
 
         self.ui_apply_btn = self.getUI("ui_apply_chg_button")
         self.ui_cancel_btn = self.getUI("ui_cancel_button")
-        self.lock_btn = self.getUI("lock_btn")
-
-        self.root_permission = None
-        if Polkit:
-            try:
-                self.root_permission = Polkit.Permission.new_sync(act_id, None, None)
-            except GLib.GError:
-                pass
-
-        if self.root_permission is not None:
-            self.root_permission.connect(
-                "notify::allowed", self.on_root_permission_changed
-            )
-
-        self.lock_btn.connect("notify::permission", self.on_root_permission_changed)
-        prem = Polkit.Permission.new_sync(act_id, None, None)
-        self.lock_btn.set_permission(prem)
 
         self.ui_os_drv_rb.connect("toggled", self.on_drv_toggled, "nouveau")
         self.ui_nv_drv_rb.connect(
             "toggled", self.on_drv_toggled, "Nvidia Proprietary Driver"
         )
+        self.ui_apply_btn.connect("clicked", self.on_apply_changes)
 
         self.ui_main_window.set_application(application)
         self.ui_main_window.set_title("Pardus Nvidia Installer")
@@ -161,13 +145,19 @@ class MainWindow(object):
     def fun_is_driver_in_use(self, driver: str):
         return self.nvidia_device["cur_driver"] == driver
 
-    def on_root_permission_changed(self, permission, blank):
-        permission = self.lock_btn.get_permission()
-        try:
-            if permission:
-                allowed = permission.get_allowed()
-                if allowed:
-                    package.pkg_test()
+    def on_apply_changes(self, button):
+        print("qwe")
+        cur_path = os.path.dirname(__file__)
+        pkg_file = "/package.py"
 
-        except GLib.GError:
-            print("now allowed")
+        def pkexec_cb(src, cdn):
+            print("callback pkexec")
+
+        pid, _, _, _ = GLib.spawn_async(
+            ["/usr/bin/pkexec", cur_path + pkg_file, "update"],
+            flags=GLib.SPAWN_SEARCH_PATH
+            | GLib.SPAWN_LEAVE_DESCRIPTORS_OPEN
+            | GLib.SPAWN_DO_NOT_REAP_CHILD,
+        )
+
+        GLib.child_watch_add(GLib.PRIORITY_DEFAULT, pid, pkexec_cb)

@@ -277,7 +277,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLockButton">
+                  <object class="GtkLockButton" id="lock_btn">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="text-lock" translatable="yes">Locked</property>
