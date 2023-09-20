@@ -1,47 +1,25 @@
 #!//usr/bin/env python3
-import gi
 import os
 import apt
 import sys
 import subprocess
-from gi.repository import GLib, Gio
-from package_progress import CustomAcquireProgress, CustomInstallProgress
+
+os.environ["DEBIAN_FRONTEND"] = "noninteractive"
 
 
 def update():
-    cache = apt.Cache()
-    cache.update()
+    pass
 
 
-def install(package_names):
-    cache = apt.Cache()
-    cache.update()
-    cache.open()
-
-    for package_name in package_names:
-        if not cache[package_name].is_installed:
-            pkg = cache[package_name]
-            pkg.mark_install()
-    try:
-        acq_prs = CustomAcquireProgress()
-        ins_prs = CustomInstallProgress()
-        cache.commit(acq_prs, ins_prs)
-        print(f"package {package_name} installed successfully")
-
-    except Exception as e:
-        print(f"error occured while installing package. err: {e}")
+def install(pkg_name, fd):
+    subprocess.call(
+        ["apt", "install", "-yq", "-o", f"APT::Status-Fd={fd}", pkg_name],
+        env={**os.environ},
+    )
 
 
-def main():
-    args = sys.argv
-    if len(args) > 1:
-        if args[1] == "update":
-            update()
-        if args[1] == "install":
-            install([args[2]])
-
-    else:
-        print("no argument passed on")
+def remove():
+    pass
 
 
 def get_pkg_info(package_name: str):
@@ -58,4 +36,14 @@ def get_pkg_info(package_name: str):
 
 
 if __name__ == "__main__":
-    main()
+    args = sys.argv
+    if len(args) > 1:
+        if args[1] == "update":
+            update()
+        if args[1] == "install":
+            pkg_nm = args[2]
+            fd = args[3]
+            install(pkg_nm, fd)
+
+    else:
+        print("no argument passed on")

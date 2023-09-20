@@ -263,23 +263,11 @@
                 <property name="spacing">13</property>
                 <property name="baseline-position">bottom</property>
                 <child>
-                  <object class="GtkButton" id="ui_apply_chg_button">
-                    <property name="label" translatable="yes">Apply Changes</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
-                    <property name="image-position">right</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkLockButton" id="lock_btn">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="text-lock" translatable="yes">Process Running</property>
+                    <property name="text-unlock" translatable="yes">Apply Changes</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -312,6 +300,21 @@
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkProgressBar" id="ui_status_progressbar">
+            <property name="height-request">30</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="double-buffered">False</property>
+            <property name="pulse-step">0.01</property>
+            <property name="show-text">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">4</property>
           </packing>
         </child>
       </object>
