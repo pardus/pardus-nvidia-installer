@@ -7,51 +7,24 @@ import subprocess
 os.environ["DEBIAN_FRONTEND"] = "noninteractive"
 
 
-def update():
-    pass
 
-
-def install(pkg_name):
-    subprocess.call(
-        ["apt", "install", "-yq", "-o", "APT::Status-Fd=1", pkg_name],
-        env={**os.environ},
-    )
-
-
-def remove(pkg_name):
-    subprocess.call(
-        ["apt", "remove", "-yq", "-o", "APT::Status-Fd=1", pkg_name],
-        env={**os.environ},
-    )
-
-
-def purge(pkg_name):
-    subprocess.call(
-        ["apt", "remove", "-yq", "-o", "APT::Status-Fd=1", pkg_name],
-        env={**os.environ},
-    )
-
-
-def update():
+def install_nvidia(nv_drv):
     subprocess.call(
         ["apt", "update", "-yq", "-o", "APT::Status-Fd=1"],
         env={**os.environ},
     )
+    subprocess.call(
+        ["apt", "remove", "-yq", "-o", "APT::Status-Fd=1", "nvidia-*"],
+        env={**os.environ},
+    )
+    subprocess.call(
+        ["apt", "install", "-yq", "-o", "APT::Status-Fd=1", nv_drv],
+        env={**os.environ},
+    )
 
-
-def install_nvidia(nv_drv):
-    update()
-    purge("nvidia-*")
-    install(nv_drv)
 
 
 def install_nouveau():
-    # update()
-    subprocess.call(
-        ["apt", "update", "-yq", "-o", "APT::Status-Fd=1"],
-        env={**os.environ},
-    )
-    # purge("nvidia-*")
     subprocess.call(
         ["apt", "remove", "-yq", "-o", "APT::Status-Fd=1", "nvidia-*"],
         env={**os.environ},

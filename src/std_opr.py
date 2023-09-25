@@ -2,25 +2,20 @@ import gi
 from gi.repository import GLib, Gio
 
 
-def on_process_stdout(src, cond, prg_bar):
+def on_process_stdout(src, cond, prg_bar,last_param):
+
     if cond == GLib.IO_HUP:
         return False
     line = src.readline()
-    if "dlstatus" in line:
-        prc = float(line.split(":")[2])
-        prg_txt = f"Status:: Downloading packages... %{prc:.2f}"
-        print(prg_txt)
-        prg_bar.set_text(prg_txt)
-        prg_frac = float(prc / 100)
-        prg_bar.set_fraction(prg_frac)
-    if "pmstatus" in line:
+    print(line)
+    #prog_txt = ""
+    if "dlstatus"  in line or  "pmstatus" in line:
         splits = line.split(":")
-        pkg = splits[1]
         prc = float(splits[2])
+        txt = splits[3]      
         prg_frac = float(prc / 100)
-        prg_txt = f"Status:: Installing package...( {pkg} ) %{prc:.2f}"
-        print(prg_txt)
-        prg_bar.set_text(prg_txt)
+        prog_txt = f"Status %{prc:.2f} :: {txt}"
+        prg_bar.set_text(prog_txt)
         prg_bar.set_fraction(prg_frac)
     return True
 

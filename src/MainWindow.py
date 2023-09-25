@@ -19,7 +19,7 @@ from gi.repository import Gtk, GObject, Polkit, GLib
 cache = apt.Cache()
 act_id = "tr.org.pardus.pkexec.pardus-nvidia-installer"
 socket_path = "/tmp/pardus-nvidia-installer"
-drivers = {"current": "nvidia-driver", "470": "nvidia-tesla-470-driver"}
+drivers = {"current": "nvidia-driver", 470:"nvidia-tesla-470-driver"}
 pkg_opr = {"purge": ""}
 
 
@@ -214,6 +214,7 @@ class MainWindow(object):
             GLib.IO_IN | GLib.IO_HUP,
             std_opr.on_process_stdout,
             ui_obj,
+            params[-1]
         )
         GLib.child_watch_add(
             GLib.PRIORITY_DEFAULT, pid, std_opr.on_process_stdext, ui_obj
