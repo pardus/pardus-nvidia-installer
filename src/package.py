@@ -11,15 +11,51 @@ def update():
     pass
 
 
-def install(pkg_name, fd):
+def install(pkg_name):
     subprocess.call(
-        ["apt", "install", "-yq", "-o", f"APT::Status-Fd={fd}", pkg_name],
+        ["apt", "install", "-yq", "-o", "APT::Status-Fd=1", pkg_name],
         env={**os.environ},
     )
 
 
-def remove():
-    pass
+def remove(pkg_name):
+    subprocess.call(
+        ["apt", "remove", "-yq", "-o", "APT::Status-Fd=1", pkg_name],
+        env={**os.environ},
+    )
+
+
+def purge(pkg_name):
+    subprocess.call(
+        ["apt", "remove", "-yq", "-o", "APT::Status-Fd=1", pkg_name],
+        env={**os.environ},
+    )
+
+
+def update():
+    subprocess.call(
+        ["apt", "update", "-yq", "-o", "APT::Status-Fd=1"],
+        env={**os.environ},
+    )
+
+
+def install_nvidia(nv_drv):
+    update()
+    purge("nvidia-*")
+    install(nv_drv)
+
+
+def install_nouveau():
+    # update()
+    subprocess.call(
+        ["apt", "update", "-yq", "-o", "APT::Status-Fd=1"],
+        env={**os.environ},
+    )
+    # purge("nvidia-*")
+    subprocess.call(
+        ["apt", "remove", "-yq", "-o", "APT::Status-Fd=1", "nvidia-*"],
+        env={**os.environ},
+    )
 
 
 def get_pkg_info(package_name: str):
@@ -44,6 +80,12 @@ if __name__ == "__main__":
             pkg_nm = args[2]
             fd = args[3]
             install(pkg_nm, fd)
+        if args[1] == "nouveau":
+            print("pkg.py nouveau")
+            install_nouveau()
+        if args[1] == "nvidia":
+            nv_drv = args[2]
+            install_nvidia(nv_drv)
 
     else:
         print("no argument passed on")

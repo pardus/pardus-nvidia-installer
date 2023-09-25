@@ -5,7 +5,7 @@
   <object class="GtkApplicationWindow" id="ui_main_window">
     <property name="can-focus">False</property>
     <child>
-      <object class="GtkBox">
+      <object class="GtkBox" id="ui_main_box">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="margin-left">13</property>
@@ -43,12 +43,6 @@
             <child>
               <placeholder/>
             </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -57,7 +51,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox">
+          <object class="GtkBox" id="ui_drv_box">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="orientation">vertical</property>
@@ -295,26 +289,26 @@
                 <property name="position">4</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkProgressBar" id="ui_status_progressbar">
+                <property name="height-request">30</property>
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="double-buffered">False</property>
+                <property name="pulse-step">0.01</property>
+                <property name="show-text">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">5</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkProgressBar" id="ui_status_progressbar">
-            <property name="height-request">30</property>
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="double-buffered">False</property>
-            <property name="pulse-step">0.01</property>
-            <property name="show-text">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">4</property>
           </packing>
         </child>
       </object>

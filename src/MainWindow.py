@@ -1,17 +1,18 @@
 import gi
 import os
 import apt
+
 import yaml
 import nvidia
 import package
 import subprocess
 import socket
-
+import std_opr
 
 gi.require_version("Gtk", "3.0")
 gi.require_version("Polkit", "1.0")
 
-from process_std import std
+
 from gi.repository import Gtk, GObject, Polkit, GLib
 
 
@@ -19,6 +20,7 @@ cache = apt.Cache()
 act_id = "tr.org.pardus.pkexec.pardus-nvidia-installer"
 socket_path = "/tmp/pardus-nvidia-installer"
 drivers = {"current": "nvidia-driver", "470": "nvidia-tesla-470-driver"}
+pkg_opr = {"purge": ""}
 
 
 class MainWindow(object):
@@ -31,24 +33,26 @@ class MainWindow(object):
             print("Error while creating user interface from glade file")
             return False
 
-        self.ui_gpu_box = self.getUI("ui_gpu_box")
-        self.ui_main_window = self.getUI("ui_main_window")
-        self.ui_cur_sel_drv_lbl = self.getUI("ui_cur_selected_drv_label")
+        self.ui_gpu_box = self.get_ui("ui_gpu_box")
+        self.ui_drv_box = self.get_ui("ui_drv_box")
+        self.ui_main_box = self.get_ui("ui_main_box")
+        self.ui_main_window = self.get_ui("ui_main_window")
+        self.ui_cur_sel_drv_lbl = self.get_ui("ui_cur_selected_drv_label")
 
-        self.ui_os_drv_lbl = self.getUI("ui_opensource_driver_label")
-        self.ui_os_drv_n_lbl = self.getUI("ui_opensource_driver_name_label")
-        self.ui_os_drv_rb = self.getUI("ui_opensource_driver_radio_button")
-        self.ui_os_drv_v_lbl = self.getUI("ui_opensource_driver_version_label")
+        self.ui_os_drv_lbl = self.get_ui("ui_opensource_driver_label")
+        self.ui_os_drv_n_lbl = self.get_ui("ui_opensource_driver_name_label")
+        self.ui_os_drv_rb = self.get_ui("ui_opensource_driver_radio_button")
+        self.ui_os_drv_v_lbl = self.get_ui("ui_opensource_driver_version_label")
 
-        self.ui_nv_drv_lbl = self.getUI("ui_proprietary_driver_label")
-        self.ui_nv_drv_n_lbl = self.getUI("ui_proprietary_driver_name_label")
-        self.ui_nv_drv_rb = self.getUI("ui_proprietary_driver_radio_button")
-        self.ui_nv_drv_v_lbl = self.getUI("ui_proprietary_driver_version_label")
+        self.ui_nv_drv_lbl = self.get_ui("ui_proprietary_driver_label")
+        self.ui_nv_drv_n_lbl = self.get_ui("ui_proprietary_driver_name_label")
+        self.ui_nv_drv_rb = self.get_ui("ui_proprietary_driver_radio_button")
+        self.ui_nv_drv_v_lbl = self.get_ui("ui_proprietary_driver_version_label")
 
-        self.ui_cancel_btn = self.getUI("ui_cancel_button")
-        self.ui_apply_chg_button = self.getUI("ui_apply_chg_button")
-        self.ui_status_label = self.getUI("ui_status_label")
-        self.ui_status_progressbar = self.getUI("ui_status_progressbar")
+        self.ui_cancel_btn = self.get_ui("ui_cancel_button")
+        self.ui_apply_chg_button = self.get_ui("ui_apply_chg_button")
+        self.ui_status_label = self.get_ui("ui_status_label")
+        self.ui_status_progressbar = self.get_ui("ui_status_progressbar")
 
         self.root_permission = None
         if Polkit:
@@ -69,62 +73,63 @@ class MainWindow(object):
         self.ui_apply_chg_button.set_permission(prem)
 
         self.ui_os_drv_rb.connect("toggled", self.on_drv_toggled, "nouveau")
-        self.ui_nv_drv_rb.connect(
-            "toggled", self.on_drv_toggled, "Nvidia Proprietary Driver"
-        )
+        self.ui_nv_drv_rb.connect("toggled", self.on_drv_toggled, "nvidia")
 
         self.ui_main_window.set_application(application)
         self.ui_main_window.set_title("Pardus Nvidia Installer")
 
         self.nvidia_device = nvidia.find_device()
-        print("nvidia device = ", self.nvidia_device)
+        self.toggled_driver = self.nvidia_device["cur_driver"]
+        if self.toggled_driver == "nvidia":
+            self.ui_nv_drv_rb.set_active(True)
+        self.chg_drv_lbl_in_use()
 
         if self.nvidia_device != None:
+            self.pkg_nv_info = package.get_pkg_info(
+                drivers[self.nvidia_device["driver"]]
+            )
             name = self.nvidia_device["name"]
             pci = self.nvidia_device["pci"]
             cur_drv = self.nvidia_device["cur_driver"]
             dev_info_box = self.gpu_box(name, pci, cur_drv)
             self.ui_gpu_box.pack_start(dev_info_box, True, True, 5)
+            self.os_drv_pkg = "xserver-xorg-video-nouveau"
+            self.pkg_os_info = package.get_pkg_info(self.os_drv_pkg)
+
+            markup = self.lbl_markup("Name", self.pkg_os_info["name"])
+            self.ui_os_drv_n_lbl.set_markup(markup)
+
+            markup = self.lbl_markup("Version", self.pkg_os_info["ver"])
+            self.ui_os_drv_v_lbl.set_markup(markup)
+
+            markup = self.lbl_markup(
+                "Description", "Open Source Driver", color="mediumspringgreen"
+            )
+            self.ui_os_drv_lbl.set_markup(markup)
+            markup = self.lbl_markup("Name", self.pkg_nv_info["name"])
+            self.ui_nv_drv_n_lbl.set_markup(markup)
+
+            markup = self.lbl_markup("Version", self.pkg_nv_info["ver"])
+            self.ui_nv_drv_v_lbl.set_markup(markup)
+
+            markup = self.lbl_markup(
+                "Description", "Proprietary Driver", color="dodgerblue"
+            )
+            self.ui_nv_drv_lbl.set_markup(markup)
+        else:
+            self.ui_main_box.remove(self.ui_drv_box)
+            label = Gtk.Label(
+                label="There is no compatible device in system.", xalign=0
+            )
+            self.ui_gpu_box.pack_start(label, True, True, 5)
         self.ui_gpu_box.show_all()
 
-        self.os_drv_pkg = "xserver-xorg-video-nouveau"
-        self.pkg_os_info = package.get_pkg_info(self.os_drv_pkg)
-        self.pkg_nv_info = package.get_pkg_info(drivers[self.nvidia_device["driver"]])
-
-        markup = self.lbl_markup(
-            "Selected Driver", self.nvidia_device["cur_driver"] + " (Currently In Use) "
-        )
-        self.ui_cur_sel_drv_lbl.set_markup(markup)
-
-        markup = self.lbl_markup("Name", self.pkg_os_info["name"])
-        self.ui_os_drv_n_lbl.set_markup(markup)
-
-        markup = self.lbl_markup("Version", self.pkg_os_info["ver"])
-        self.ui_os_drv_v_lbl.set_markup(markup)
-
-        markup = self.lbl_markup(
-            "Description", "Open Source Driver", color="mediumspringgreen"
-        )
-        self.ui_os_drv_lbl.set_markup(markup)
-
-        markup = self.lbl_markup("Name", self.pkg_nv_info["name"])
-        self.ui_nv_drv_n_lbl.set_markup(markup)
-
-        markup = self.lbl_markup("Version", self.pkg_nv_info["ver"])
-        self.ui_nv_drv_v_lbl.set_markup(markup)
-
-        markup = self.lbl_markup(
-            "Description", "Proprietary Driver", color="dodgerblue"
-        )
-
-        self.ui_nv_drv_lbl.set_markup(markup)
-
-    def getUI(self, object_name: str):
+    def get_ui(self, object_name: str):
         return self.gtk_builder.get_object(object_name)
 
     def gpu_box(self, name: str, pci: str, cur_drv: str):
         box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 13)
-        vendor_markup = self.lbl_markup("Device Vendor", "Nvidia Corporation")
+        vendor_markup = self.lbl_markup("Device Vendor", "Nvidia")
         name_markup = self.lbl_markup("Device Model", name)
         pci_markup = self.lbl_markup("PCI", pci)
         drv_markup = self.lbl_markup("Current Driver In Use", cur_drv)
@@ -154,18 +159,24 @@ class MainWindow(object):
             return f"<span> <b>{label}: </b> <span>{desc}</span> </span>"
 
     def on_drv_toggled(self, radio_button: Gtk.RadioButton, name: str):
+        markup_desc = name
+        drv_in_use = self.is_drv_in_use(name)
+
+        if drv_in_use:
+            markup_desc = name + " (Currently In Use) "
+
         if radio_button.get_active():
-            markup_desc = name
-            drv_in_use = self.is_drv_in_use(name)
-            self.ui_apply_btn.set_sensitive(not drv_in_use)
-            if drv_in_use:
-                markup_desc = name + " (Currently In Use) "
-            markup = self.lbl_markup("Selected Driver", markup_desc)
-            self.ui_cur_sel_drv_lbl.set_markup(markup)
-            print(self.is_drv_in_use(name))
+            self.ui_apply_chg_button.set_sensitive(not drv_in_use)
+            self.ui_cur_sel_drv_lbl.set_markup(markup_desc)
+            self.toggled_driver = name
+            self.chg_drv_lbl_in_use()
 
     def is_drv_in_use(self, driver: str):
         return self.nvidia_device["cur_driver"] == driver
+
+    def chg_drv_lbl_in_use(self):
+        markup = self.lbl_markup("Current Selected Driver", self.toggled_driver)
+        self.ui_cur_sel_drv_lbl.set_markup(markup)
 
     def on_root_permission_changed(self, permission, blank):
         permission = self.ui_apply_chg_button.get_permission()
@@ -176,81 +187,35 @@ class MainWindow(object):
                     cur_path = os.path.dirname(os.path.abspath(__file__))
                     pkg_file = "/package.py"
                     print(cur_path + pkg_file)
+                    print(self.toggled_driver)
                     params = [
                         "/usr/bin/pkexec",
                         cur_path + pkg_file,
-                        "install",
-                        "android-studio",
+                        self.toggled_driver,
                     ]
-                    self.start_prc(params, 1)
+                    if self.toggled_driver == "nvidia":
+                        params.append(drivers[self.nvidia_device["driver"]])
+
+                    print("params", params)
+                    self.start_prc(params, self.ui_status_progressbar)
         except GLib.GError:
             print("now allowed")
 
-    def on_process_stdout(self, src, cond):
-        if cond == GLib.IO_HUP:
-            return False
-        line = src.readline()
-        print(line)
-        if "dlstatus" in line:
-            prc = float(line.split(":")[2])
-            prg_txt = f"Status:: Downloading packages..."
-            self.ui_status_progressbar.set_text(prg_txt)
-            prg_frac = float(prc / 200.00)
-            print("frac: ", prg_frac)
-            self.ui_status_progressbar.set_fraction(prg_frac)
-
-        if "pmstatus" in line:
-            splits = line.split(":")
-            pkg = splits[1]
-            prc = float(splits[2])
-            prg_frac = float(0.5 + (prc / 200))
-            print("frac: ", prg_frac)
-
-            prg_txt = f"Status:: Installing package...( {pkg} )"
-            self.ui_status_progressbar.set_text(prg_txt)
-            self.ui_status_progressbar.set_fraction(prg_frac)
-
-        return True
-
-    def on_process_stderr(self, src, cond):
-        if cond == GLib.IO_HUP:
-            return False
-        line = src.readline()
-        print("mw err: ", line)
-        return True
-
-    def on_process_stdext(self, pid, stat):
-        if stat == 0:
-            self.ui_status_progressbar.set_text(
-                "Selected driver installed successfully."
-            )
-            self.ui_status_progressbar.set_fraction(1)
-        else:
-            self.ui_status_progressbar.set_text("An error occured during installation.")
-            self.ui_status_progressbar.set_fraction(1)
-        return True
-
-    def start_prc(self, params, fd):
+    def start_prc(self, params, ui_obj=None):
         pid, std_in, std_out, std_err = GLib.spawn_async(
-            params + [str(fd)],
+            params,
             flags=GLib.SpawnFlags.DO_NOT_REAP_CHILD,
             standard_output=True,
             standard_error=True,
         )
-        print("mw pid:", pid)
-        print("mw stdout: ", std_out)
-        print("mw stdout type: ", type(std_out))
-        if fd == 1:
-            GLib.io_add_watch(
-                GLib.IOChannel(std_out),
-                GLib.IO_IN | GLib.IO_HUP,
-                self.on_process_stdout,
-            )
-        elif fd == 2:
-            GLib.io_add_watch(
-                GLib.IOChannel(std_err),
-                GLib.IO_IN | GLib.IO_HUP,
-                self.on_process_stderr,
-            )
-        GLib.child_watch_add(GLib.PRIORITY_DEFAULT, pid, self.on_process_stdext)
+
+        GLib.io_add_watch(
+            GLib.IOChannel(std_out),
+            GLib.IO_IN | GLib.IO_HUP,
+            std_opr.on_process_stdout,
+            ui_obj,
+        )
+        GLib.child_watch_add(
+            GLib.PRIORITY_DEFAULT, pid, std_opr.on_process_stdext, ui_obj
+        )
         return pid
