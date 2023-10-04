@@ -25,13 +25,13 @@ def get_dev_list():
                     vendor_id = int(f.read(), 16)
                 with open(os.path.join(pci_dev_path, dir, "device")) as f:
                     device_id = int(f.read(), 16)
-                with open(os.path.join(pci_dev_path, dir, "uevent")) as f:
-                    line = f.readlines()[0]
-                
-                
-                if "DRIVER" in line:
-                    cur_driver = line.split("=")[1][:-1]
-                else:
+
+                drv_mdl = os.path.join(pci_dev_path, dir, "driver", "module")
+
+                try:
+                    orig_path = os.readlink(drv_mdl)
+                    cur_driver = os.path.basename(orig_path)
+                except OSError as e:
                     cur_driver = "Driver Not Found"
 
                 if vendor_id == nvidia_pci_id:

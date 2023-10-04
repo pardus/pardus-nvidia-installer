@@ -37,10 +37,7 @@ class Application(Gtk.Application):
         )
 
     def do_activate(self):
-        # We only allow a single window and raise any existing ones
         if not self.window:
-            # Windows are associated with the application
-            # when the last one is closed the application shuts down
             self.window = MainWindow(self)
         else:
             self.window.controlArgs()
@@ -54,6 +51,6 @@ class Application(Gtk.Application):
         return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = Application()
     app.run(sys.argv)
