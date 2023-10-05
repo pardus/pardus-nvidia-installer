@@ -19,7 +19,7 @@ from gi.repository import Gtk, GObject, Polkit, GLib
 cache = apt.Cache()
 act_id = "tr.org.pardus.pkexec.pardus-nvidia-installer"
 socket_path = "/tmp/pardus-nvidia-installer"
-drivers = {"current": "nvidia-driver", 470:"nvidia-tesla-470-driver"}
+drivers = {"current": "nvidia-driver", 470: "nvidia-tesla-470-driver"}
 pkg_opr = {"purge": ""}
 
 
@@ -38,6 +38,7 @@ class MainWindow(object):
         self.ui_main_box = self.get_ui("ui_main_box")
         self.ui_main_window = self.get_ui("ui_main_window")
         self.ui_cur_sel_drv_lbl = self.get_ui("ui_cur_selected_drv_label")
+        self.ui_confirm_dialog = self.get_ui("ui_confirm_dialog")
 
         self.ui_os_drv_lbl = self.get_ui("ui_opensource_driver_label")
         self.ui_os_drv_n_lbl = self.get_ui("ui_opensource_driver_name_label")
@@ -84,7 +85,7 @@ class MainWindow(object):
             self.ui_nv_drv_rb.set_active(True)
         self.chg_drv_lbl_in_use()
 
-        if self.nvidia_device != None:
+        if self.nvidia_device:
             self.pkg_nv_info = package.get_pkg_info(
                 drivers[self.nvidia_device["driver"]]
             )
@@ -166,7 +167,7 @@ class MainWindow(object):
             markup_desc = name + " (Currently In Use) "
 
         if radio_button.get_active():
-            self.ui_apply_chg_button.set_sensitive(not drv_in_use)
+            # self.ui_apply_chg_button.set_sensitive(not drv_in_use)
             self.ui_cur_sel_drv_lbl.set_markup(markup_desc)
             self.toggled_driver = name
             self.chg_drv_lbl_in_use()
@@ -186,8 +187,6 @@ class MainWindow(object):
                 if allowed:
                     cur_path = os.path.dirname(os.path.abspath(__file__))
                     pkg_file = "/package.py"
-                    print(cur_path + pkg_file)
-                    print(self.toggled_driver)
                     params = [
                         "/usr/bin/pkexec",
                         cur_path + pkg_file,
@@ -196,12 +195,15 @@ class MainWindow(object):
                     if self.toggled_driver == "nvidia":
                         params.append(drivers[self.nvidia_device["driver"]])
 
-                    print("params", params)
-                    self.start_prc(params, self.ui_status_progressbar)
+                    res = self.start_prc(
+                        params, self.ui_status_progressbar, self.ui_confirm_dialog
+                    )
+                    print("mw res: ", res)
+
         except GLib.GError:
             print("now allowed")
 
-    def start_prc(self, params, ui_obj=None):
+    def start_prc(self, params, ui_obj=None, dlg=None):
         pid, std_in, std_out, std_err = GLib.spawn_async(
             params,
             flags=GLib.SpawnFlags.DO_NOT_REAP_CHILD,
@@ -214,9 +216,10 @@ class MainWindow(object):
             GLib.IO_IN | GLib.IO_HUP,
             std_opr.on_process_stdout,
             ui_obj,
-            params[-1]
+            params[-1],
         )
-        GLib.child_watch_add(
-            GLib.PRIORITY_DEFAULT, pid, std_opr.on_process_stdext, ui_obj
+        pid = GLib.child_watch_add(
+            GLib.PRIORITY_DEFAULT, pid, std_opr.on_process_stdext, ui_obj, dlg
         )
+
         return pid

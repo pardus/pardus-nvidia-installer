@@ -3,9 +3,9 @@ import os
 import apt
 import sys
 import subprocess
+import dbus
 
 os.environ["DEBIAN_FRONTEND"] = "noninteractive"
-
 
 
 def install_nvidia(nv_drv):
@@ -13,6 +13,7 @@ def install_nvidia(nv_drv):
         ["apt", "update", "-yq", "-o", "APT::Status-Fd=1"],
         env={**os.environ},
     )
+
     subprocess.call(
         ["apt", "remove", "-yq", "-o", "APT::Status-Fd=1", "nvidia-*"],
         env={**os.environ},
@@ -21,7 +22,6 @@ def install_nvidia(nv_drv):
         ["apt", "install", "-yq", "-o", "APT::Status-Fd=1", nv_drv],
         env={**os.environ},
     )
-
 
 
 def install_nouveau():
