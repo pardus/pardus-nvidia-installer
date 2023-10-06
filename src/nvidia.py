@@ -58,7 +58,8 @@ def find_device():
     pci_devices = get_dev_list()
     parsed_nvidia_devices = parse_devices(nvidia_devices_yaml_path)
     for pci in pci_devices:
-        if parsed_nvidia_devices[pci.device] != None:
+        # if parsed_nvidia_devices[pci.device] != None:
+        if pci.device in parsed_nvidia_devices.keys():
             nvidia_dev = parsed_nvidia_devices[pci.device]
             nvidia_dev["pci"] = str(pci)
             nvidia_dev["cur_driver"] = pci.cur_driver
