@@ -1,0 +1,1 @@
+option('var_dir',type:'string',value:'/var',description:'directory for var')
