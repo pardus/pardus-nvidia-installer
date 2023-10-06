@@ -1,0 +1,20 @@
+Source: pardus-nvidia-installer
+Section: unknown
+Priority: optional
+Maintainer: osman.coskun <osman.coskun@pardus.org.tr>
+Rules-Requires-Root: no
+Build-Depends:
+ debhelper-compat (= 13),
+Standards-Version: 4.6.2
+Homepage: <insert the upstream URL, if relevant>
+#Vcs-Browser: https://salsa.debian.org/debian/pardus-nvidia-installer
+#Vcs-Git: https://salsa.debian.org/debian/pardus-nvidia-installer.git
+
+Package: pardus-nvidia-installer
+Architecture: any
+Depends:
+ python3-yaml,
+ ${shlibs:Depends},
+ ${misc:Depends},
+Description: <insert up to 60 chars description>
+ <Insert long description, indented with spaces.>
