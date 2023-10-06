@@ -1,0 +1,18 @@
+[Desktop Entry]
+Name=Pardus Nvidia Installer
+Name[pt]=Bem-vindo ao Pardus
+Name[tr]=Pardus Nvidia Yukleyici
+GenericName=Pardus Nvidia Installer
+GenericName[pt]=Aplicação de Boas-vindas
+Comment=Pardus Nvidia Installer, Install drivers.
+Comment[pt]=Bem-vindo ao Pardus. Personalize o ambiente de trabalho com apenas alguns cliques.
+Comment[tr]=Pardus Nvidia Yukleyici. Surucu yukleyin
+Exec=pardus-nvidia-installer
+Icon=pardus-nvidia-installer
+Terminal=false
+Type=Application
+Categories=Settings;X-Pardus-Apps;
+StartupNotify=true
+Keywords=welcome;configure;tweaks;settings;layout;style;
+Keywords[pt]=bem-vindo;configurar;ajustes;definições;disposição;esquema;estilo;
+Keywords[tr]=hoşgeldin;yapılandırıcı;inceayarlar;ayarlar;tasarım;tarz;
