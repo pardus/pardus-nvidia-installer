@@ -50,7 +50,6 @@ class MainWindow(object):
         self.ui_nv_drv_rb = self.get_ui("ui_proprietary_driver_radio_button")
         self.ui_nv_drv_v_lbl = self.get_ui("ui_proprietary_driver_version_label")
 
-        self.ui_cancel_btn = self.get_ui("ui_cancel_button")
         self.ui_apply_chg_button = self.get_ui("ui_apply_chg_button")
         self.ui_status_label = self.get_ui("ui_status_label")
         self.ui_status_progressbar = self.get_ui("ui_status_progressbar")
@@ -167,7 +166,7 @@ class MainWindow(object):
             markup_desc = name + " (Currently In Use) "
 
         if radio_button.get_active():
-            # self.ui_apply_chg_button.set_sensitive(not drv_in_use)
+            self.ui_apply_chg_button.set_sensitive(not drv_in_use)
             self.ui_cur_sel_drv_lbl.set_markup(markup_desc)
             self.toggled_driver = name
             self.chg_drv_lbl_in_use()
@@ -198,7 +197,7 @@ class MainWindow(object):
                     res = self.start_prc(
                         params, self.ui_status_progressbar, self.ui_confirm_dialog
                     )
-                    print("mw res: ", res)
+                    self.ui_apply_chg_button.set_sensitive(False)
 
         except GLib.GError:
             print("now allowed")
