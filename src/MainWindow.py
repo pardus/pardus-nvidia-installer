@@ -19,7 +19,10 @@ from gi.repository import Gtk, GObject, Polkit, GLib
 cache = apt.Cache()
 act_id = "tr.org.pardus.pkexec.pardus-nvidia-installer"
 socket_path = "/tmp/pardus-nvidia-installer"
-drivers = {"current": "nvidia-driver", 470: "nvidia-tesla-470-driver"}
+drivers = {
+        "current": "nvidia-driver", 
+        470: "nvidia-tesla-470-driver"
+}
 pkg_opr = {"purge": ""}
 
 
@@ -84,10 +87,11 @@ class MainWindow(object):
             self.ui_nv_drv_rb.set_active(True)
         self.chg_drv_lbl_in_use()
 
-        if self.nvidia_device:
+        if self.nvidia_device and self.nvidia_device["driver"] in drivers.keys():
             self.pkg_nv_info = package.get_pkg_info(
                 drivers[self.nvidia_device["driver"]]
             )
+
             name = self.nvidia_device["name"]
             pci = self.nvidia_device["pci"]
             cur_drv = self.nvidia_device["cur_driver"]
@@ -116,6 +120,11 @@ class MainWindow(object):
                 "Description", "Proprietary Driver", color="dodgerblue"
             )
             self.ui_nv_drv_lbl.set_markup(markup)
+        elif self.nvidia_device["driver"] not in drivers.keys():
+            self.ui_main_box.remove(self.ui_drv_box)
+            lbl = f"Your GPU: {self.nvidia_device['name']} support only support version {self.nvidia_device['driver']}. But this package is not in our repositories."
+            label = Gtk.Label(label=lbl)
+            self.ui_gpu_box.pack_start(label, True, True, 5)
         else:
             self.ui_main_box.remove(self.ui_drv_box)
             label = Gtk.Label(
