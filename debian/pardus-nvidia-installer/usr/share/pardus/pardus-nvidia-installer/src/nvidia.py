@@ -40,6 +40,7 @@ def get_dev_list():
 
 
 def parse_devices(path: str):
+    # path = "/../data/nvidia-pci.yaml"
     with open(os.path.dirname(__file__) + path, "r") as f:
         nvidia_devices = list(yaml.safe_load_all(f))[0]["nvidia"]
 
@@ -56,13 +57,10 @@ def parse_devices(path: str):
 def find_device():
     pci_devices = get_dev_list()
     parsed_nvidia_devices = parse_devices(nvidia_devices_yaml_path)
-    nvidia_devices = []
     for pci in pci_devices:
+        # if parsed_nvidia_devices[pci.device] != None:
         if pci.device in parsed_nvidia_devices.keys():
             nvidia_dev = parsed_nvidia_devices[pci.device]
             nvidia_dev["pci"] = str(pci)
             nvidia_dev["cur_driver"] = pci.cur_driver
-            nvidia_devices.append(nvidia_dev)
-            nvidia_devices.append(nvidia_dev)
-
-    return nvidia_devices
+            return nvidia_dev

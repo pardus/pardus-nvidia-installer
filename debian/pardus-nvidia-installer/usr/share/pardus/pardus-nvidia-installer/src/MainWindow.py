@@ -19,10 +19,9 @@ from gi.repository import Gtk, GObject, Polkit, GLib
 cache = apt.Cache()
 act_id = "tr.org.pardus.pkexec.pardus-nvidia-installer"
 socket_path = "/tmp/pardus-nvidia-installer"
-driver_packages = {
-    "nouveau": "xserver-xorg-video-nouveau",
-    "current": "nvidia-driver",
-    470: "nvidia-tesla-470-driver",
+drivers = {
+        "current": "nvidia-driver", 
+        470: "nvidia-tesla-470-driver"
 }
 pkg_opr = {"purge": ""}
 
@@ -36,9 +35,6 @@ class MainWindow(object):
         except GObject.GError:
             print("Error while creating user interface from glade file")
             return False
-
-        self.drivers = ["nouveau"]
-        self.driver_buttons = []
 
         self.ui_gpu_box = self.get_ui("ui_gpu_box")
         self.ui_drv_box = self.get_ui("ui_drv_box")
@@ -86,26 +82,19 @@ class MainWindow(object):
         self.ui_main_window.set_title("Pardus Nvidia Installer")
 
         self.nvidia_device = nvidia.find_device()
-        print(self.nvidia_device)
-        for dev in self.nvidia_device:
-            self.drivers.append(dev["driver"])
-        print(self.drivers)
-        self.toggled_driver = self.nvidia_device[0]["cur_driver"]
+        self.toggled_driver = self.nvidia_device["cur_driver"]
         if self.toggled_driver == "nvidia":
             self.ui_nv_drv_rb.set_active(True)
         self.chg_drv_lbl_in_use()
 
-        if (
-            self.nvidia_device[0]
-            and self.nvidia_device[0]["driver"] in driver_packages.keys()
-        ):
+        if self.nvidia_device and self.nvidia_device["driver"] in drivers.keys():
             self.pkg_nv_info = package.get_pkg_info(
-                driver_packages[self.nvidia_device[0]["driver"]]
+                drivers[self.nvidia_device["driver"]]
             )
 
-            name = self.nvidia_device[0]["name"]
-            pci = self.nvidia_device[0]["pci"]
-            cur_drv = self.nvidia_device[0]["cur_driver"]
+            name = self.nvidia_device["name"]
+            pci = self.nvidia_device["pci"]
+            cur_drv = self.nvidia_device["cur_driver"]
             dev_info_box = self.gpu_box(name, pci, cur_drv)
             self.ui_gpu_box.pack_start(dev_info_box, True, True, 5)
             self.os_drv_pkg = "xserver-xorg-video-nouveau"
@@ -131,9 +120,9 @@ class MainWindow(object):
                 "Description", "Proprietary Driver", color="dodgerblue"
             )
             self.ui_nv_drv_lbl.set_markup(markup)
-        elif self.nvidia_device[0]["driver"] not in driver_packages.keys():
+        elif self.nvidia_device["driver"] not in drivers.keys():
             self.ui_main_box.remove(self.ui_drv_box)
-            lbl = f"Your GPU: {self.nvidia_device[0]['name']} support only support version {self.nvidia_device[0]['driver']}. But this package is not in our repositories."
+            lbl = f"Your GPU: {self.nvidia_device['name']} support only support version {self.nvidia_device['driver']}. But this package is not in our repositories."
             label = Gtk.Label(label=lbl)
             self.ui_gpu_box.pack_start(label, True, True, 5)
         else:
@@ -142,52 +131,10 @@ class MainWindow(object):
                 label="There is no compatible device in system.", xalign=0
             )
             self.ui_gpu_box.pack_start(label, True, True, 5)
-        for index, driver in enumerate(self.drivers):
-            info = package.get_pkg_info(driver_packages[driver])
-            name = info["name"]
-            ver = info["ver"]
-            drv = "nvidia"
-            if index == 0:
-                drv = "nouveau"
-            bx = self.driver_box(drv, name, ver)
-            self.ui_gpu_box.pack_start(bx, True, True, 5)
         self.ui_gpu_box.show_all()
 
     def get_ui(self, object_name: str):
         return self.gtk_builder.get_object(object_name)
-
-    def driver_box(self, drv, drv_name, drv_ver):
-        b = Gtk.Builder.new_from_file(
-            os.path.dirname(__file__) + "/../ui/driver_toggle.glade"
-        )
-        btn = b.get_object("ui_radio_button")
-        btn.set_name(drv)
-
-        name = b.get_object("ui_name_label")
-        name.set_label(drv_name)
-
-        ver = b.get_object("ui_version_label")
-        ver.set_label(drv_ver)
-
-        markup = self.lbl_markup(
-            "Description",
-            "Open Source Driver",
-            color="mediumspringgreen",
-        )
-        if drv == "nvidia":
-            markup = self.lbl_markup(
-                "Description",
-                "Proprietary",
-                color="dodgerblue",
-            )
-        lbl = b.get_object("ui_driver_label")
-        lbl.set_markup(markup)
-        grp = None
-        if len(self.driver_buttons) > 0:
-            grp = self.driver_buttons[0]
-        btn.join_group(grp)
-        self.driver_buttons.append(btn)
-        return btn
 
     def gpu_box(self, name: str, pci: str, cur_drv: str):
         box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 13)
@@ -234,7 +181,7 @@ class MainWindow(object):
             self.chg_drv_lbl_in_use()
 
     def is_drv_in_use(self, driver: str):
-        return self.nvidia_device[0]["cur_driver"] == driver
+        return self.nvidia_device["cur_driver"] == driver
 
     def chg_drv_lbl_in_use(self):
         markup = self.lbl_markup("Current Selected Driver", self.toggled_driver)
@@ -254,7 +201,7 @@ class MainWindow(object):
                         self.toggled_driver,
                     ]
                     if self.toggled_driver == "nvidia":
-                        params.append(drivers[self.nvidia_device[0]["driver"]])
+                        params.append(drivers[self.nvidia_device["driver"]])
 
                     res = self.start_prc(
                         params, self.ui_status_progressbar, self.ui_confirm_dialog

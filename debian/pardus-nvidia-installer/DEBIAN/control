@@ -1,0 +1,11 @@
+Package: pardus-nvidia-installer
+Version: 0.0.1
+Architecture: amd64
+Maintainer: osman.coskun <osman.coskun@pardus.org.tr>
+Installed-Size: 451
+Depends: python3-yaml
+Section: unknown
+Priority: optional
+Homepage: <insert the upstream URL, if relevant>
+Description: <insert up to 60 chars description>
+ <Insert long description, indented with spaces.>
