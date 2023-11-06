@@ -19,6 +19,7 @@ from gi.repository import Gtk, GObject, Polkit, GLib
 cache = apt.Cache()
 act_id = "tr.org.pardus.pkexec.pardus-nvidia-installer"
 socket_path = "/tmp/pardus-nvidia-installer"
+nouveau = "xserver-xorg-video-nouveau"
 driver_packages = {
     "nouveau": "xserver-xorg-video-nouveau",
     "current": "nvidia-driver",
@@ -37,25 +38,14 @@ class MainWindow(object):
             print("Error while creating user interface from glade file")
             return False
 
-        self.drivers = ["nouveau"]
         self.driver_buttons = []
-
+        self.active_driver = ""
+        self.ui_gpu_info_box = self.get_ui("ui_gpu_info_box")
         self.ui_gpu_box = self.get_ui("ui_gpu_box")
         self.ui_drv_box = self.get_ui("ui_drv_box")
         self.ui_main_box = self.get_ui("ui_main_box")
         self.ui_main_window = self.get_ui("ui_main_window")
-        self.ui_cur_sel_drv_lbl = self.get_ui("ui_cur_selected_drv_label")
         self.ui_confirm_dialog = self.get_ui("ui_confirm_dialog")
-
-        self.ui_os_drv_lbl = self.get_ui("ui_opensource_driver_label")
-        self.ui_os_drv_n_lbl = self.get_ui("ui_opensource_driver_name_label")
-        self.ui_os_drv_rb = self.get_ui("ui_opensource_driver_radio_button")
-        self.ui_os_drv_v_lbl = self.get_ui("ui_opensource_driver_version_label")
-
-        self.ui_nv_drv_lbl = self.get_ui("ui_proprietary_driver_label")
-        self.ui_nv_drv_n_lbl = self.get_ui("ui_proprietary_driver_name_label")
-        self.ui_nv_drv_rb = self.get_ui("ui_proprietary_driver_radio_button")
-        self.ui_nv_drv_v_lbl = self.get_ui("ui_proprietary_driver_version_label")
 
         self.ui_apply_chg_button = self.get_ui("ui_apply_chg_button")
         self.ui_status_label = self.get_ui("ui_status_label")
@@ -77,108 +67,63 @@ class MainWindow(object):
             "notify::permission", self.on_root_permission_changed
         )
         prem = Polkit.Permission.new_sync(act_id, None, None)
-        self.ui_apply_chg_button.set_permission(prem)
 
-        self.ui_os_drv_rb.connect("toggled", self.on_drv_toggled, "nouveau")
-        self.ui_nv_drv_rb.connect("toggled", self.on_drv_toggled, "nvidia")
+        self.nvidia_devices = nvidia.find_device()
+        for index, dev in enumerate(self.nvidia_devices):
+            name = dev["device"]
+            pci = dev["pci"]
+            driver = dev["driver"]
+            cur_driver = dev["cur_driver"]
+            driver_info = package.get_pkg_info(driver)
+
+            toggle = self.driver_box(driver, driver_info["name"], driver_info["ver"])
+
+            if index == 0:
+                info = self.gpu_box(name, pci, cur_driver)
+                self.ui_gpu_info_box.pack_start(info, True, True, 5)
+                toggle = self.driver_box(
+                    driver, driver_info["name"], driver_info["ver"], True
+                )
+            toggle.connect("toggled", self.on_drv_toggled, driver)
+            active = dev["drv_in_use"] or cur_driver == nouveau
+            toggle.set_active(active)
+            if active:
+                self.active_driver = driver
+
+            self.ui_gpu_box.pack_start(toggle, True, True, 5)
+        self.ui_apply_chg_button.set_permission(prem)
+        self.ui_apply_chg_button.set_sensitive(False)
 
         self.ui_main_window.set_application(application)
         self.ui_main_window.set_title("Pardus Nvidia Installer")
 
-        self.nvidia_device = nvidia.find_device()
-        print(self.nvidia_device)
-        for dev in self.nvidia_device:
-            self.drivers.append(dev["driver"])
-        print(self.drivers)
-        self.toggled_driver = self.nvidia_device[0]["cur_driver"]
-        if self.toggled_driver == "nvidia":
-            self.ui_nv_drv_rb.set_active(True)
-        self.chg_drv_lbl_in_use()
-
-        if (
-            self.nvidia_device[0]
-            and self.nvidia_device[0]["driver"] in driver_packages.keys()
-        ):
-            self.pkg_nv_info = package.get_pkg_info(
-                driver_packages[self.nvidia_device[0]["driver"]]
-            )
-
-            name = self.nvidia_device[0]["name"]
-            pci = self.nvidia_device[0]["pci"]
-            cur_drv = self.nvidia_device[0]["cur_driver"]
-            dev_info_box = self.gpu_box(name, pci, cur_drv)
-            self.ui_gpu_box.pack_start(dev_info_box, True, True, 5)
-            self.os_drv_pkg = "xserver-xorg-video-nouveau"
-            self.pkg_os_info = package.get_pkg_info(self.os_drv_pkg)
-
-            markup = self.lbl_markup("Name", self.pkg_os_info["name"])
-            self.ui_os_drv_n_lbl.set_markup(markup)
-
-            markup = self.lbl_markup("Version", self.pkg_os_info["ver"])
-            self.ui_os_drv_v_lbl.set_markup(markup)
-
-            markup = self.lbl_markup(
-                "Description", "Open Source Driver", color="mediumspringgreen"
-            )
-            self.ui_os_drv_lbl.set_markup(markup)
-            markup = self.lbl_markup("Name", self.pkg_nv_info["name"])
-            self.ui_nv_drv_n_lbl.set_markup(markup)
-
-            markup = self.lbl_markup("Version", self.pkg_nv_info["ver"])
-            self.ui_nv_drv_v_lbl.set_markup(markup)
-
-            markup = self.lbl_markup(
-                "Description", "Proprietary Driver", color="dodgerblue"
-            )
-            self.ui_nv_drv_lbl.set_markup(markup)
-        elif self.nvidia_device[0]["driver"] not in driver_packages.keys():
-            self.ui_main_box.remove(self.ui_drv_box)
-            lbl = f"Your GPU: {self.nvidia_device[0]['name']} support only support version {self.nvidia_device[0]['driver']}. But this package is not in our repositories."
-            label = Gtk.Label(label=lbl)
-            self.ui_gpu_box.pack_start(label, True, True, 5)
-        else:
-            self.ui_main_box.remove(self.ui_drv_box)
-            label = Gtk.Label(
-                label="There is no compatible device in system.", xalign=0
-            )
-            self.ui_gpu_box.pack_start(label, True, True, 5)
-        for index, driver in enumerate(self.drivers):
-            info = package.get_pkg_info(driver_packages[driver])
-            name = info["name"]
-            ver = info["ver"]
-            drv = "nvidia"
-            if index == 0:
-                drv = "nouveau"
-            bx = self.driver_box(drv, name, ver)
-            self.ui_gpu_box.pack_start(bx, True, True, 5)
-        self.ui_gpu_box.show_all()
+        self.ui_main_window.show_all()
 
     def get_ui(self, object_name: str):
         return self.gtk_builder.get_object(object_name)
 
-    def driver_box(self, drv, drv_name, drv_ver):
+    def driver_box(self, drv, drv_name, drv_ver, recommended=False):
         b = Gtk.Builder.new_from_file(
             os.path.dirname(__file__) + "/../ui/driver_toggle.glade"
         )
         btn = b.get_object("ui_radio_button")
+
         btn.set_name(drv)
 
         name = b.get_object("ui_name_label")
-        name.set_label(drv_name)
+        markup = self.lbl_markup("Driver", drv_name)
+        if recommended:
+            markup = self.lbl_markup("Driver", drv_name + "<b> (Recommended)</b>")
+        name.set_markup(markup)
 
         ver = b.get_object("ui_version_label")
-        ver.set_label(drv_ver)
+        markup = self.lbl_markup("Version", drv_ver)
+        ver.set_markup(markup)
 
-        markup = self.lbl_markup(
-            "Description",
-            "Open Source Driver",
-            color="mediumspringgreen",
-        )
-        if drv == "nvidia":
+        markup = self.lbl_markup("Description", "Proprietary", color="dodgerblue")
+        if drv == nouveau:
             markup = self.lbl_markup(
-                "Description",
-                "Proprietary",
-                color="dodgerblue",
+                "Description", "Open Source Driver", color="mediumspringgreen"
             )
         lbl = b.get_object("ui_driver_label")
         lbl.set_markup(markup)
@@ -221,24 +166,13 @@ class MainWindow(object):
             return f"<span> <b>{label}: </b> <span>{desc}</span> </span>"
 
     def on_drv_toggled(self, radio_button: Gtk.RadioButton, name: str):
-        markup_desc = name
-        drv_in_use = self.is_drv_in_use(name)
-
-        if drv_in_use:
-            markup_desc = name + " (Currently In Use) "
-
         if radio_button.get_active():
-            self.ui_apply_chg_button.set_sensitive(not drv_in_use)
-            self.ui_cur_sel_drv_lbl.set_markup(markup_desc)
+            self.ui_apply_chg_button.set_sensitive(not self.active_driver == name)
             self.toggled_driver = name
-            self.chg_drv_lbl_in_use()
+            print(self.toggled_driver)
 
     def is_drv_in_use(self, driver: str):
-        return self.nvidia_device[0]["cur_driver"] == driver
-
-    def chg_drv_lbl_in_use(self):
-        markup = self.lbl_markup("Current Selected Driver", self.toggled_driver)
-        self.ui_cur_sel_drv_lbl.set_markup(markup)
+        return self.active_driver == driver
 
     def on_root_permission_changed(self, permission, blank):
         permission = self.ui_apply_chg_button.get_permission()
@@ -253,8 +187,6 @@ class MainWindow(object):
                         cur_path + pkg_file,
                         self.toggled_driver,
                     ]
-                    if self.toggled_driver == "nvidia":
-                        params.append(drivers[self.nvidia_device[0]["driver"]])
 
                     res = self.start_prc(
                         params, self.ui_status_progressbar, self.ui_confirm_dialog

@@ -1,13 +1,18 @@
 import os
-import yaml
+import apt
+import json
+import package
+import subprocess
 
-nvidia_pci_id = 0x10DE
+nvidia_pci_id = "10DE"
 nvidia_devices_yaml_path = "/../data/nvidia-pci.yaml"
+nvidia_devices_json_path = "/../data/nvidia-pci.json"
 drivers = {"current": "nvidia-driver", "470": "nvidia-tesla-470-driver"}
+nouveau = "xserver-xorg-video-nouveau"
 
 
 class PciDev:
-    def __init__(self, vendor: int, device: int, cur_driver: str):
+    def __init__(self, vendor: str, device: str, cur_driver: str):
         self.vendor = vendor
         self.device = device
         self.cur_driver = cur_driver
@@ -22,9 +27,9 @@ def get_dev_list():
         if dirs:
             for dir in dirs:
                 with open(os.path.join(pci_dev_path, dir, "vendor")) as f:
-                    vendor_id = int(f.read(), 16)
+                    vendor_id = f.read().strip()[2:].upper()
                 with open(os.path.join(pci_dev_path, dir, "device")) as f:
-                    device_id = int(f.read(), 16)
+                    device_id = f.read().strip()[2:].upper()
 
                 drv_mdl = os.path.join(pci_dev_path, dir, "driver", "module")
 
@@ -33,36 +38,44 @@ def get_dev_list():
                     cur_driver = os.path.basename(orig_path)
                 except OSError as e:
                     cur_driver = "Driver Not Found"
-
                 if vendor_id == nvidia_pci_id:
-                    print(cur_driver)
                     yield PciDev(vendor_id, device_id, cur_driver)
 
 
-def parse_devices(path: str):
-    with open(os.path.dirname(__file__) + path, "r") as f:
-        nvidia_devices = list(yaml.safe_load_all(f))[0]["nvidia"]
-
-    pci_map = {}
-    for drivers in nvidia_devices:
-        for driver in nvidia_devices[drivers]:
-            pci_map[int(str(driver["pci"]), 16)] = {
-                "name": driver["name"],
-                "driver": drivers,
-            }
-    return pci_map
+def is_drv_installed(driver):
+    cache = apt.Cache()
+    return cache[driver].is_installed
+    cmd = "/sbin/modinfo nvidia-current --field=version"
+    return subprocess.getoutput(cmd)
 
 
 def find_device():
     pci_devices = get_dev_list()
-    parsed_nvidia_devices = parse_devices(nvidia_devices_yaml_path)
-    nvidia_devices = []
-    for pci in pci_devices:
-        if pci.device in parsed_nvidia_devices.keys():
-            nvidia_dev = parsed_nvidia_devices[pci.device]
-            nvidia_dev["pci"] = str(pci)
-            nvidia_dev["cur_driver"] = pci.cur_driver
-            nvidia_devices.append(nvidia_dev)
-            nvidia_devices.append(nvidia_dev)
+    parsed_nvidia_drivers = json.loads(
+        open(os.path.dirname(__file__) + nvidia_devices_json_path, "r").read()
+    )
+    nvidia_devices = [{"driver": "xserver-xorg-video-nouveau", "drv_in_use": False}]
+    for index, pci in enumerate(pci_devices):
+        for driver in parsed_nvidia_drivers:
+            if pci.device in parsed_nvidia_drivers[driver].keys():
+                data = {
+                    "pci": pci.device,
+                    "device": parsed_nvidia_drivers[driver][pci.device],
+                    "cur_driver": pci.cur_driver,
+                }
+                if index == 0:
+                    nvidia_devices[0]["pci"] = pci.device
+                    nvidia_devices[0]["device"] = parsed_nvidia_drivers[driver][
+                        pci.device
+                    ]
+                    nvidia_devices[0]["cur_driver"] = pci.cur_driver
+
+                data["driver"] = driver
+
+                cur_drv_info = package.get_pkg_info(driver)
+                data["drv_in_use"] = is_drv_installed(driver)
+                print(data)
+
+                nvidia_devices.append(data)
 
     return nvidia_devices

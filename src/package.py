@@ -6,6 +6,7 @@ import subprocess
 import dbus
 
 os.environ["DEBIAN_FRONTEND"] = "noninteractive"
+nouveau = "xserver-xorg-video-nouveau"
 
 
 def install_nvidia(nv_drv):
@@ -47,17 +48,10 @@ def get_pkg_info(package_name: str):
 if __name__ == "__main__":
     args = sys.argv
     if len(args) > 1:
-        if args[1] == "update":
-            update()
-        if args[1] == "install":
-            pkg_nm = args[2]
-            fd = args[3]
-            install(pkg_nm, fd)
-        if args[1] == "nouveau":
-            print("pkg.py nouveau")
+        if args[1] == nouveau:
             install_nouveau()
-        if args[1] == "nvidia":
-            nv_drv = args[2]
+        else:
+            nv_drv = args[1]
             install_nvidia(nv_drv)
 
     else:
