@@ -71,9 +71,15 @@ def find_device():
 
                 if pci.cur_driver == "nouveau":
                     data["cur_driver"] = nouveau
+                    data["drv_in_use"] = True
                 else:
                     if is_drv_installed(driver):
+                        cache = apt.Cache()
+                        ap = cache[driver].versions
+                        data["cur_driver_ver"] = ap[0]
+                        nvidia_devices[0]["driver"] = driver
                         data["cur_driver"] = driver
+                        data["drv_in_use"] = True
                     else:
                         data["cur_driver"] = "Not Found"
 

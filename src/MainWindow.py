@@ -75,11 +75,13 @@ class MainWindow(object):
             driver = dev["driver"]
             cur_driver = dev["cur_driver"]
             driver_info = package.get_pkg_info(driver)
+            drv_in_use = dev["drv_in_use"]
 
             toggle = self.driver_box(driver, driver_info["name"], driver_info["ver"])
 
-            if index == 0:
-                info = self.gpu_box(name, pci, cur_driver)
+            if drv_in_use:
+                cur_driver_ver = dev["cur_driver_ver"]
+                info = self.gpu_box(name, pci, cur_driver_ver)
                 self.ui_gpu_info_box.pack_start(info, True, True, 5)
                 toggle = self.driver_box(
                     driver, driver_info["name"], driver_info["ver"], True
