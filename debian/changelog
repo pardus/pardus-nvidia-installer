@@ -1,3 +1,29 @@
+pardus-nvidia-installer (0.0.2) unstable; urgency=medium
+
+  * fix: multiple driver support added with control
+  * feat:multiple driver support added with new pci data
+  * feat: new pci list per driver version
+  * Created README.md
+  * fix: alternative message for nvidia devices which currently doesnt have any driver in the repo
+  * fix: buttons are disabled during installation
+  *	fix: nvidia pci device parsing
+  *	fix: meson & application start
+  * feat: debian files created
+  * feat: added icon,desktop,meson files
+  * feat: restart confirm dialog added
+  * feat: getting driver logic improved
+  * fix: added policy and pkla file
+  * feat: added process std functionality
+  *	fix: pkexec
+  * feat: permission dialog added
+  *	feat: control buttons added
+  * feat: drivers are listing in ui.
+  * fix: PCI and Nvidia parsing logic improved
+  * feat: driver and pci can be found now
+  * feat: ui file created. basic structure is done
+
+ -- osman.coskun <osman.coskun@pardus.org.tr>  Tue, 07 Nov 2023 08:26:59 +0300
+
 pardus-nvidia-installer (0.0.1) unstable; urgency=medium
 
   * Initial release.

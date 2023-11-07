@@ -9,9 +9,9 @@
   <vendor_url>http://www.pardus.org.tr/</vendor_url>
 
   <action id="tr.org.pardus.pkexec.pardus-nvidia-installer">
-    <description>Run system report creator.</description>
-    <message>Authentication is required to create system report</message>
-    <message xml:lang="tr">Sistem raporu oluşturmak için yetkilendirme gerekiyor</message>
+    <description>Run Nvidia Driver Installer</description>
+    <message>Authentication is required to install Nvidia driver.</message>
+    <message xml:lang="tr">Nvidia ekran kartınızın sürücülerinin yüklenmesi için yetkilendirme gerekiyor</message>
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
