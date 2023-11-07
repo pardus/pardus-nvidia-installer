@@ -77,7 +77,7 @@ def find_device():
                         cache = apt.Cache()
                         ap = cache[driver].versions
                         data["cur_driver_ver"] = ap[0]
-                        nvidia_devices[0]["driver"] = driver
+                        nvidia_devices[0]["cur_driver"] = driver
                         data["cur_driver"] = driver
                         data["drv_in_use"] = True
                     else:
