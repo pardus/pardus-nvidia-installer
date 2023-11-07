@@ -85,14 +85,13 @@ class MainWindow(object):
                     driver, driver_info["name"], driver_info["ver"], True
                 )
             toggle.connect("toggled", self.on_drv_toggled, driver)
-            active = dev["drv_in_use"] or cur_driver == nouveau
+            active = cur_driver == driver
             toggle.set_active(active)
             if active:
                 self.active_driver = driver
 
             self.ui_gpu_box.pack_start(toggle, True, True, 5)
         self.ui_apply_chg_button.set_permission(prem)
-        self.ui_apply_chg_button.set_sensitive(False)
 
         self.ui_main_window.set_application(application)
         self.ui_main_window.set_title("Pardus Nvidia Installer")

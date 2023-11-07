@@ -36,6 +36,7 @@ def get_dev_list():
                 try:
                     orig_path = os.readlink(drv_mdl)
                     cur_driver = os.path.basename(orig_path)
+
                 except OSError as e:
                     cur_driver = "Driver Not Found"
                 if vendor_id == nvidia_pci_id:
@@ -45,8 +46,6 @@ def get_dev_list():
 def is_drv_installed(driver):
     cache = apt.Cache()
     return cache[driver].is_installed
-    cmd = "/sbin/modinfo nvidia-current --field=version"
-    return subprocess.getoutput(cmd)
 
 
 def find_device():
@@ -68,14 +67,19 @@ def find_device():
                     nvidia_devices[0]["device"] = parsed_nvidia_drivers[driver][
                         pci.device
                     ]
-                    nvidia_devices[0]["cur_driver"] = pci.cur_driver
+                    nvidia_devices[0]["cur_driver"] = nouveau
+
+                if pci.cur_driver == "nouveau":
+                    data["cur_driver"] = nouveau
+                else:
+                    if is_drv_installed(driver):
+                        data["cur_driver"] = driver
+                    else:
+                        data["cur_driver"] = "Not Found"
 
                 data["driver"] = driver
 
-                cur_drv_info = package.get_pkg_info(driver)
                 data["drv_in_use"] = is_drv_installed(driver)
-                print(data)
-
                 nvidia_devices.append(data)
-
+    print(nvidia_devices)
     return nvidia_devices
