@@ -37,10 +37,10 @@ def get_pkg_info(package_name: str):
     pkg = cache[package_name]
     if pkg.is_installed:
         version = pkg.installed.version
-        name = pkg.installed.raw_description
+        name = pkg.installed.summary
     else:
         version = pkg.versions[0].version
-        name = pkg.versions[0].raw_description
+        name = pkg.versions[0].summary
 
     return {"ver": version, "name": name}
 
