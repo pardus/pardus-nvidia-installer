@@ -5,6 +5,7 @@ import package
 import subprocess
 
 nvidia_pci_id = "10DE"
+nvidia_pci_id_int = 0x10DE
 nvidia_devices_yaml_path = "/../data/nvidia-pci.yaml"
 nvidia_devices_json_path = "/../data/nvidia-pci.json"
 drivers = {"current": "nvidia-driver", "470": "nvidia-tesla-470-driver"}
@@ -19,7 +20,44 @@ class PciDev:
 
     def __str__(self):
         return f"{self.vendor:04x}:{self.device:04x}"
+class NvidiaDevice:
+    def __init__(self,vendor_id:int=None,vendor_name:str=None,
+                 device_id:str=None,device_name:str=None,
+                 driver_ver:str=None,driver_name:str=None
+                 ):
+        self.vendor_id = vendor_id
+        self.vendor_name = vendor_name
 
+        self.device_id = device_id
+        self.device_name = device_name
+
+        self.driver_ver = driver_ver
+        self.driver_name = driver_name
+    
+
+def graphics():
+    pci_dev_path = "/sys/bus/pci/devices/"
+    for paths, dirs, files in os.walk(pci_dev_path):
+        if dirs:
+            for dir in dirs:
+                vp = os.path.join(pci_dev_path,dir,"vendor")
+                vc = readfile(vp).strip()
+                vc = int(vc,16)
+
+                if vc == nvidia_pci_id_int:
+                    dp = os.path.join(pci_dev_path,dir,"device")
+                    dc = readfile(dp).strip()
+                    dc = int(dc,16)
+
+
+
+def readfile(filepath:str=None):
+    content = None
+    if os.path.isfile(filepath):
+        f = open(filepath,"r")
+        content = f.read()
+        f.close()
+    return content
 
 def get_dev_list():
     pci_dev_path = "/sys/bus/pci/devices/"
