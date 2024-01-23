@@ -2,12 +2,14 @@ import os
 import apt
 import json
 
+
 nvidia_pci_id = "10DE"
 nvidia_pci_id_int = 0x10DE
 nvidia_devices_yaml_path = "/../data/nvidia-pci.yaml"
 nvidia_devices_json_path = "/../data/nvidia-pci.json"
 drivers = {"current": "nvidia-driver", "470": "nvidia-tesla-470-driver"}
 nouveau = "xserver-xorg-video-nouveau"
+cache = apt.Cache()
 class PciDev:
     def __init__(self, vendor: str, device: str, cur_driver: str):
         self.vendor = vendor
@@ -17,15 +19,23 @@ class PciDev:
     def __str__(self):
         return f"{self.vendor:04x}:{self.device:04x}"
 
+class NvidiaDriver:
+    def __init__(self,package,version,type):
+        self.package = package
+        self.version = version
+        self.type = type
+
 class NvidiaDevice:
     def __init__(self,vendor_id:int=None,vendor_name:str=None,
-                 device_id:str=None,device_name:str=None,
+                 device_id:int=None,device_name:str=None,
                  driver_name:str=None,driver_version:str=None):
         self.vendor_id = vendor_id
         self.vendor_name = vendor_name
+        self.vendor_id_str = int2hex(self.vendor_id)
 
         self.device_id = device_id
         self.device_name = device_name
+        self.device_id_str = int2hex(self.device_id)
 
         self.driver_name = driver_name
         self.driver_version = driver_version
@@ -113,6 +123,17 @@ def is_drv_installed(driver):
     cache = apt.Cache()
     return cache[driver].is_installed
 
+def drivers():
+    with open(os.path.dirname(__file__) + nvidia_devices_json_path,"r") as f:
+        parsed_nvidia_drivers = json.loads(f.read())
+    yield NvidiaDriver(nouveau,get_pkg_ver(nouveau),"Open Source Driver")
+    gpus = graphics()
+    for gpu in gpus:
+        for driver in parsed_nvidia_drivers:
+            if gpu.device_id_str in parsed_nvidia_drivers[driver].keys():
+                yield NvidiaDriver(driver,get_pkg_ver(driver),"Proprietary Driver")
+def int2hex(num):
+    return str(hex(num)[2:]).upper()
 
 def find_device():
     pci_devices = get_dev_list()
@@ -137,9 +158,7 @@ def find_device():
 
                 if pci.cur_driver == "nouveau":
                     data["cur_driver"] = nouveau
-                    data["drv_in_use"] = True
-                else:
-                    if is_drv_installed(driver):
+                    if data["drv_installed"] == driver:
                         cache = apt.Cache()
                         ap = cache[driver].versions
                         data["cur_driver_ver"] = ap[0]
@@ -155,3 +174,10 @@ def find_device():
                 nvidia_devices.append(data)
     print(nvidia_devices)
     return nvidia_devices
+
+
+def get_pkg_ver(pkg):
+    return cache[pkg].versions[0].version
+    
+
+

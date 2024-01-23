@@ -68,31 +68,47 @@ class MainWindow(object):
         )
         prem = Polkit.Permission.new_sync(act_id, None, None)
 
-        self.nvidia_devices = nvidia.find_device()
-        for index, dev in enumerate(self.nvidia_devices):
-            name = dev["device"]
-            pci = dev["pci"]
-            driver = dev["driver"]
-            cur_driver = dev["cur_driver"]
-            driver_info = package.get_pkg_info(driver)
-            drv_in_use = dev["drv_in_use"]
+#        self.nvidia_devices = nvidia.find_device()
+        self.nvidia_devices = nvidia.graphics()
+        for nvidia_device in self.nvidia_devices:
+            gpu_info = self.gpu_box(nvidia_device.vendor_name,
+                                    nvidia_device.device_name,
+                                    nvidia_device.device_id_str,
+                                    nvidia_device.driver_name,
+                                    nvidia_device.driver_version,
 
-            toggle = self.driver_box(driver, driver_info["name"], driver_info["ver"])
-
-            if drv_in_use:
-                cur_driver_ver = dev["cur_driver_ver"]
-                info = self.gpu_box(name, pci, cur_driver_ver)
-                self.ui_gpu_info_box.pack_start(info, True, True, 5)
-                toggle = self.driver_box(
-                    driver, driver_info["name"], driver_info["ver"], True
-                )
-            toggle.connect("toggled", self.on_drv_toggled, driver)
-            active = cur_driver == driver
-            toggle.set_active(active)
-            if active:
-                self.active_driver = driver
-
-            self.ui_gpu_box.pack_start(toggle, True, True, 5)
+                                    )
+            self.ui_gpu_box.pack_start(gpu_info,True,True,5)
+#        for index, dev in enumerate(self.nvidia_devices):
+#            name = dev.device_name
+#            pci = dev.device_id
+#            driver = dev.driver_name
+#            cur_driver = dev.driver_name
+#            driver_info = package.get_pkg_info("nvidia-driver")
+#            drv_in_use = dev.driver_name 
+#
+#            toggle = self.driver_box(driver, name, dev.driver_version)
+#
+#            if drv_in_use:
+#                cur_driver_ver =dev.driver_version 
+#                info = self.gpu_box(name, pci, cur_driver_ver)
+#                self.ui_gpu_info_box.pack_start(info, True, True, 5)
+#                toggle = self.driver_box(
+#                    driver, name, dev.driver_version, True
+#                )
+#            toggle.connect("toggled", self.on_drv_toggled, driver)
+#            active = cur_driver == driver
+#            toggle.set_active(active)
+#            if active:
+#                self.active_driver = driver
+#
+#            self.ui_gpu_box.pack_start(toggle, True, True, 5)
+        self.nvidia_drivers = nvidia.drivers()
+        for nvidia_driver in self.nvidia_drivers:
+            toggle = self.driver_box(nvidia_driver.package,
+                                     nvidia_driver.version,
+                                     nvidia_driver.type)
+            self.ui_gpu_box.pack_start(toggle,True,True,5)
         self.ui_apply_chg_button.set_permission(prem)
 
         self.ui_main_window.set_application(application)
@@ -103,17 +119,17 @@ class MainWindow(object):
     def get_ui(self, object_name: str):
         return self.gtk_builder.get_object(object_name)
 
-    def driver_box(self, drv, drv_name, drv_ver, recommended=False):
+    def driver_box(self, drv_name, drv_ver,drv_type):
         b = Gtk.Builder.new_from_file(
             os.path.dirname(__file__) + "/../ui/driver_toggle.glade"
         )
         btn = b.get_object("ui_radio_button")
 
-        btn.set_name(drv)
+        btn.set_name(drv_name)
 
         name = b.get_object("ui_name_label")
         markup = self.lbl_markup("Driver", drv_name)
-        if recommended:
+        if drv_name == nouveau:
             markup = self.lbl_markup("Driver", drv_name + "<b> (Recommended)</b>")
         name.set_markup(markup)
 
@@ -121,10 +137,10 @@ class MainWindow(object):
         markup = self.lbl_markup("Version", drv_ver)
         ver.set_markup(markup)
 
-        markup = self.lbl_markup("Description", "Proprietary", color="dodgerblue")
-        if drv == nouveau:
+        markup = self.lbl_markup("Description", drv_type, color="dodgerblue")
+        if drv_name == nouveau:
             markup = self.lbl_markup(
-                "Description", "Open Source Driver", color="mediumspringgreen"
+                "Description", drv_type , color="mediumspringgreen"
             )
         lbl = b.get_object("ui_driver_label")
         lbl.set_markup(markup)
@@ -135,12 +151,13 @@ class MainWindow(object):
         self.driver_buttons.append(btn)
         return btn
 
-    def gpu_box(self, name: str, pci: str, cur_drv: str):
+    def gpu_box(self,vendor_name:str,device_name:str,device_id:str,device_driver:str,driver_version:str):
         box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 13)
-        vendor_markup = self.lbl_markup("Device Vendor", "Nvidia")
-        name_markup = self.lbl_markup("Device Model", name)
-        pci_markup = self.lbl_markup("PCI", pci)
-        drv_markup = self.lbl_markup("Current Driver In Use", cur_drv)
+        vendor_markup = self.lbl_markup("Device Vendor",vendor_name)
+        name_markup = self.lbl_markup("Device Model", device_name)
+        pci_markup = self.lbl_markup("PCI", device_id)
+        drv_markup = self.lbl_markup("Current Driver In Use",device_driver)
+        drv_ver_markup =self.lbl_markup("Driver Version",driver_version)
 
         vendor_label = Gtk.Label(xalign=0)
         vendor_label.set_markup(vendor_markup)
@@ -154,10 +171,14 @@ class MainWindow(object):
         driver_label = Gtk.Label(xalign=0)
         driver_label.set_markup(drv_markup)
 
+        driver_ver_label = Gtk.Label(xalign=0)
+        driver_ver_label.set_markup(drv_ver_markup)
+
         box.pack_start(vendor_label, True, True, 0)
         box.pack_start(name_label, True, True, 0)
         box.pack_start(pci_label, True, True, 0)
         box.pack_start(driver_label, True, True, 0)
+        box.pack_start(driver_ver_label,True,True,0)
         return box
 
     def lbl_markup(self, label: str, desc: str, color: str = None):
