@@ -1,3 +1,9 @@
+pardus-nvidia-installer (0.0.3) unstable; urgency=medium
+
+  * feat: mirror switch between nvidia and pardus.
+
+ -- osman.coskun <osman.coskun@pardus.org.tr> Tue, 30 Jan 2023 17:24:30 +0300
+
 pardus-nvidia-installer (0.0.2) unstable; urgency=medium
 
   * fix: multiple driver support added with control

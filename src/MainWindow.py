@@ -27,6 +27,9 @@ driver_packages = {
 }
 pkg_opr = {"purge": ""}
 
+cur_path = os.path.dirname(os.path.abspath(__file__))
+pkg_file = "/package.py"
+
 
 class MainWindow(object):
     def __init__(self, application):
@@ -40,6 +43,7 @@ class MainWindow(object):
 
         self.driver_buttons = []
         self.active_driver = ""
+        self.toggled_driver = ""
         self.ui_gpu_info_box = self.get_ui("ui_gpu_info_box")
         self.ui_gpu_box = self.get_ui("ui_gpu_box")
         self.ui_drv_box = self.get_ui("ui_drv_box")
@@ -50,76 +54,61 @@ class MainWindow(object):
         self.ui_apply_chg_button = self.get_ui("ui_apply_chg_button")
         self.ui_status_label = self.get_ui("ui_status_label")
         self.ui_status_progressbar = self.get_ui("ui_status_progressbar")
+        self.ui_apply_chg_button.connect("clicked", self.on_button_clicked)
 
-        self.root_permission = None
-        if Polkit:
-            try:
-                self.root_permission = Polkit.Permission.new_sync(act_id, None, None)
-            except GLib.GError:
-                pass
+        self.ui_pardus_src_button = self.get_ui("ui_pardus_src_button")
+        self.ui_pardus_src_button.connect("clicked", self.on_nvidia_mirror_changed)
+        self.ui_nvidia_src_button = self.get_ui("ui_nvidia_src_button")
+        self.ui_nvidia_src_button.connect("clicked", self.on_nvidia_mirror_changed)
 
-        if self.root_permission is not None:
-            self.root_permission.connect(
-                "notify::allowed", self.on_root_permission_changed
-            )
+        self.drv_arr = []
 
-        self.ui_apply_chg_button.connect(
-            "notify::permission", self.on_root_permission_changed
-        )
-        prem = Polkit.Permission.new_sync(act_id, None, None)
+        self.apt_opr = ""
+        self.create_gpu_drivers()
 
-#        self.nvidia_devices = nvidia.find_device()
-        self.nvidia_devices = nvidia.graphics()
-        for nvidia_device in self.nvidia_devices:
-            gpu_info = self.gpu_box(nvidia_device.vendor_name,
-                                    nvidia_device.device_name,
-                                    nvidia_device.device_id_str,
-                                    nvidia_device.driver_name,
-                                    nvidia_device.driver_version,
-
-                                    )
-            self.ui_gpu_box.pack_start(gpu_info,True,True,5)
-#        for index, dev in enumerate(self.nvidia_devices):
-#            name = dev.device_name
-#            pci = dev.device_id
-#            driver = dev.driver_name
-#            cur_driver = dev.driver_name
-#            driver_info = package.get_pkg_info("nvidia-driver")
-#            drv_in_use = dev.driver_name 
-#
-#            toggle = self.driver_box(driver, name, dev.driver_version)
-#
-#            if drv_in_use:
-#                cur_driver_ver =dev.driver_version 
-#                info = self.gpu_box(name, pci, cur_driver_ver)
-#                self.ui_gpu_info_box.pack_start(info, True, True, 5)
-#                toggle = self.driver_box(
-#                    driver, name, dev.driver_version, True
-#                )
-#            toggle.connect("toggled", self.on_drv_toggled, driver)
-#            active = cur_driver == driver
-#            toggle.set_active(active)
-#            if active:
-#                self.active_driver = driver
-#
-#            self.ui_gpu_box.pack_start(toggle, True, True, 5)
-        self.nvidia_drivers = nvidia.drivers()
-        for nvidia_driver in self.nvidia_drivers:
-            toggle = self.driver_box(nvidia_driver.package,
-                                     nvidia_driver.version,
-                                     nvidia_driver.type)
-            self.ui_gpu_box.pack_start(toggle,True,True,5)
-        self.ui_apply_chg_button.set_permission(prem)
-
+        self.check_source()
         self.ui_main_window.set_application(application)
         self.ui_main_window.set_title("Pardus Nvidia Installer")
 
         self.ui_main_window.show_all()
 
+    def check_source(self):
+        state = nvidia.source()
+        self.ui_nvidia_src_button.set_sensitive(not state)
+        self.ui_pardus_src_button.set_sensitive(state)
+
+    def create_gpu_drivers(self):
+        for toggle in self.drv_arr:
+            self.ui_gpu_box.remove(toggle)
+        self.drv_arr = []
+        self.nvidia_devices = nvidia.graphics()
+        for nvidia_device in self.nvidia_devices:
+            gpu_info = self.gpu_box(
+                nvidia_device.vendor_name,
+                nvidia_device.device_name,
+                nvidia_device.device_id_str,
+                nvidia_device.driver_name,
+                nvidia_device.driver_version,
+            )
+            self.ui_gpu_info_box.pack_start(gpu_info, True, True, 5)
+
+        self.nvidia_drivers = nvidia.drivers()
+        active_drv_index = 0
+        for index,nvidia_driver in enumerate(self.nvidia_drivers):
+            toggle = self.driver_box(
+                nvidia_driver.package, nvidia_driver.version, nvidia_driver.type
+            )
+            
+            drv_state = nvidia.is_pkg_installed(nvidia_driver.package)
+            toggle.set_active(drv_state)
+            toggle.connect("toggled", self.on_drv_toggled, nvidia_driver.package)
+            self.drv_arr.append(toggle)
+            self.ui_gpu_box.pack_start(toggle, True, True, 5)
+
     def get_ui(self, object_name: str):
         return self.gtk_builder.get_object(object_name)
 
-    def driver_box(self, drv_name, drv_ver,drv_type):
+    def driver_box(self, drv_name, drv_ver, drv_type):
         b = Gtk.Builder.new_from_file(
             os.path.dirname(__file__) + "/../ui/driver_toggle.glade"
         )
@@ -139,9 +128,7 @@ class MainWindow(object):
 
         markup = self.lbl_markup("Description", drv_type, color="dodgerblue")
         if drv_name == nouveau:
-            markup = self.lbl_markup(
-                "Description", drv_type , color="mediumspringgreen"
-            )
+            markup = self.lbl_markup("Description", drv_type, color="mediumspringgreen")
         lbl = b.get_object("ui_driver_label")
         lbl.set_markup(markup)
         grp = None
@@ -151,19 +138,26 @@ class MainWindow(object):
         self.driver_buttons.append(btn)
         return btn
 
-    def gpu_box(self,vendor_name:str,device_name:str,device_id:str,device_driver:str,driver_version:str):
+    def gpu_box(
+        self,
+        vendor_name: str,
+        device_name: str,
+        device_id: str,
+        device_driver: str,
+        driver_version: str,
+    ):
         box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 13)
-        vendor_markup = self.lbl_markup("Device Vendor",vendor_name)
+        vendor_markup = self.lbl_markup("Device Vendor", vendor_name)
         name_markup = self.lbl_markup("Device Model", device_name)
         pci_markup = self.lbl_markup("PCI", device_id)
-        drv_markup = self.lbl_markup("Current Driver In Use",device_driver)
-        drv_ver_markup =self.lbl_markup("Driver Version",driver_version)
+        drv_markup = self.lbl_markup("Current Driver In Use", device_driver)
+        drv_ver_markup = self.lbl_markup("Driver Version", driver_version)
 
         vendor_label = Gtk.Label(xalign=0)
         vendor_label.set_markup(vendor_markup)
 
         name_label = Gtk.Label(xalign=0)
-        name_label.set_markup(name_markup)
+        name_label.set_markup(f"<b>{device_name}</b>")
 
         pci_label = Gtk.Label(xalign=0)
         pci_label.set_markup(pci_markup)
@@ -174,11 +168,8 @@ class MainWindow(object):
         driver_ver_label = Gtk.Label(xalign=0)
         driver_ver_label.set_markup(drv_ver_markup)
 
-        box.pack_start(vendor_label, True, True, 0)
+        #       box.pack_start(vendor_label, True, True, 0)
         box.pack_start(name_label, True, True, 0)
-        box.pack_start(pci_label, True, True, 0)
-        box.pack_start(driver_label, True, True, 0)
-        box.pack_start(driver_ver_label,True,True,0)
         return box
 
     def lbl_markup(self, label: str, desc: str, color: str = None):
@@ -191,50 +182,40 @@ class MainWindow(object):
         if radio_button.get_active():
             self.ui_apply_chg_button.set_sensitive(not self.active_driver == name)
             self.toggled_driver = name
-            print(self.toggled_driver)
 
-    def is_drv_in_use(self, driver: str):
-        return self.active_driver == driver
+    def on_button_clicked(self, button):
+        params = [
+            "/usr/bin/pkexec",
+            cur_path + pkg_file,
+            self.toggled_driver
+        ]
+        self.apt_opr = "install"
+        self.start_prc(params)
+        self.ui_apply_chg_button.set_sensitive(False)
 
-    def on_root_permission_changed(self, permission, blank):
-        permission = self.ui_apply_chg_button.get_permission()
-        try:
-            if permission:
-                allowed = permission.get_allowed()
-                if allowed:
-                    cur_path = os.path.dirname(os.path.abspath(__file__))
-                    pkg_file = "/package.py"
-                    params = [
-                        "/usr/bin/pkexec",
-                        cur_path + pkg_file,
-                        self.toggled_driver,
-                    ]
+    def on_nvidia_mirror_changed(self, button):
+        cur_path = os.path.dirname(os.path.abspath(__file__))
+        params = ["/usr/bin/pkexec", cur_path + pkg_file, "update"]
+        self.apt_opr = "update"
+        self.start_prc(params)
 
-                    res = self.start_prc(
-                        params, self.ui_status_progressbar, self.ui_confirm_dialog
-                    )
-                    self.ui_apply_chg_button.set_sensitive(False)
-
-        except GLib.GError:
-            print("now allowed")
-
-    def start_prc(self, params, ui_obj=None, dlg=None):
+    def start_prc(self, params):
         pid, std_in, std_out, std_err = GLib.spawn_async(
             params,
             flags=GLib.SpawnFlags.DO_NOT_REAP_CHILD,
             standard_output=True,
             standard_error=True,
         )
+        print(params)
 
         GLib.io_add_watch(
             GLib.IOChannel(std_out),
             GLib.IO_IN | GLib.IO_HUP,
             std_opr.on_process_stdout,
-            ui_obj,
-            params[-1],
+            self,
         )
         pid = GLib.child_watch_add(
-            GLib.PRIORITY_DEFAULT, pid, std_opr.on_process_stdext, ui_obj, dlg
+            GLib.PRIORITY_DEFAULT, pid, std_opr.on_process_stdext, self
         )
 
         return pid
