@@ -1,4 +1,5 @@
 import os
+from os.path import isfile
 import apt
 import json
 import shutil
@@ -108,11 +109,15 @@ def graphics():
                     dc = int(dc, 16)
                     dn = pci_ids[vc]["devices"][dc]
 
+                    drv_c = None
+                    drv_ver_c = None
+                    
                     drv_p = os.path.join(pci_dev_path, dir, "driver", "module")
-                    orig_drv_p = os.readlink(drv_p)
-                    drv_c = os.path.basename(orig_drv_p)
-                    drv_ver_p = os.path.join(drv_p, "version")
-                    drv_ver_c = readfile(drv_ver_p)
+                    if os.path.isfile(drv_p):
+                        orig_drv_p = os.readlink(drv_p)
+                        drv_c = os.path.basename(orig_drv_p)
+                        drv_ver_p = os.path.join(drv_p, "version")
+                        drv_ver_c = readfile(drv_ver_p)
                     devices.append(NvidiaDevice(vc, vn, dc, dn, drv_c, drv_ver_c))
 
     return devices
