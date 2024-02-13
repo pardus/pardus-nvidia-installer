@@ -1,6 +1,6 @@
 #!/bin/bash
 
-langs=("tr")
+langs=("tr" "pt")
 
 if ! command -v xgettext &> /dev/null
 then
@@ -16,9 +16,9 @@ xgettext -o data/po/pardus-nvidia-installer.pot --files-from=data/po/files
 for lang in ${langs[@]}; do
 	if [[ -f po/$lang.po ]]; then
 		echo "updating $lang.po"
-		msgmerge -o data/po/$lang.po data/po/$lang.po data/po/pardus-software.pot
+		msgmerge -o data/po/$lang.po data/po/$lang.po data/po/pardus-nvidia-installer.pot
 	else
 		echo "creating $lang.po"
-		cp data/po/pardus-software.pot data/po/$lang.po
+		cp data/po/pardus-nvidia-installer.pot data/po/$lang.po
 	fi
 done

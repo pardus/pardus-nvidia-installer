@@ -1,9 +1,13 @@
 import os
-from os.path import isfile
 import apt
 import json
 import shutil
-
+import locale
+from locale import gettext as _
+APPNAME_CODE = "pardus-nvidia-installer"
+TRANSLATION_PATH = "/usr/share/locale"
+locale.bindtextdomain(APPNAME_CODE,TRANSLATION_PATH)
+locale.textdomain(APPNAME_CODE)
 nvidia_pci_id = "10DE"
 nvidia_pci_id_int = 0x10DE
 nvidia_devices_yaml_path = "/../data/nvidia-pci.yaml"
@@ -133,13 +137,13 @@ def drivers():
         return drivers
     with open(os.path.dirname(__file__) + nvidia_devices_json_path, "r") as f:
         parsed_nvidia_drivers = json.loads(f.read())
-    drivers.append(NvidiaDriver(nouveau, get_pkg_ver(nouveau), "Open Source Driver"))
+    drivers.append(NvidiaDriver(nouveau, get_pkg_ver(nouveau), _("Open Source Driver")))
 
     for gpu in gpus:
         for driver in parsed_nvidia_drivers:
             if gpu.device_id_str in parsed_nvidia_drivers[driver].keys():
                 drivers.append(
-                    NvidiaDriver(driver, get_pkg_ver(driver), "Proprietary Driver")
+                    NvidiaDriver(driver, get_pkg_ver(driver), _("Proprietary Driver"))
                 )
     return drivers
 

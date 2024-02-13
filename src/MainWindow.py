@@ -4,15 +4,21 @@ import apt
 
 import nvidia
 import std_opr
-
+import locale
 gi.require_version("Gtk", "3.0")
 gi.require_version("Polkit", "1.0")
 
 
 from gi.repository import Gtk, GObject, GLib
+from locale import gettext as _
+APPNAME_CODE = "pardus-nvidia-installer"
+TRANSLATIONS_PATH = "/usr/share/locale/"
+locale.bindtextdomain(APPNAME_CODE,TRANSLATIONS_PATH)
+locale.textdomain(APPNAME_CODE)
 
 
 cache = apt.Cache()
+
 act_id = "tr.org.pardus.pkexec.pardus-nvidia-installer"
 socket_path = "/tmp/pardus-nvidia-installer"
 nouveau = "xserver-xorg-video-nouveau"
@@ -68,7 +74,7 @@ class MainWindow(object):
 
         self.check_source()
         self.ui_main_window.set_application(application)
-        self.ui_main_window.set_title("Pardus Nvidia Installer")
+        self.ui_main_window.set_title(_("Pardus Nvidia Installer"))
 
         self.ui_main_window.show_all()
 
@@ -83,13 +89,7 @@ class MainWindow(object):
         self.drv_arr = []
         self.nvidia_devices = nvidia.graphics()
         for nvidia_device in self.nvidia_devices:
-            gpu_info = self.gpu_box(
-                nvidia_device.vendor_name,
-                nvidia_device.device_name,
-                nvidia_device.device_id_str,
-                nvidia_device.driver_name,
-                nvidia_device.driver_version,
-            )
+            gpu_info = self.gpu_box(nvidia_device.device_name)
             self.ui_gpu_info_box.pack_start(gpu_info, True, True, 5)
 
         self.nvidia_drivers = nvidia.drivers()
@@ -116,18 +116,18 @@ class MainWindow(object):
         btn.set_name(drv_name)
 
         name = b.get_object("ui_name_label")
-        markup = self.lbl_markup("Driver", drv_name)
+        markup = self.lbl_markup(_("Driver"), drv_name)
         if drv_name == nouveau:
-            markup = self.lbl_markup("Driver", drv_name + "<b> (Recommended)</b>")
+            markup = self.lbl_markup(_("Driver"), drv_name)
         name.set_markup(markup)
 
         ver = b.get_object("ui_version_label")
-        markup = self.lbl_markup("Version", drv_ver)
+        markup = self.lbl_markup(_("Version"), drv_ver)
         ver.set_markup(markup)
 
-        markup = self.lbl_markup("Description", drv_type, color="dodgerblue")
+        markup = self.lbl_markup(_("Description"), drv_type, color="dodgerblue")
         if drv_name == nouveau:
-            markup = self.lbl_markup("Description", drv_type, color="mediumspringgreen")
+            markup = self.lbl_markup(_("Description"), drv_type, color="mediumspringgreen")
         lbl = b.get_object("ui_driver_label")
         lbl.set_markup(markup)
         grp = None
@@ -146,7 +146,7 @@ class MainWindow(object):
         box.pack_start(name_label, True, True, 0)
         return box
 
-    def lbl_markup(self, label, desc, color):
+    def lbl_markup(self, label, desc, color=None):
         if color:
             return f'<span> <b>{label}: </b> <span foreground="{color}">{desc}</span> </span>'
         else:
