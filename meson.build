@@ -34,5 +34,5 @@ install_subdir('ui',install_dir : source_dir)
 install_data(['pardus-nvidia-installer'], install_dir : prefix / 'bin')
 
 # locale settings
-# subdir('data/po')
+subdir('data/po')
 
