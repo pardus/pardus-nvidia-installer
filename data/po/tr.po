@@ -1,7 +1,7 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Osman Coskun <osman.coskun@pardus.org.tr> 2024.
 #
 #, fuzzy
 msgid ""
@@ -19,50 +19,51 @@ msgstr ""
 
 #: ui/ui.glade:52
 msgid "<span><b>Warning</b></span>"
-msgstr ""
+msgstr "Dikkat"
 
 #: ui/ui.glade:54
 msgid ""
 "To use your graphics card with selected driver, you need to restart system. "
 "Would you like to restart now?"
 msgstr ""
-
+"Ekran kartınızı seçilen sürücüyle kullanmak için yeniden başlatmanız gerekmektedir"
+"Şimdi yeniden başlatmak ister misiniz?"
 #: ui/ui.glade:153
 msgid "Used Driver Repository"
-msgstr ""
+msgstr "Kullanılan Sürücü Kaynağı"
 
 #: ui/ui.glade:172
 msgid "Pardus Repo"
-msgstr ""
+msgstr "Pardus Depo"
 
 #: ui/ui.glade:185
 msgid "Nvidia Repo"
-msgstr ""
+msgstr "Nvidia Depo"
 
 #: ui/ui.glade:290
 msgid "Apply Changes"
-msgstr ""
+msgstr "Değişiklikleri Uygula"
 
 #: src/MainWindow.py:77
 msgid "Pardus Nvidia Installer"
-msgstr ""
+msgstr "Pardus Nvidia Sürücü Yükleyici"
 
 #: src/MainWindow.py:119 src/MainWindow.py:121
 msgid "Driver"
-msgstr ""
+msgstr "Sürücü"
 
 #: src/MainWindow.py:125
 msgid "Version"
-msgstr ""
+msgstr "Sürüm"
 
 #: src/MainWindow.py:128 src/MainWindow.py:130
 msgid "Description"
-msgstr ""
+msgstr "Tanım"
 
 #: src/nvidia.py:140
 msgid "Open Source Driver"
-msgstr ""
+msgstr "Açık Kaynak Sürücü"
 
 #: src/nvidia.py:146
 msgid "Proprietary Driver"
-msgstr ""
+msgstr "Sahipli Sürücü w"

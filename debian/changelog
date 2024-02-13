@@ -1,3 +1,9 @@
+pardus-nvidia-installer (0.0.4) unstable; urgency=medium
+
+  * feat: translations are added.
+  * feat: Turkish translation completed.
+  * Removed unusued functions and variables from core files.
+
 pardus-nvidia-installer (0.0.3) unstable; urgency=medium
 
   * feat: mirror switch between nvidia and pardus.
