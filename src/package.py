@@ -1,10 +1,8 @@
 #!//usr/bin/env python3
 import os
-from os.path import isfile
 import apt
 import sys
 import subprocess
-import dbus
 import shutil
 import nvidia
 

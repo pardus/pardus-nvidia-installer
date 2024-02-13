@@ -2,18 +2,14 @@ import gi
 import os
 import apt
 
-import yaml
 import nvidia
-import package
-import subprocess
-import socket
 import std_opr
 
 gi.require_version("Gtk", "3.0")
 gi.require_version("Polkit", "1.0")
 
 
-from gi.repository import Gtk, GObject, Polkit, GLib
+from gi.repository import Gtk, GObject, GLib
 
 
 cache = apt.Cache()
@@ -60,6 +56,10 @@ class MainWindow(object):
         self.ui_pardus_src_button.connect("clicked", self.on_nvidia_mirror_changed)
         self.ui_nvidia_src_button = self.get_ui("ui_nvidia_src_button")
         self.ui_nvidia_src_button.connect("clicked", self.on_nvidia_mirror_changed)
+        self.ui_about_dialog = self.get_ui("ui_about_dialog")
+        self.ui_about_button = self.get_ui("ui_about_button")
+        
+        self.ui_about_button.connect("clicked",self.on_about_button_clicked)
 
         self.drv_arr = []
 
@@ -93,7 +93,6 @@ class MainWindow(object):
             self.ui_gpu_info_box.pack_start(gpu_info, True, True, 5)
 
         self.nvidia_drivers = nvidia.drivers()
-        active_drv_index = 0
         for index,nvidia_driver in enumerate(self.nvidia_drivers):
             toggle = self.driver_box(
                 nvidia_driver.package, nvidia_driver.version, nvidia_driver.type
@@ -138,47 +137,22 @@ class MainWindow(object):
         self.driver_buttons.append(btn)
         return btn
 
-    def gpu_box(
-        self,
-        vendor_name: str,
-        device_name: str,
-        device_id: str,
-        device_driver: str,
-        driver_version: str,
-    ):
+    def gpu_box(self,device_name):
         box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 13)
-        vendor_markup = self.lbl_markup("Device Vendor", vendor_name)
-        name_markup = self.lbl_markup("Device Model", device_name)
-        pci_markup = self.lbl_markup("PCI", device_id)
-        drv_markup = self.lbl_markup("Current Driver In Use", device_driver)
-        drv_ver_markup = self.lbl_markup("Driver Version", driver_version)
-
-        vendor_label = Gtk.Label(xalign=0)
-        vendor_label.set_markup(vendor_markup)
 
         name_label = Gtk.Label(xalign=0)
         name_label.set_markup(f"<b>{device_name}</b>")
 
-        pci_label = Gtk.Label(xalign=0)
-        pci_label.set_markup(pci_markup)
-
-        driver_label = Gtk.Label(xalign=0)
-        driver_label.set_markup(drv_markup)
-
-        driver_ver_label = Gtk.Label(xalign=0)
-        driver_ver_label.set_markup(drv_ver_markup)
-
-        #       box.pack_start(vendor_label, True, True, 0)
         box.pack_start(name_label, True, True, 0)
         return box
 
-    def lbl_markup(self, label: str, desc: str, color: str = None):
+    def lbl_markup(self, label, desc, color):
         if color:
             return f'<span> <b>{label}: </b> <span foreground="{color}">{desc}</span> </span>'
         else:
             return f"<span> <b>{label}: </b> <span>{desc}</span> </span>"
 
-    def on_drv_toggled(self, radio_button: Gtk.RadioButton, name: str):
+    def on_drv_toggled(self, radio_button, name):
         if radio_button.get_active():
             self.ui_apply_chg_button.set_sensitive(not self.active_driver == name)
             self.toggled_driver = name
@@ -192,6 +166,9 @@ class MainWindow(object):
         self.apt_opr = "install"
         self.start_prc(params)
         self.ui_apply_chg_button.set_sensitive(False)
+
+    def on_about_button_clicked(self, button):
+        self.ui_about_dialog.run()
 
     def on_nvidia_mirror_changed(self, button):
         cur_path = os.path.dirname(os.path.abspath(__file__))
