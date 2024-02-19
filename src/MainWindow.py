@@ -5,6 +5,7 @@ import apt
 import nvidia
 import std_opr
 import locale
+import package
 gi.require_version("Gtk", "3.0")
 gi.require_version("Polkit", "1.0")
 
@@ -67,6 +68,11 @@ class MainWindow(object):
         
         self.ui_about_button.connect("clicked",self.on_about_button_clicked)
 
+        self.ui_controller_box = self.get_ui("ui_controller_box")
+        self.ui_secondary_gpu_box = self.get_ui("ui_secondary_gpu_box")
+        self.ui_gpu_disable_switch = self.get_ui("ui_gpu_disable_switch")
+        self.check_secondary_gpu()
+        self.ui_gpu_disable_switch.connect("notify::active",self.on_sec_gpu_toggled)
         self.drv_arr = []
 
         self.apt_opr = ""
@@ -83,6 +89,18 @@ class MainWindow(object):
         self.ui_nvidia_src_button.set_sensitive(not state)
         self.ui_pardus_src_button.set_sensitive(state)
 
+    def check_secondary_gpu(self):
+        state = package.check_sec_state()
+        self.ui_gpu_disable_switch.set_state(state)
+        print(state)
+
+    def on_sec_gpu_toggled(self,switch, name):
+        params = ["/usr/bin/pkexec",cur_path+pkg_file]
+        if switch.get_state():
+            params.append("enable-sec-gpu")
+        else:
+            params.append("disable-sec-gpu")
+        self.start_prc(params)
     def create_gpu_drivers(self):
         for toggle in self.drv_arr:
             self.ui_gpu_box.remove(toggle)

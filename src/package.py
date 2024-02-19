@@ -9,6 +9,7 @@ import nvidia
 os.environ["DEBIAN_FRONTEND"] = "noninteractive"
 nouveau = "xserver-xorg-video-nouveau"
 
+nvidia_disable_gpu_path = "/var/cache/pni-disable-gpu"
 nvidia_src_file = "nvidia-drivers.list"
 dest = "/etc/apt/sources.list.d/nvidia-drivers.list"
 src_list = os.path.dirname(__file__) + "/../" + nvidia_src_file
@@ -17,6 +18,19 @@ src_list = os.path.dirname(__file__) + "/../" + nvidia_src_file
 def sys_source():
     return os.path.isfile(dest)
 
+
+def disable_sec_gpu():
+    if not os.path.isfile(nvidia_disable_gpu_path):
+        with open(nvidia_disable_gpu_path,"a") as f:
+            f.write("Secondary GPU Disabled")
+def enable_sec_gpu():
+    if os.path.isfile(nvidia_disable_gpu_path):
+        os.remove(nvidia_disable_gpu_path)
+        
+def check_sec_state():
+    if os.path.isfile(nvidia_disable_gpu_path):
+        return False
+    return True
 
 def toggle_source_list():
     src_state = sys_source()
@@ -81,6 +95,10 @@ if __name__ == "__main__":
             install_nouveau()
         elif args[1] == "update":
             update()
+        elif args[1] == "disable-sec-gpu":
+            disable_sec_gpu()
+        elif args[1] == "enable-sec-gpu":
+            enable_sec_gpu()
         else:
             install_nvidia(args[1])
 

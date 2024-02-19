@@ -10,7 +10,7 @@ data_dir = join_paths(prefix,get_option('datadir'))
 icon_dir = join_paths(prefix,'share','icons','hicolor','scalable','apps')
 policy_dir = join_paths(prefix,'share','polkit-1','actions')
 pol_auth_dir = join_paths(var_dir,'lib','polkit-1','localauthority','50-local.d')
-
+systemd_service_dir = join_paths(sysconfdir,'systemd','system')
 
 # /usr/share/polkit-1/actions/
 
@@ -26,6 +26,8 @@ install_data(['pardus-nvidia-installer.svg'],install_dir:icon_dir)
 install_data(['pardus-nvidia-installer','pardus-nvidia-installer.svg'], install_dir : source_dir)
 install_data([polkit_file],install_dir : policy_dir)
 install_data([pkla_file],install_dir:pol_auth_dir)
+install_data('pni-disable-gpu.service', systemd_service_dir)
+install_data(['pni-disable-gpu.sh'], install_dir : source_dir)
 
 install_subdir('data',install_dir : source_dir)
 install_subdir('src',install_dir : source_dir)

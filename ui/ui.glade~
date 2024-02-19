@@ -51,7 +51,7 @@ Ali Riza Keskin &lt;aliriza.keskin@pardus.org.tr&gt;</property>
     <property name="buttons">ok-cancel</property>
     <property name="text" translatable="yes">&lt;span&gt;&lt;b&gt;Warning&lt;/b&gt;&lt;/span&gt;</property>
     <property name="use-markup">True</property>
-    <property name="secondary-text" translatable="yes">To use your graphics card with selected driver, you need to restart system. Would you like to restart now?</property>
+    <property name="secondary-text" translatable="yes">Changes have been made . To ensure these changes take effect, a system restart is required. Please save any work and click 'Restart' to complete the process.</property>
     <child internal-child="vbox">
       <object class="GtkBox">
         <property name="can-focus">False</property>
@@ -141,19 +141,14 @@ Ali Riza Keskin &lt;aliriza.keskin@pardus.org.tr&gt;</property>
           </packing>
         </child>
         <child>
-          <object class="GtkBox">
+          <object class="GtkBox" id="ui_secondary_gpu_box">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="orientation">vertical</property>
-            <property name="spacing">13</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Used Driver Repository</property>
-                <attributes>
-                  <attribute name="size" value="15360"/>
-                </attributes>
+                <property name="label" translatable="yes">Disable Secondary GPU</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -162,35 +157,198 @@ Ali Riza Keskin &lt;aliriza.keskin@pardus.org.tr&gt;</property>
               </packing>
             </child>
             <child>
-              <object class="GtkButtonBox">
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkSwitch" id="ui_gpu_disable_switch">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack-type">end</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <object class="GtkBox" id="ui_controller_box">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="homogeneous">True</property>
-                <property name="layout-style">expand</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">13</property>
                 <child>
-                  <object class="GtkToggleButton" id="ui_pardus_src_button">
-                    <property name="label" translatable="yes">Pardus Repo</property>
+                  <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Used Driver Repository</property>
+                    <attributes>
+                      <attribute name="size" value="15360"/>
+                    </attributes>
                   </object>
                   <packing>
-                    <property name="expand">True</property>
+                    <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="ui_nvidia_src_button">
-                    <property name="label" translatable="yes">Nvidia Repo</property>
+                  <object class="GtkButtonBox">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="homogeneous">True</property>
+                    <property name="layout-style">expand</property>
+                    <child>
+                      <object class="GtkToggleButton" id="ui_pardus_src_button">
+                        <property name="label" translatable="yes">Pardus Repo</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="ui_nvidia_src_button">
+                        <property name="label" translatable="yes">Nvidia Repo</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <style>
+                  <class name="title"/>
+                  <class name="tweak"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="ui_drv_box">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">5</property>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <object class="GtkBox" id="ui_gpu_box">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="margin-top">13</property>
+                    <property name="spacing">13</property>
+                    <child>
+                      <object class="GtkProgressBar" id="ui_status_progressbar">
+                        <property name="height-request">30</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="double-buffered">False</property>
+                        <property name="pulse-step">0.01</property>
+                        <property name="show-text">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="ui_apply_chg_button">
+                        <property name="label" translatable="yes">Apply Changes</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
+                    <property name="position">5</property>
                   </packing>
                 </child>
               </object>
@@ -200,116 +358,14 @@ Ali Riza Keskin &lt;aliriza.keskin@pardus.org.tr&gt;</property>
                 <property name="position">1</property>
               </packing>
             </child>
-            <style>
-              <class name="title"/>
-              <class name="tweak"/>
-            </style>
+            <child>
+              <placeholder/>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox" id="ui_drv_box">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="orientation">vertical</property>
-            <property name="spacing">5</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <object class="GtkBox" id="ui_gpu_box">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="orientation">vertical</property>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="margin-top">13</property>
-                <property name="spacing">13</property>
-                <child>
-                  <object class="GtkProgressBar" id="ui_status_progressbar">
-                    <property name="height-request">30</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="double-buffered">False</property>
-                    <property name="pulse-step">0.01</property>
-                    <property name="show-text">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="ui_apply_chg_button">
-                    <property name="label" translatable="yes">Apply Changes</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">5</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">5</property>
           </packing>
         </child>
       </object>

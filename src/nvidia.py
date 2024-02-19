@@ -1,4 +1,5 @@
 import os
+from os.path import isfile
 import apt
 import json
 import shutil
@@ -10,6 +11,7 @@ locale.bindtextdomain(APPNAME_CODE,TRANSLATION_PATH)
 locale.textdomain(APPNAME_CODE)
 nvidia_pci_id = "10DE"
 nvidia_pci_id_int = 0x10DE
+nvidia_disable_gpu_path = "/var/cache/pardus-nvidia-installer-disable-gpu"
 nvidia_devices_yaml_path = "/../data/nvidia-pci.yaml"
 nvidia_devices_json_path = "/../data/nvidia-pci.json"
 drivers = {"current": "nvidia-driver", "470": "nvidia-tesla-470-driver"}
@@ -47,10 +49,9 @@ class NvidiaDevice:
         self.driver_name = driver_name
         self.driver_version = driver_version
 
-
+    
 def source():
     return os.path.isfile(dest)
-
 
 def toggle_source_list():
     src_state = source()
