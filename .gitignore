@@ -3,6 +3,7 @@
 
 # Translations
 *.mo
+*.swp
 __pycache__
 **/__pycache__
 # Installer logs

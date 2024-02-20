@@ -54,7 +54,14 @@ class MainWindow(object):
         self.ui_main_window = self.get_ui("ui_main_window")
         self.ui_confirm_dialog = self.get_ui("ui_confirm_dialog")
 
+
+        self.ui_info_stack = self.get_ui("ui_info_stack")
+        self.ui_disabled_gpu_box = self.get_ui("ui_disabled_gpu_box")
+        self.ui_enabled_gpu_box = self.get_ui("ui_enabled_gpu_box")
+
         self.ui_apply_chg_button = self.get_ui("ui_apply_chg_button")
+
+
         self.ui_status_label = self.get_ui("ui_status_label")
         self.ui_status_progressbar = self.get_ui("ui_status_progressbar")
         self.ui_apply_chg_button.connect("clicked", self.on_button_clicked)
@@ -70,9 +77,7 @@ class MainWindow(object):
 
         self.ui_controller_box = self.get_ui("ui_controller_box")
         self.ui_secondary_gpu_box = self.get_ui("ui_secondary_gpu_box")
-        self.ui_gpu_disable_switch = self.get_ui("ui_gpu_disable_switch")
         self.check_secondary_gpu()
-        self.ui_gpu_disable_switch.connect("notify::active",self.on_sec_gpu_toggled)
         self.drv_arr = []
 
         self.apt_opr = ""
@@ -91,17 +96,11 @@ class MainWindow(object):
 
     def check_secondary_gpu(self):
         state = package.check_sec_state()
-        self.ui_controller_box.set_sensitive(state)
-        self.ui_gpu_disable_switch.set_state(state)
-        print(state)
-
-    def on_sec_gpu_toggled(self,switch, name):
-        params = ["/usr/bin/pkexec",cur_path+pkg_file]
-        if switch.get_state():
-            params.append("enable-sec-gpu")
+        if state:
+            self.ui_info_stack.set_visible_child(self.ui_enabled_gpu_box)
         else:
-            params.append("disable-sec-gpu")
-        self.start_prc(params)
+            self.ui_info_stack.set_visible_child(self.ui_disabled_gpu_box)
+
     def create_gpu_drivers(self):
         for toggle in self.drv_arr:
             self.ui_gpu_box.remove(toggle)
