@@ -9,6 +9,11 @@ import nvidia
 os.environ["DEBIAN_FRONTEND"] = "noninteractive"
 nouveau = "xserver-xorg-video-nouveau"
 
+
+nvidia_modprobe_conf = "/etc/modprobe.d/nvidia.conf"
+nvidia_modprobed_conf = "/etc/modprobe.d/nvidia.conf.bak"
+nouveau_modprobe_conf = "/etc/modprobe.d/nvidia-blacklists-nouveau.conf"
+nouveau_modprobed_conf = "/etc/modprobe.d/nvidia-blacklists-nouveau.conf.bak"
 nvidia_disable_gpu_path = "/var/cache/pni-disable-gpu"
 nvidia_src_file = "nvidia-drivers.list"
 dest = "/etc/apt/sources.list.d/nvidia-drivers.list"
@@ -23,14 +28,22 @@ def disable_sec_gpu():
     if not os.path.isfile(nvidia_disable_gpu_path):
         with open(nvidia_disable_gpu_path,"a") as f:
             f.write("Secondary GPU Disabled")
+
+    if os.path.isfile(nvidia_modprobe_conf):
+        os.rename(nvidia_modprobe_conf, nvidia_modprobed_conf)
+    if os.path.isfile(nouveau_modprobe_conf):
+        os.rename(nouveau_modprobe_conf, nouveau_modprobed_conf)
+
 def enable_sec_gpu():
     if os.path.isfile(nvidia_disable_gpu_path):
         os.remove(nvidia_disable_gpu_path)
-        
+    if os.path.isfile(nvidia_modprobed_conf):
+        os.rename(nvidia_modprobed_conf, nvidia_modprobe_conf)
+    if os.path.isfile(nouveau_modprobed_conf):
+        os.rename(nouveau_modprobed_conf, nouveau_modprobe_conf)
+
 def check_sec_state():
-    if os.path.isfile(nvidia_disable_gpu_path):
-        return False
-    return True
+    return not os.path.isfile(nvidia_disable_gpu_path)
 
 def toggle_source_list():
     src_state = sys_source()

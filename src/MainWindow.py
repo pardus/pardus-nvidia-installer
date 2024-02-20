@@ -91,6 +91,7 @@ class MainWindow(object):
 
     def check_secondary_gpu(self):
         state = package.check_sec_state()
+        self.ui_controller_box.set_sensitive(state)
         self.ui_gpu_disable_switch.set_state(state)
         print(state)
 
