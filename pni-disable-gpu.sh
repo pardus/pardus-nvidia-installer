@@ -11,7 +11,7 @@ remove_pci(){
     if [[ -d "/sys/bus/pci/devices/$1/driver" ]] ; then
         module=$(basename $(readlink /sys/bus/pci/devices/$1/driver/module))
         echo "Disabled: $module ($1)"
-        rmmod -f $module
+        rmmod -f $module || true
     fi
     echo 1 > /sys/bus/pci/devices/$1/remove
 }
