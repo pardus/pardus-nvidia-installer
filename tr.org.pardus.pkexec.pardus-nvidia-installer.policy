@@ -10,8 +10,8 @@
 
   <action id="tr.org.pardus.pkexec.pardus-nvidia-installer">
     <description>Run Nvidia Driver Installer</description>
-    <message>Authentication is required to install Nvidia driver.</message>
-    <message xml:lang="tr">Nvidia ekran kartınızın sürücülerinin yüklenmesi için yetkilendirme gerekiyor</message>
+    <message>Authentication is requred for Pardus Nvidia Installer to make changes on your system.</message>
+    <message xml:lang="tr">Pardus Nvidia Kurucusu'sunun sistem uzerinde degisiklik yapmasi icin izniniz gerekiyor.</message>
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>

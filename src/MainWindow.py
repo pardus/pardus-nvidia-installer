@@ -77,6 +77,8 @@ class MainWindow(object):
 
         self.ui_controller_box = self.get_ui("ui_controller_box")
         self.ui_secondary_gpu_box = self.get_ui("ui_secondary_gpu_box")
+        self.ui_disable_check_button = self.get_ui("ui_disable_check_button")
+        self.ui_enable_button = self.get_ui("ui_enable_button")
         self.check_secondary_gpu()
         self.drv_arr = []
 
@@ -178,9 +180,12 @@ class MainWindow(object):
     def on_button_clicked(self, button):
         params = [
             "/usr/bin/pkexec",
-            cur_path + pkg_file,
-            self.toggled_driver
+            cur_path + pkg_file
         ]
+        if self.ui_disable_check_button.get_active():
+            params.append("disable-sec-gpu")
+        else:
+            params.append(self.toggled_driver)
         self.apt_opr = "install"
         self.start_prc(params)
         self.ui_apply_chg_button.set_sensitive(False)

@@ -170,7 +170,7 @@ Ali Riza Keskin &lt;aliriza.keskin@pardus.org.tr&gt;</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton">
+                  <object class="GtkButton" id="ui_enable_button">
                     <property name="label" translatable="yes">Enable GPU</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
@@ -328,7 +328,7 @@ Ali Riza Keskin &lt;aliriza.keskin@pardus.org.tr&gt;</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton">
+                      <object class="GtkCheckButton" id="ui_disable_check_button">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">False</property>
