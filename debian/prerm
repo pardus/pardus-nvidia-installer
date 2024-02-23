@@ -1,6 +1,6 @@
-#!/bin/bash
-set -e
-systemctl stop pni-disable-gpu.service || true
-systemctl disable pni-disable-gpu.service || true
-echo "merhaba" >> /var/cache/prerm-nv
+#!/bin/sh
+
+set -e 
+systemctl disable pni-disable-gpu.service
+systemctl daemon-reload
 exit 0
