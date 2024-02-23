@@ -1,4 +1,6 @@
 #!/bin/bash
-if [[ ! -f /etc/systemd/system/multi-user.target.requires/pni-disable-gpu.service ]] &>/dev/null; then
-    rm /etc/systemd/system/multi-user.target.requires/pni-disable-gpu.service 
-fi
+set -e
+systemctl stop pni-disable-gpu.service || true
+systemctl disable pni-disable-gpu.service || true
+echo "merhaba" >> /var/cache/prerm-nv
+exit 0
