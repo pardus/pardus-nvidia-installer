@@ -98,18 +98,18 @@ def graphics():
                 vc = readfile(vp)
                 vc = int(vc, 16)
                 vn = pci_ids[vc]["vendor_name"]
-
-                if vc == nvidia_pci_id_int:
+                sp = os.path.join(pci_dev_path, dir, "class")
+                sc = readfile(sp)
+                st = False
+                if vc == nvidia_pci_id_int and sc == "0x030000" or sc == "0x030200":
+                    if sc == "0x030200" or sc == "0x030000":
+                        st = True
                     dp = os.path.join(pci_dev_path, dir, "device")
                     dc = readfile(dp)
                     dc = int(dc, 16)
                     dn = pci_ids[vc]["devices"][dc]
 
-                    sp = os.path.join(pci_dev_path, dir, "class")
-                    sc = False
-                    if readfile(sp) == '0x030200':
-                        print("secondary gpu")
-                        sc = True
+                    
                     drv_c = None
                     drv_ver_c = None
                     
@@ -119,7 +119,7 @@ def graphics():
                         drv_c = os.path.basename(orig_drv_p)
                         drv_ver_p = os.path.join(drv_p, "version")
                         drv_ver_c = readfile(drv_ver_p)
-                    devices.append(NvidiaDevice(vc, vn, dc, dn, drv_c, drv_ver_c, sc))
+                    devices.append(NvidiaDevice(vc, vn, dc, dn, drv_c, drv_ver_c, st))
 
     return devices
 
