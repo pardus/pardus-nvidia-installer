@@ -355,7 +355,7 @@ Ali Riza Keskin &lt;aliriza.keskin@pardus.org.tr&gt;</property>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Disabled Secondary GPU</property>
+                                <property name="label" translatable="yes">Disable Secondary GPU</property>
                                 <property name="justify">fill</property>
                               </object>
                               <packing>
