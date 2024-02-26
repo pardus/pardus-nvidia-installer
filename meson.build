@@ -19,6 +19,8 @@ desktop_file_dir = join_paths(prefix,'share','applications')
 service_file = 'pni-disable-gpu.service'
 service_runner = 'pni-disable-gpu.sh'
 update_translation_file = 'update_translations.sh'
+nvidia_gpg = 'nvidia-drivers.gpg'
+nvidia_list = 'nvidia-drivers.list'
 # Source files
 source_dir = join_paths(prefix , 'share' , 'pardus' , 'pardus-nvidia-installer')
 install_data([desktop_file],install_dir : desktop_file_dir)
@@ -34,6 +36,8 @@ install_subdir('src',install_dir : source_dir)
 install_subdir('ui',install_dir : source_dir)
 
 install_data(['pardus-nvidia-installer'], install_dir : prefix / 'bin')
+install_data([nvidia_gpg,nvidia_list], install_dir :source_dir)
+
 # locale settings
 subdir('data/po')
 
