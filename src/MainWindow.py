@@ -64,7 +64,7 @@ class MainWindow(object):
 
         self.ui_status_label = self.get_ui("ui_status_label")
         self.ui_status_progressbar = self.get_ui("ui_status_progressbar")
-        self.ui_apply_chg_button.connect("clicked", self.on_button_clicked)
+        self.ui_apply_chg_button.connect("clicked", self.on_apply_button_clicked)
 
         self.ui_pardus_src_button = self.get_ui("ui_pardus_src_button")
         self.ui_pardus_src_button.connect("clicked", self.on_nvidia_mirror_changed)
@@ -74,11 +74,16 @@ class MainWindow(object):
         self.ui_about_button = self.get_ui("ui_about_button")
         
         self.ui_about_button.connect("clicked",self.on_about_button_clicked)
-
+        
+        self.nvidia_devices = nvidia.graphics()
         self.ui_controller_box = self.get_ui("ui_controller_box")
         self.ui_secondary_gpu_box = self.get_ui("ui_secondary_gpu_box")
         self.ui_disable_check_button = self.get_ui("ui_disable_check_button")
+        self.ui_disable_check_button.connect("clicked",self.on_disable_checkbox_checked)
         self.ui_enable_button = self.get_ui("ui_enable_button")
+        self.ui_enable_button.connect("clicked",self.on_enable_button_clicked)
+        self.initial_sec_gpu_state = False
+        self.initial_gpu_driver = ""
         self.check_secondary_gpu()
         self.drv_arr = []
 
@@ -97,17 +102,20 @@ class MainWindow(object):
         self.ui_pardus_src_button.set_sensitive(state)
 
     def check_secondary_gpu(self):
-        state = package.check_sec_state()
-        if state:
+        self.initial_sec_gpu_state = package.check_sec_state()
+        if self.initial_sec_gpu_state:
             self.ui_info_stack.set_visible_child(self.ui_enabled_gpu_box)
         else:
             self.ui_info_stack.set_visible_child(self.ui_disabled_gpu_box)
 
+        for dev in self.nvidia_devices:
+            if not dev.is_secondary_gpu:
+                self.ui_controller_box.remove(self.ui_disable_check_button)
+                break
     def create_gpu_drivers(self):
         for toggle in self.drv_arr:
             self.ui_gpu_box.remove(toggle)
         self.drv_arr = []
-        self.nvidia_devices = nvidia.graphics()
         for nvidia_device in self.nvidia_devices:
             gpu_info = self.gpu_box(nvidia_device.device_name)
             self.ui_gpu_info_box.pack_start(gpu_info, True, True, 5)
@@ -119,6 +127,10 @@ class MainWindow(object):
             )
             
             drv_state = nvidia.is_pkg_installed(nvidia_driver.package)
+            if drv_state:
+                self.initial_gpu_driver = nvidia_driver.package
+                self.toggled_driver = nvidia_driver.package
+                self.ui_apply_chg_button.set_sensitive(False)
             toggle.set_active(drv_state)
             toggle.connect("toggled", self.on_drv_toggled, nvidia_driver.package)
             self.drv_arr.append(toggle)
@@ -174,17 +186,24 @@ class MainWindow(object):
 
     def on_drv_toggled(self, radio_button, name):
         if radio_button.get_active():
-            self.ui_apply_chg_button.set_sensitive(not self.active_driver == name)
             self.toggled_driver = name
-
-    def on_button_clicked(self, button):
+            self.ui_apply_chg_button.set_sensitive(self.check_initials())
+        
+    def on_enable_button_clicked(self,button):
+        params = [
+                "/usr/bin/pkexec",
+                cur_path + pkg_file,
+                "enable-sec-gpu"
+                ]
+        self.start_prc(params)
+    def on_apply_button_clicked(self, button):
         params = [
             "/usr/bin/pkexec",
             cur_path + pkg_file
         ]
-        if self.ui_disable_check_button.get_active():
+        if self.initial_sec_gpu_state == self.ui_disable_check_button.get_active():
             params.append("disable-sec-gpu")
-        else:
+        elif self.initial_gpu_driver != self.toggled_driver:
             params.append(self.toggled_driver)
         self.apt_opr = "install"
         self.start_prc(params)
@@ -193,6 +212,19 @@ class MainWindow(object):
     def on_about_button_clicked(self, button):
         self.ui_about_dialog.run()
 
+    def check_initials(self):
+        sec_gpu_changes = False
+        if self.ui_disable_check_button.get_active() == self.initial_sec_gpu_state:
+            sec_gpu_changes = True
+        driver_changes = False
+        if self.toggled_driver != self.initial_gpu_driver:
+            driver_changes = True
+        return sec_gpu_changes or driver_changes
+
+    def on_disable_checkbox_checked(self,button):
+        self.ui_apply_chg_button.set_sensitive(self.check_initials())
+
+        
     def on_nvidia_mirror_changed(self, button):
         cur_path = os.path.dirname(os.path.abspath(__file__))
         params = ["/usr/bin/pkexec", cur_path + pkg_file, "update"]
@@ -217,5 +249,6 @@ class MainWindow(object):
         pid = GLib.child_watch_add(
             GLib.PRIORITY_DEFAULT, pid, std_opr.on_process_stdext, self
         )
-
+        self.ui_main_window.set_sensitive(False)
+        self.ui_status_progressbar.set_show_text(True)
         return pid

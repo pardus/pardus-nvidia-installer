@@ -37,6 +37,7 @@ class NvidiaDevice:
         device_name: str = None,
         driver_name: str = None,
         driver_version: str = None,
+        is_secondary_gpu:bool = True
     ):
         self.vendor_id = vendor_id
         self.vendor_name = vendor_name
@@ -48,6 +49,7 @@ class NvidiaDevice:
 
         self.driver_name = driver_name
         self.driver_version = driver_version
+        self.is_secondary_gpu = is_secondary_gpu
 
     
 def source():
@@ -103,6 +105,11 @@ def graphics():
                     dc = int(dc, 16)
                     dn = pci_ids[vc]["devices"][dc]
 
+                    sp = os.path.join(pci_dev_path, dir, "class")
+                    sc = False
+                    if readfile(sp) == '0x030200':
+                        print("secondary gpu")
+                        sc = True
                     drv_c = None
                     drv_ver_c = None
                     
@@ -112,7 +119,7 @@ def graphics():
                         drv_c = os.path.basename(orig_drv_p)
                         drv_ver_p = os.path.join(drv_p, "version")
                         drv_ver_c = readfile(drv_ver_p)
-                    devices.append(NvidiaDevice(vc, vn, dc, dn, drv_c, drv_ver_c))
+                    devices.append(NvidiaDevice(vc, vn, dc, dn, drv_c, drv_ver_c, sc))
 
     return devices
 

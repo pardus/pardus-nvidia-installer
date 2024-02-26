@@ -34,7 +34,7 @@ def on_process_stdext(pid, stat, self):
     self.ui_status_progressbar.set_fraction(1)
     if stat == 0:
         self.ui_status_progressbar.set_text("Operation completed successfully")
-        if self.apt_opr == "install":
+        if self.apt_opr != "update":
             if self.ui_confirm_dialog:
                 dlg_res = self.ui_confirm_dialog.run()
                 if dlg_res == Gtk.ResponseType.OK:
@@ -57,4 +57,4 @@ def on_process_stdext(pid, stat, self):
         self.ui_status_progressbar.set_text("An error occured.")
         return False
     self.check_source()
-    self.ui_apply_chg_button.set_sensitive(True)
+    self.ui_main_window.set_sensitive(True)
