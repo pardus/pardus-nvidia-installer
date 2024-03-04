@@ -79,6 +79,9 @@ class MainWindow(object):
         self.ui_controller_box = self.get_ui("ui_controller_box")
         self.ui_secondary_gpu_box = self.get_ui("ui_secondary_gpu_box")
         self.ui_disable_check_button = self.get_ui("ui_disable_check_button")
+        self.ui_main_stack = self.get_ui("ui_main_stack")
+        self.ui_nvidia_box = self.get_ui("ui_nvidia_box")
+        self.ui_novidia_box = self.get_ui("ui_novidia_box")
         self.ui_disable_check_button.connect("clicked",self.on_disable_checkbox_checked)
         self.ui_enable_button = self.get_ui("ui_enable_button")
         self.ui_enable_button.connect("clicked",self.on_enable_button_clicked)
@@ -113,7 +116,10 @@ class MainWindow(object):
                 self.ui_controller_box.remove(self.ui_disable_check_button)
                 break
     def create_gpu_drivers(self):
+        if len(self.nvidia_devices) == 0:
+            self.ui_main_stack.set_visible_child(self.ui_novidia_box)
         for toggle in self.drv_arr:
+
             self.ui_gpu_box.remove(toggle)
         self.drv_arr = []
         for nvidia_device in self.nvidia_devices:
