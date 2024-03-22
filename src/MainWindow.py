@@ -63,6 +63,7 @@ class MainWindow(object):
 
         self.ui_apply_chg_button = self.get_ui("ui_apply_chg_button")
 
+        
         self.ui_status_label = self.get_ui("ui_status_label")
         self.ui_status_progressbar = self.get_ui("ui_status_progressbar")
         self.ui_apply_chg_button.connect("clicked", self.on_apply_button_clicked)
@@ -75,7 +76,8 @@ class MainWindow(object):
         # self.ui_nvidia_src_button.connect("clicked", self.on_nvidia_mirror_changed)
         self.ui_about_dialog = self.get_ui("ui_about_dialog")
         self.ui_about_button = self.get_ui("ui_about_button")
-
+        self.ui_downgrade_dialog = self.get_ui("ui_downgrade_dialog")
+        self.ui_upgrade_dialog = self.get_ui("ui_upgrade_dialog")
         self.ui_about_button.connect("clicked", self.on_about_button_clicked)
 
         self.nvidia_devices = nvidia.graphics()
@@ -142,11 +144,11 @@ class MainWindow(object):
                 nvidia_driver.package, nvidia_driver.version
             )
             if drv_state:
-                self.initial_gpu_driver = nvidia_driver.package
+                self.initial_gpu_driver = nvidia_driver
                 self.toggled_driver = nvidia_driver.package
-                self.ui_apply_chg_button.set_sensitive(False)
+                self.ui_apply_chg_button.set_sensitive(True)
             toggle.set_active(drv_state)
-            toggle.connect("toggled", self.on_drv_toggled, nvidia_driver.package)
+            toggle.connect("toggled", self.on_drv_toggled, nvidia_driver)
             self.drv_arr.append(toggle)
             self.ui_gpu_box.pack_start(toggle, True, True, 5)
 
@@ -205,24 +207,34 @@ class MainWindow(object):
         else:
             return f"<span> <b>{label}: </b> <span>{desc}</span> </span>"
 
-    def on_drv_toggled(self, radio_button, name):
+    def on_drv_toggled(self, radio_button, driver):
         if radio_button.get_active():
-            self.toggled_driver = name
-            self.ui_apply_chg_button.set_sensitive(self.check_initials())
+            self.toggled_driver = driver
+           # self.ui_apply_chg_button.set_sensitive(self.check_initials())
 
     def on_enable_button_clicked(self, button):
         params = ["/usr/bin/pkexec", cur_path + pkg_file, "enable-sec-gpu"]
         std_opr.start_prc(self, params)
 
     def on_apply_button_clicked(self, button):
+        print("apply button clicked")
         params = ["/usr/bin/pkexec", cur_path + pkg_file]
+        self.apt_opr = None
         if self.initial_sec_gpu_state == self.ui_disable_check_button.get_active():
-            params.append("disable-sec-gpu")
-        elif self.initial_gpu_driver != self.toggled_driver:
-            params.append(self.toggled_driver)
-        self.apt_opr = "install"
-        std_opr.start_prc(self, params)
-        self.ui_apply_chg_button.set_sensitive(False)
+            self.apt_opr = "disable-sec-gpu"
+        if self.apt_opr == None and self.initial_gpu_driver != self.toggled_driver:
+            ver_state = package.compare_version(self.initial_gpu_driver.version,self.toggled_driver.version)
+            if ver_state < 0:
+                self.apt_opr = "upgrade"
+                self.ui_upgrade_dialog.run()
+            else:
+                self.apt_opr = "downgrade"
+                self.ui_downgrade_dialog.run()
+#            params.append(self.toggled_driver)
+        
+        print("apt opr: ", self.apt_opr)
+#        std_opr.start_prc(self, params)
+        #self.ui_apply_chg_button.set_sensitive(False)
 
     def on_about_button_clicked(self, button):
         self.ui_about_dialog.run()
@@ -237,7 +249,8 @@ class MainWindow(object):
         return sec_gpu_changes or driver_changes
 
     def on_disable_checkbox_checked(self, button):
-        self.ui_apply_chg_button.set_sensitive(self.check_initials())
+        pass
+        #self.ui_apply_chg_button.set_sensitive(self.check_initials())
 
     def on_nvidia_mirror_changed(self, button, state):
         cur_path = os.path.dirname(os.path.abspath(__file__))

@@ -3,5 +3,5 @@
 set -e 
 systemctl daemon-reload | true
 systemctl enable pni-disable-gpu.service | true
-curl -fSsL https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/3bf863cc.pub | sudo gpg --dearmor | sudo tee /usr/share/keyrings/nvidia-drivers.gpg > /dev/null 2>&1 | true
+cat /usr/share/pardus/pardus-nvidia-installer/nvidia.pub | gpg --dearmor > /usr/share/keyrings/nvidia-drivers.gpg 
 exit 0

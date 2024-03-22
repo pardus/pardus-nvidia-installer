@@ -5,7 +5,8 @@ import sys
 import subprocess
 import shutil
 import nvidia
-
+import apt_pkg
+apt_pkg.init_system()
 os.environ["DEBIAN_FRONTEND"] = "noninteractive"
 nouveau = "xserver-xorg-video-nouveau"
 
@@ -22,6 +23,9 @@ src_list = os.path.dirname(__file__) + "/../" + nvidia_src_file
 
 def sys_source():
     return os.path.isfile(dest)
+
+compare_version = apt_pkg.version_compare
+
 
 
 def disable_sec_gpu():

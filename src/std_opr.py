@@ -76,5 +76,4 @@ def on_process_stdext(pid, stat, self):
     else:
         self.ui_status_progressbar.set_text("An error occured.")
         return False
-    self.check_source()
     self.ui_main_window.set_sensitive(True)
