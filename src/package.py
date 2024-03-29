@@ -69,6 +69,11 @@ def install_nvidia(nv_drv):
     )
 
     subprocess.call(
+            ["apt","autoremove","-yq","-o","APT::Status-Fd=1"],
+            env={**os.environ}
+            )
+
+    subprocess.call(
         ["apt", "install", "-yq", "-o", "APT::Status-Fd=1", nv_drv],
         env={**os.environ},
     )
@@ -80,6 +85,9 @@ def install_nouveau():
         env={**os.environ},
     )
 
+def toggle_driver(self):
+    toggle_source_list()
+    install_nvidia()
 
 def update():
     if os.path.isfile(dest):
@@ -116,6 +124,8 @@ if __name__ == "__main__":
             disable_sec_gpu()
         elif args[1] == "enable-sec-gpu":
             enable_sec_gpu()
+        elif args[1] == "toggle":
+            toggle_driver()
         else:
             install_nvidia(args[1])
 

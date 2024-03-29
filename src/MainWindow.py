@@ -220,20 +220,23 @@ class MainWindow(object):
         print("apply button clicked")
         params = ["/usr/bin/pkexec", cur_path + pkg_file]
         self.apt_opr = None
+        dlg_res = None
+        
         if self.initial_sec_gpu_state == self.ui_disable_check_button.get_active():
             self.apt_opr = "disable-sec-gpu"
-        if self.apt_opr == None and self.initial_gpu_driver != self.toggled_driver:
+        if self.apt_opr == None and self.initial_gpu_driver != self.toggled_driver and self.initial_gpu_driver.package != nouveau:
             ver_state = package.compare_version(self.initial_gpu_driver.version,self.toggled_driver.version)
+            self.apt_opr = "toggle"
             if ver_state < 0:
-                self.apt_opr = "upgrade"
-                self.ui_upgrade_dialog.run()
+                dlg_res = self.ui_upgrade_dialog.run()
             else:
-                self.apt_opr = "downgrade"
-                self.ui_downgrade_dialog.run()
-#            params.append(self.toggled_driver)
-        
-        print("apt opr: ", self.apt_opr)
-#        std_opr.start_prc(self, params)
+                dlg_res = self.ui_downgrade_dialog.run()
+
+            if dlg_res == Gtk.ResponseType.OK:
+                params.append(self.apt_opr)
+        if not self.apt_opr:
+            params.append(self.toggled_driver.package)
+        std_opr.start_prc(self, params)
         #self.ui_apply_chg_button.set_sensitive(False)
 
     def on_about_button_clicked(self, button):
