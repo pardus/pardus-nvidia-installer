@@ -224,19 +224,29 @@ class MainWindow(object):
         
         if self.initial_sec_gpu_state == self.ui_disable_check_button.get_active():
             self.apt_opr = "disable-sec-gpu"
-        if self.apt_opr == None and self.initial_gpu_driver != self.toggled_driver and self.initial_gpu_driver.package != nouveau:
-            ver_state = package.compare_version(self.initial_gpu_driver.version,self.toggled_driver.version)
-            self.apt_opr = "toggle"
-            if ver_state < 0:
+
+        if self.apt_opr != 'disable-sec-gpu':
+
+            if self.initial_gpu_driver.repo == 'pardus' and self.toggled_driver == 'nvidia':
                 dlg_res = self.ui_upgrade_dialog.run()
             else:
                 dlg_res = self.ui_downgrade_dialog.run()
 
             if dlg_res == Gtk.ResponseType.OK:
-                params.append(self.apt_opr)
-        if not self.apt_opr:
-            params.append(self.toggled_driver.package)
-        std_opr.start_prc(self, params)
+                params.append(self.toggled_driver.package)
+#        if self.apt_opr == None and self.initial_gpu_driver != self.toggled_driver and self.initial_gpu_driver.package != nouveau:
+#            ver_state = package.compare_version(self.initial_gpu_driver.version,self.toggled_driver.version)
+#            self.apt_opr = "toggle"
+#            if ver_state > 0:
+##                dlg_res = self.ui_upgrade_dialog.run()
+#            else:
+#                dlg_res = self.ui_downgrade_dialog.run()
+
+ #           if dlg_res == Gtk.ResponseType.OK:
+#        if not self.apt_opr:
+#            params.append(self.toggled_driver.package)
+        if len(params) != 2:
+            std_opr.start_prc(self, params)
         #self.ui_apply_chg_button.set_sensitive(False)
 
     def on_about_button_clicked(self, button):

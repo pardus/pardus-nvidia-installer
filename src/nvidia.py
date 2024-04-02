@@ -4,8 +4,9 @@ import apt
 import json
 import shutil
 import locale
+import apt_pkg
 from locale import gettext as _
-
+apt_pkg.init_system()
 APPNAME_CODE = "pardus-nvidia-installer"
 TRANSLATION_PATH = "/usr/share/locale"
 locale.bindtextdomain(APPNAME_CODE, TRANSLATION_PATH)
@@ -126,6 +127,23 @@ def graphics():
 
     return devices
 
+def get_package_info(package_name):
+    cache = apt.Cache()
+    package = cache[package_name]
+    versions = package.versions
+    ver_list = {}
+    for version in versions:
+        origins = version.origins
+        for orig in origins:
+            if orig.origin not in ver_list.keys() and len(orig.origin) > 1:
+                ver_list[orig.origin] = version.version
+            else:
+                if orig.origin in ver_list.keys():
+                    result = apt_pkg.version_compare(ver_list[orig.origin],version.version)   
+                    if result < 0:
+                        ver_list[orig.origin] = version.version
+    return ver_list
+                    
 
 def readfile(filepath):
     content = None
@@ -163,22 +181,14 @@ def drivers():
     for gpu in gpus:
         for driver in parsed_nvidia_drivers:
             if gpu.device_id_str in parsed_nvidia_drivers[driver].keys():
-                newest_drv_ver = newest_pkg_ver(driver)
-                cur_pkg_ver = get_pkg_ver(driver)
-                origin = get_package_origin(driver, newest_drv_ver)
-                drivers.append(
-                    NvidiaDriver(
-                        driver, newest_drv_ver, _("Proprietary Driver"), origin
-                    )
-                )
+                driver_lists = get_package_info(driver)
 
-                if cur_pkg_ver != newest_drv_ver:
-                    origin = get_package_origin(driver, cur_pkg_ver)
+                for origin in driver_lists:
                     drivers.append(
-                        NvidiaDriver(
-                            driver, cur_pkg_ver, _("Proprietary Driver"), origin
-                        )
-                    )
+                            NvidiaDriver(
+                                driver,driver_lists[origin], _("Proprietary Driver"), origin
+                                )
+                            )
 
     return drivers
 
