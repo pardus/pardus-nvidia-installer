@@ -69,9 +69,9 @@ def install_nvidia(nv_drv):
     )
 
     subprocess.call(
-            ["apt","autoremove","-yq","-o","APT::Status-Fd=1"],
-            env={**os.environ}
-            )
+        ["apt","autoremove","-yq","-o","APT::Status-Fd=1"],
+        env={**os.environ},
+    )
 
     subprocess.call(
         ["apt", "install", "-yq", "-o", "APT::Status-Fd=1", nv_drv],
