@@ -142,6 +142,7 @@ def get_package_info(package_name):
                     result = apt_pkg.version_compare(ver_list[orig.origin],version.version)   
                     if result < 0:
                         ver_list[orig.origin] = version.version
+    print(ver_list)
     return ver_list
                     
 
@@ -176,6 +177,7 @@ def drivers():
             get_package_origin(nouveau, get_pkg_ver(nouveau)),
         ),
     )
+    print(drivers[0].repo)
     cache = apt.Cache()
 
     for gpu in gpus:
