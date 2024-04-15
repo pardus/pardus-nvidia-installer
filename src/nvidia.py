@@ -6,6 +6,7 @@ import shutil
 import locale
 import apt_pkg
 from locale import gettext as _
+
 apt_pkg.init_system()
 APPNAME_CODE = "pardus-nvidia-installer"
 TRANSLATION_PATH = "/usr/share/locale"
@@ -25,11 +26,15 @@ cache = apt.Cache()
 
 
 class NvidiaDriver:
-    def __init__(self, package, version, type, repo):
+    def __init__(self, package, version, type, repo, installed=False):
         self.package = package
         self.version = version
         self.type = type
         self.repo = repo
+        self.installed = installed
+
+    def __str__(self) -> str:
+        return f"package:{self.package}, version:{self.version}, type:{self.type}, repo:{self.repo}, installed:{self.installed}"
 
 
 class NvidiaDevice:
@@ -127,6 +132,7 @@ def graphics():
 
     return devices
 
+
 def get_package_info(package_name):
     cache = apt.Cache()
     package = cache[package_name]
@@ -139,12 +145,14 @@ def get_package_info(package_name):
                 ver_list[orig.origin] = version.version
             else:
                 if orig.origin in ver_list.keys():
-                    result = apt_pkg.version_compare(ver_list[orig.origin],version.version)   
+                    result = apt_pkg.version_compare(
+                        ver_list[orig.origin], version.version
+                    )
                     if result < 0:
                         ver_list[orig.origin] = version.version
     print(ver_list)
     return ver_list
-                    
+
 
 def readfile(filepath):
     content = None
@@ -156,10 +164,10 @@ def readfile(filepath):
 
 def is_pkg_installed(driver, version=None):
     cache = apt.Cache()
-
     if version:
         return version in str(cache[driver].installed)
-    return cache[driver].is_installed
+    else:
+        return cache[driver].is_installed
 
 
 def drivers():
@@ -175,22 +183,26 @@ def drivers():
             get_pkg_ver(nouveau),
             _("Open Source Driver"),
             get_package_origin(nouveau, get_pkg_ver(nouveau)),
+            is_pkg_installed(nouveau, get_pkg_ver(nouveau)),
         ),
     )
-    print(drivers[0].repo)
     cache = apt.Cache()
 
     for gpu in gpus:
         for driver in parsed_nvidia_drivers:
             if gpu.device_id_str in parsed_nvidia_drivers[driver].keys():
                 driver_lists = get_package_info(driver)
-
                 for origin in driver_lists:
+                    version = driver_lists[origin]
                     drivers.append(
-                            NvidiaDriver(
-                                driver,driver_lists[origin], _("Proprietary Driver"), origin
-                                )
-                            )
+                        NvidiaDriver(
+                            driver,
+                            version,
+                            _("Proprietary Driver"),
+                            origin,
+                            is_pkg_installed(driver, version),
+                        )
+                    )
 
     return drivers
 
@@ -199,9 +211,9 @@ def get_package_origin(package_name, package_version=None):
     cache = apt.Cache()
     pkg = cache[package_name]
     vers = pkg.versions
-    print(vers)
     if package_version and package_version in str(vers):
         for ver in vers:
+
             if package_version in str(ver):
                 for orig in ver.origins:
                     if orig.origin:

@@ -6,6 +6,7 @@ import subprocess
 import shutil
 import nvidia
 import apt_pkg
+
 apt_pkg.init_system()
 os.environ["DEBIAN_FRONTEND"] = "noninteractive"
 nouveau = "xserver-xorg-video-nouveau"
@@ -24,19 +25,20 @@ src_list = os.path.dirname(__file__) + "/../" + nvidia_src_file
 def sys_source():
     return os.path.isfile(dest)
 
-compare_version = apt_pkg.version_compare
 
+compare_version = apt_pkg.version_compare
 
 
 def disable_sec_gpu():
     if not os.path.isfile(nvidia_disable_gpu_path):
-        with open(nvidia_disable_gpu_path,"a") as f:
+        with open(nvidia_disable_gpu_path, "a") as f:
             f.write("Secondary GPU Disabled")
 
     if os.path.isfile(nvidia_modprobe_conf):
         os.rename(nvidia_modprobe_conf, nvidia_modprobed_conf)
     if os.path.isfile(nouveau_modprobe_conf):
         os.rename(nouveau_modprobe_conf, nouveau_modprobed_conf)
+
 
 def enable_sec_gpu():
     if os.path.isfile(nvidia_disable_gpu_path):
@@ -46,8 +48,10 @@ def enable_sec_gpu():
     if os.path.isfile(nouveau_modprobed_conf):
         os.rename(nouveau_modprobed_conf, nouveau_modprobe_conf)
 
+
 def check_sec_state():
     return not os.path.isfile(nvidia_disable_gpu_path)
+
 
 def toggle_source_list():
     src_state = sys_source()
@@ -69,7 +73,7 @@ def install_nvidia(nv_drv):
     )
 
     subprocess.call(
-        ["apt","autoremove","-yq","-o","APT::Status-Fd=1"],
+        ["apt", "autoremove", "-yq", "-o", "APT::Status-Fd=1"],
         env={**os.environ},
     )
 
@@ -85,19 +89,28 @@ def install_nouveau():
         env={**os.environ},
     )
 
+
 def toggle_driver(self):
     toggle_source_list()
     install_nvidia()
+
 
 def update():
     if os.path.isfile(dest):
         os.remove(dest)
     else:
         shutil.copyfile(src_list, dest)
-    
+
     subprocess.call(
         ["apt", "update", "-yq", "-o", "APT::Status-Fd=1"], env={**os.environ}
     )
+
+
+def install(driver):
+    if driver != nouveau:
+        install_nvidia(driver)
+    else:
+        install_nouveau()
 
 
 def get_pkg_info(package_name: str):
@@ -116,18 +129,21 @@ def get_pkg_info(package_name: str):
 if __name__ == "__main__":
     args = sys.argv
     if len(args) > 1:
-        if args[1] == nouveau:
+        param1 = args[1]
+        if param1 == nouveau:
             install_nouveau()
-        elif args[1] == "update":
+        elif param1 == "update":
             update()
-        elif args[1] == "disable-sec-gpu":
+        elif param1 == "disable-sec-gpu":
             disable_sec_gpu()
-        elif args[1] == "enable-sec-gpu":
+        elif param1 == "enable-sec-gpu":
             enable_sec_gpu()
-        elif args[1] == "toggle":
+        elif param1 == "toggle":
             toggle_driver()
-        else:
-            install_nvidia(args[1])
+        elif param1 == "install":
+            driver = args[2]
+            print(driver)
+            install(driver)
 
     else:
         print("no argument passed on")

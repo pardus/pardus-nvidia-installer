@@ -78,15 +78,23 @@ Ali Riza Keskin &lt;aliriza.keskin@pardus.org.tr&gt;</property>
       </object>
     </child>
   </object>
-  <object class="GtkMessageDialog" id="ui_downgrade_dialog">
+  <object class="GtkMessageDialog" id="ui_info_dialog">
     <property name="can-focus">False</property>
+    <property name="modal">True</property>
     <property name="window-position">center</property>
     <property name="type-hint">dialog</property>
-    <property name="message-type">question</property>
+    <property name="message-type">warning</property>
     <property name="buttons">ok-cancel</property>
-    <property name="text" translatable="yes">&lt;span&gt;&lt;b&gt;Warning&lt;/b&gt;&lt;/span&gt;</property>
+    <property name="text" translatable="yes">&lt;span&gt;&lt;b&gt;⚠️ Important Notice: ⚠️&lt;/b&gt;&lt;/span&gt;</property>
     <property name="use-markup">True</property>
-    <property name="secondary-text" translatable="yes">Current driver is on Nvidia repository. To select driver on Pardus repository, you need to uninstall driver and install downgraded driver. Press OK to continue.</property>
+    <property name="secondary-text" translatable="yes">Please be informed that the driver installation provided through this app is sourced exclusively from the Pardus and Nvidia repositories. While we strive to ensure the quality and reliability of these drivers, it is crucial to understand that we are not affiliated with Pardus or Nvidia.
+
+&lt;b&gt;Disclaimer: &lt;/b&gt;
+We want to emphasize that we do not accept responsibility for any issues or complications that may arise during or after the installation process. While every effort has been made to provide a seamless experience, unforeseen circumstances can occur.   
+
+&lt;b&gt;Issue Reporting:&lt;/b&gt;  
+Feel free to report any issues or concerns via our GitHub repository: [Your GitHub Address]</property>
+    <property name="secondary-use-markup">True</property>
     <child internal-child="vbox">
       <object class="GtkBox">
         <property name="can-focus">False</property>
@@ -586,43 +594,6 @@ You can't use this application</property>
               </object>
             </child>
           </object>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkMessageDialog" id="ui_upgrade_dialog">
-    <property name="can-focus">False</property>
-    <property name="window-position">center</property>
-    <property name="type-hint">dialog</property>
-    <property name="message-type">question</property>
-    <property name="buttons">ok-cancel</property>
-    <property name="text" translatable="yes">&lt;span&gt;&lt;b&gt;Warning&lt;/b&gt;&lt;/span&gt;</property>
-    <property name="use-markup">True</property>
-    <property name="secondary-text" translatable="yes">Current driver is on Pardus repository. To select driver on Nvidia repository, you need to uninstall driver and install new driver. Press OK to continue.</property>
-    <child internal-child="vbox">
-      <object class="GtkBox">
-        <property name="can-focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox">
-            <property name="can-focus">False</property>
-            <property name="layout-style">end</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <placeholder/>
         </child>
       </object>
     </child>

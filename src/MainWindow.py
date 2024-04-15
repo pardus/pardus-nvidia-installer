@@ -1,7 +1,7 @@
 import gi
 import os
 import apt
-
+import signal
 import nvidia
 import std_opr
 import locale
@@ -45,10 +45,13 @@ class MainWindow(object):
         except GObject.GError:
             print("Error while creating user interface from glade file")
             return False
-
+        self.application = application
         self.driver_buttons = []
         self.active_driver = ""
         self.toggled_driver = ""
+        self.drv_arr = []
+        self.initial_gpu_driver = ""
+        self.initial_sec_gpu_state = False
         self.state = nvidia.source()
         self.ui_gpu_info_box = self.get_ui("ui_gpu_info_box")
         self.ui_gpu_box = self.get_ui("ui_gpu_box")
@@ -62,6 +65,7 @@ class MainWindow(object):
         self.ui_enabled_gpu_box = self.get_ui("ui_enabled_gpu_box")
 
         self.ui_apply_chg_button = self.get_ui("ui_apply_chg_button")
+        self.ui_disable_check_button = self.get_ui("ui_disable_check_button")
 
         self.ui_status_label = self.get_ui("ui_status_label")
         self.ui_status_progressbar = self.get_ui("ui_status_progressbar")
@@ -69,20 +73,18 @@ class MainWindow(object):
         self.ui_repo_switch = self.get_ui("ui_repo_switch")
         self.ui_repo_switch.set_state(self.state)
         self.ui_repo_switch.connect("state-set", self.on_nvidia_mirror_changed)
-        # self.ui_pardus_src_button = self.get_ui("ui_pardus_src_button")
-        # self.ui_pardus_src_button.connect("clicked", self.on_nvidia_mirror_changed)
-        # self.ui_nvidia_src_button = self.get_ui("ui_nvidia_src_button")
-        # self.ui_nvidia_src_button.connect("clicked", self.on_nvidia_mirror_changed)
+
         self.ui_about_dialog = self.get_ui("ui_about_dialog")
         self.ui_about_button = self.get_ui("ui_about_button")
-        self.ui_downgrade_dialog = self.get_ui("ui_downgrade_dialog")
-        self.ui_upgrade_dialog = self.get_ui("ui_upgrade_dialog")
+
+        self.ui_info_dialog = self.get_ui("ui_info_dialog")
+
         self.ui_about_button.connect("clicked", self.on_about_button_clicked)
 
         self.nvidia_devices = nvidia.graphics()
         self.ui_controller_box = self.get_ui("ui_controller_box")
         self.ui_secondary_gpu_box = self.get_ui("ui_secondary_gpu_box")
-        self.ui_disable_check_button = self.get_ui("ui_disable_check_button")
+
         self.ui_main_stack = self.get_ui("ui_main_stack")
         self.ui_nvidia_box = self.get_ui("ui_nvidia_box")
         self.ui_novidia_box = self.get_ui("ui_novidia_box")
@@ -91,21 +93,23 @@ class MainWindow(object):
         )
         self.ui_enable_button = self.get_ui("ui_enable_button")
         self.ui_enable_button.connect("clicked", self.on_enable_button_clicked)
-        self.initial_sec_gpu_state = False
-        self.initial_gpu_driver = ""
+
         self.check_secondary_gpu()
-        self.drv_arr = []
 
         self.apt_opr = ""
         self.create_gpu_drivers()
 
         self.ui_main_window.set_application(application)
         self.ui_main_window.set_title(_("Pardus Nvidia Installer"))
-
+        self.user_disclaimer()
         self.ui_main_window.show_all()
 
-        # self.ui_nvidia_src_button.set_sensitive(not state)
-        # self.ui_pardus_src_button.set_sensitive(state)
+    def user_disclaimer(self):
+        response = self.ui_info_dialog.run()
+        if response != Gtk.ResponseType.OK:
+            self.application.quit()
+        else:
+            self.ui_info_dialog.close()
 
     def check_secondary_gpu(self):
         self.initial_sec_gpu_state = package.check_sec_state()
@@ -131,7 +135,8 @@ class MainWindow(object):
 
         self.nvidia_drivers = nvidia.drivers()
         self.filtered_nvidia_drivers = []
-        for index,nvidia_driver in enumerate(self.nvidia_drivers):
+        for index, nvidia_driver in enumerate(self.nvidia_drivers):
+            print(nvidia_driver)
             if index == 0:
                 self.filtered_nvidia_drivers.append(nvidia_driver)
             else:
@@ -140,9 +145,8 @@ class MainWindow(object):
                         self.filtered_nvidia_drivers.append(nvidia_driver)
                 else:
                     self.filtered_nvidia_drivers.append(nvidia_driver)
-        
-        self.nvidia_drivers = self.filtered_nvidia_drivers
 
+        self.nvidia_drivers = self.filtered_nvidia_drivers
 
         for index, nvidia_driver in enumerate(self.nvidia_drivers):
             toggle = self.driver_box(
@@ -152,17 +156,15 @@ class MainWindow(object):
                 nvidia_driver.repo,
             )
 
-            drv_state = nvidia.is_pkg_installed(
-                nvidia_driver.package, nvidia_driver.version
-            )
-            if drv_state:
+            if nvidia_driver.installed:
                 self.initial_gpu_driver = nvidia_driver
                 self.toggled_driver = nvidia_driver
                 self.ui_apply_chg_button.set_sensitive(True)
-            toggle.set_active(drv_state)
+            toggle.set_active(nvidia_driver.installed)
             toggle.connect("toggled", self.on_drv_toggled, nvidia_driver)
             self.drv_arr.append(toggle)
             self.ui_gpu_box.pack_start(toggle, True, True, 5)
+        self.ui_apply_chg_button.set_sensitive(self.check_initials())
 
     def get_ui(self, object_name: str):
         return self.gtk_builder.get_object(object_name)
@@ -222,9 +224,7 @@ class MainWindow(object):
     def on_drv_toggled(self, radio_button, driver):
         if radio_button.get_active():
             self.toggled_driver = driver
-
-        
-        # self.ui_apply_chg_button.set_sensitive(self.check_initials())
+        self.ui_apply_chg_button.set_sensitive(self.check_initials())
 
     def on_enable_button_clicked(self, button):
         params = ["/usr/bin/pkexec", cur_path + pkg_file, "enable-sec-gpu"]
@@ -237,9 +237,14 @@ class MainWindow(object):
         dlg_res = None
         if self.initial_sec_gpu_state == self.ui_disable_check_button.get_active():
             self.apt_opr = "disable-sec-gpu"
+            params.append(self.apt_opr)
+            std_opr.start_prc(self, params)
 
-        #if len(params) != 2:
-        #    std_opr.start_prc(self, params)
+        else:
+            self.apt_opr = "install"
+            params += [self.apt_opr, self.toggled_driver.package]
+            std_opr.start_prc(self, params)
+
         # self.ui_apply_chg_button.set_sensitive(False)
 
     def on_about_button_clicked(self, button):
