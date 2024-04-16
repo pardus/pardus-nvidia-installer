@@ -23,6 +23,6 @@ Installing Nvidia GPU drivers for Pardus with few clicks.
 - [x] Creating user interface depends on the scenario. 
 - [x] Adding prompt for rebooting system after installation. 
 - [x] Creating policies and implementing it with GTK.
-- [ ] Multiple device and driver support.
-- [ ] Adding about dialog for application.
-- [ ] Adding a logo for application.
+- [x] Multiple device and driver support.
+- [x] Adding about dialog for application.
+- [x] Adding a logo for application.
