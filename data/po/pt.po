@@ -1,68 +1,70 @@
-# SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Hugo Carvalho <hugokarvalho@hotmail.com>, 2024.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: Pardus Nvidia Installer\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-02-13 10:56+0300\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2024-04-22 00:40+0100\n"
+"Last-Translator: Hugo Carvalho <hugokarvalho@hotmail.com>\n"
+"Language-Team: Portuguese <hugokarvalho@hotmail.com>\n"
+"Language: pt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #: ui/ui.glade:52
 msgid "<span><b>Warning</b></span>"
-msgstr ""
+msgstr "<span><b>Aviso</b></span>"
 
 #: ui/ui.glade:54
 msgid ""
 "To use your graphics card with selected driver, you need to restart system. "
 "Would you like to restart now?"
 msgstr ""
+"Para utilizar a sua placa gráfica com o controlador selecionado, é "
+"necessário reiniciar o sistema. Deseja reiniciar agora?"
 
 #: ui/ui.glade:153
 msgid "Used Driver Repository"
-msgstr ""
+msgstr "Repositório de condutores usados"
 
 #: ui/ui.glade:172
 msgid "Pardus Repo"
-msgstr ""
+msgstr "Repositório Pardus"
 
 #: ui/ui.glade:185
 msgid "Nvidia Repo"
-msgstr ""
+msgstr "Repositório Nvidia"
 
 #: ui/ui.glade:290
 msgid "Apply Changes"
-msgstr ""
+msgstr "Aplicar alterações"
 
 #: src/MainWindow.py:77
 msgid "Pardus Nvidia Installer"
-msgstr ""
+msgstr "Instalador Nvidia Pardus"
 
 #: src/MainWindow.py:119 src/MainWindow.py:121
 msgid "Driver"
-msgstr ""
+msgstr "Controlador"
 
 #: src/MainWindow.py:125
 msgid "Version"
-msgstr ""
+msgstr "Versão"
 
 #: src/MainWindow.py:128 src/MainWindow.py:130
 msgid "Description"
-msgstr ""
+msgstr "Descrição"
 
 #: src/nvidia.py:140
 msgid "Open Source Driver"
-msgstr ""
+msgstr "Controlador de Código Aberto"
 
 #: src/nvidia.py:146
 msgid "Proprietary Driver"
-msgstr ""
+msgstr "Controlador Proprietário"
