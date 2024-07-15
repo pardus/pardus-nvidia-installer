@@ -50,8 +50,11 @@ MANIFEST
 *.manifest
 *.spec
 debian/pardus-nvidia-installer
+debian/debhelper-build-stamp
 debian/.debhelper
-
+debian/files
+pardus-nvidia-installer.postrm.debhelper
+pardus-nvidia-installer.substvars
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
