@@ -249,6 +249,7 @@ class MainWindow(object):
 
     def on_about_button_clicked(self, button):
         self.ui_about_dialog.run()
+        self.ui_about_dialog.hide()
 
     def check_initials(self):
         sec_gpu_changes = False
