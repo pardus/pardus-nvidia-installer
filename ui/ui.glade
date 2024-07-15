@@ -126,16 +126,15 @@ Feel free to report any issues or concerns via our GitHub repository: [Your GitH
   <object class="GtkApplicationWindow" id="ui_main_window">
     <property name="width-request">500</property>
     <property name="can-focus">False</property>
+    <property name="window-position">center</property>
     <child>
       <object class="GtkBox" id="ui_main_box">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
-        <property name="margin-left">13</property>
-        <property name="margin-right">13</property>
-        <property name="margin-start">35</property>
-        <property name="margin-end">35</property>
+        <property name="margin-start">34</property>
+        <property name="margin-end">34</property>
         <property name="margin-top">21</property>
-        <property name="margin-bottom">21</property>
+        <property name="margin-bottom">5</property>
         <property name="orientation">vertical</property>
         <property name="spacing">21</property>
         <child>
@@ -146,7 +145,7 @@ Feel free to report any issues or concerns via our GitHub repository: [Your GitH
             <property name="can-focus">False</property>
             <property name="halign">center</property>
             <property name="valign">start</property>
-            <property name="spacing">23</property>
+            <property name="spacing">21</property>
             <child>
               <object class="GtkImage">
                 <property name="width-request">60</property>
@@ -479,12 +478,6 @@ Feel free to report any issues or concerns via our GitHub repository: [Your GitH
                     <property name="position">0</property>
                   </packing>
                 </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
               </object>
               <packing>
                 <property name="name">page0</property>
@@ -510,12 +503,6 @@ You can't use this application</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
               </object>
               <packing>
                 <property name="name">page1</property>
@@ -531,17 +518,11 @@ You can't use this application</property>
           </packing>
         </child>
         <child>
-          <placeholder/>
-        </child>
-        <child>
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="orientation">vertical</property>
-            <property name="spacing">7</property>
-            <child>
-              <placeholder/>
-            </child>
+            <property name="spacing">5</property>
             <child>
               <object class="GtkSeparator">
                 <property name="visible">True</property>
@@ -557,7 +538,10 @@ You can't use this application</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">TÜBİTAK ULAKBİM | 2024</property>
+                <property name="label">TÜBİTAK ULAKBİM | 2024</property>
+                <attributes>
+                  <attribute name="weight" value="light"/>
+                </attributes>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -590,7 +574,7 @@ You can't use this application</property>
               <object class="GtkImage">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="stock">gtk-about</property>
+                <property name="icon-name">dialog-information-symbolic</property>
               </object>
             </child>
           </object>
