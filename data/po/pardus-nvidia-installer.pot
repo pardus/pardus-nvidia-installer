@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# Osman Coskun <osman.coskun@pardus.org.tr> 2024.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-13 10:56+0300\n"
+"POT-Creation-Date: 2024-07-15 23:25+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,52 +17,112 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ui/ui.glade:52
+#: ui/ui.glade:11
 msgid "<span><b>Warning</b></span>"
 msgstr ""
 
-#: ui/ui.glade:54
+#: ui/ui.glade:13
 msgid ""
-"To use your graphics card with selected driver, you need to restart system. "
-"Would you like to restart now?"
+"Changes have been made . To ensure these changes take effect, a system "
+"restart is required. Please save any work and click 'OK' to complete the "
+"process."
 msgstr ""
 
-#: ui/ui.glade:153
-msgid "Used Driver Repository"
+#: ui/ui.glade:47
+msgid "<span><b>⚠️ Important Notice: ⚠️</b></span>"
 msgstr ""
 
-#: ui/ui.glade:172
-msgid "Pardus Repo"
+#: ui/ui.glade:49
+msgid ""
+"Please be informed that the driver installation provided through this app is "
+"sourced exclusively from the Pardus and Nvidia repositories. While we strive "
+"to ensure the quality and reliability of these drivers, it is crucial to "
+"understand that we are not affiliated with Pardus or Nvidia.\n"
+"\n"
+"<b>Disclaimer: </b>\n"
+"We want to emphasize that we do not accept responsibility for any issues or "
+"complications that may arise during or after the installation process. While "
+"every effort has been made to provide a seamless experience, unforeseen "
+"circumstances can occur.   \n"
+"\n"
+"<b>Issue Reporting:</b>  \n"
+"Feel free to report any issues or concerns via our GitHub repository: "
+"https://github.com/pardus/pardus-nvidia-installer"
+msgstr ""
+
+#: ui/ui.glade:173
+msgid ""
+"This application indicates that your secondary NVIDIA GPU is currently "
+"disabled. To activate it, simply click the 'Enable GPU' button next to this "
+"message."
 msgstr ""
 
 #: ui/ui.glade:185
-msgid "Nvidia Repo"
+msgid "Enable GPU"
 msgstr ""
 
-#: ui/ui.glade:290
+#: ui/ui.glade:202 ui/ui.glade:469
+msgid "page1"
+msgstr ""
+
+#: ui/ui.glade:230
+msgid "Use Nvidia Repository"
+msgstr ""
+
+#: ui/ui.glade:350
+msgid "Disable Secondary GPU"
+msgstr ""
+
+#: ui/ui.glade:375
 msgid "Apply Changes"
 msgstr ""
 
-#: src/MainWindow.py:77
+#: ui/ui.glade:430
+msgid "page2"
+msgstr ""
+
+#: ui/ui.glade:444
+msgid "page0"
+msgstr ""
+
+#: ui/ui.glade:456
+msgid ""
+"There is no NVIDIA graphics card on your system. \n"
+"You can't use this application"
+msgstr ""
+
+#: ui/ui.glade:525 src/MainWindow.py:103
 msgid "Pardus Nvidia Installer"
 msgstr ""
 
-#: src/MainWindow.py:119 src/MainWindow.py:121
+#: ui/ui.glade:558
+msgid "translator-credits"
+msgstr ""
+
+#: src/MainWindow.py:181 src/MainWindow.py:183
 msgid "Driver"
 msgstr ""
 
-#: src/MainWindow.py:125
+#: src/MainWindow.py:187
 msgid "Version"
 msgstr ""
 
-#: src/MainWindow.py:128 src/MainWindow.py:130
+#: src/MainWindow.py:190 src/MainWindow.py:193
 msgid "Description"
 msgstr ""
 
-#: src/nvidia.py:140
+#: src/nvidia.py:184
 msgid "Open Source Driver"
 msgstr ""
 
-#: src/nvidia.py:146
+#: src/nvidia.py:201
 msgid "Proprietary Driver"
+msgstr ""
+
+#: src/std_opr.py:65
+msgid "Operation completed successfully"
+msgstr ""
+
+#: src/std_opr.py:86
+msgid "An error occured."
 msgstr ""

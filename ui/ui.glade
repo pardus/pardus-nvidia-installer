@@ -10,7 +10,7 @@
     <property name="buttons">ok-cancel</property>
     <property name="text" translatable="yes">&lt;span&gt;&lt;b&gt;Warning&lt;/b&gt;&lt;/span&gt;</property>
     <property name="use-markup">True</property>
-    <property name="secondary-text" translatable="yes">Changes have been made . To ensure these changes take effect, a system restart is required. Please save any work and click 'Restart' to complete the process.</property>
+    <property name="secondary-text" translatable="yes">Changes have been made . To ensure these changes take effect, a system restart is required. Please save any work and click 'OK' to complete the process.</property>
     <child internal-child="vbox">
       <object class="GtkBox">
         <property name="can-focus">False</property>
@@ -40,7 +40,7 @@
   <object class="GtkMessageDialog" id="ui_info_dialog">
     <property name="can-focus">False</property>
     <property name="modal">True</property>
-    <property name="window-position">center</property>
+    <property name="window-position">mouse</property>
     <property name="type-hint">dialog</property>
     <property name="message-type">warning</property>
     <property name="buttons">ok-cancel</property>
@@ -52,7 +52,7 @@
 We want to emphasize that we do not accept responsibility for any issues or complications that may arise during or after the installation process. While every effort has been made to provide a seamless experience, unforeseen circumstances can occur.   
 
 &lt;b&gt;Issue Reporting:&lt;/b&gt;  
-Feel free to report any issues or concerns via our GitHub repository: [Your GitHub Address]</property>
+Feel free to report any issues or concerns via our GitHub repository: https://github.com/pardus/pardus-nvidia-installer</property>
     <property name="secondary-use-markup">True</property>
     <child internal-child="vbox">
       <object class="GtkBox">
