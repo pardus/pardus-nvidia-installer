@@ -52,7 +52,7 @@
 We want to emphasize that we do not accept responsibility for any issues or complications that may arise during or after the installation process. While every effort has been made to provide a seamless experience, unforeseen circumstances can occur.   
 
 &lt;b&gt;Issue Reporting:&lt;/b&gt;  
-Feel free to report any issues or concerns via our GitHub repository: https://github.com/pardus/pardus-nvidia-installer</property>
+Feel free to report any issues or concerns via our GitHub repository: &lt;a href="https://github.com/pardus/pardus-nvidia-installer"&gt; Pardus Github &lt;/a&gt;</property>
     <property name="secondary-use-markup">True</property>
     <child internal-child="vbox">
       <object class="GtkBox">
