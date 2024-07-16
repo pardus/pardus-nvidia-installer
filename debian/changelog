@@ -1,3 +1,67 @@
+pardus-nvidia-installer (0.0.5) unstable; urgency=medium
+
+  [ Osman Coskun ]
+  * gitignore updated for build files
+  * locale files and languages added
+  * fix: charset
+  * feat: disable gpu
+  * fix: nvidia conf
+  * fix: layout
+  * feat: disable button
+  * fix: missing files
+  * feat: prerm service added
+  * fix: pni service
+  * prerm added
+  * feat: control added
+  * feat: TR translation
+  * fix: removed nvidia devices other than gpu
+  * fix: meson
+  * gpg dearmor added
+  * fix: novidia
+  * fix: multiple versions
+  * fix: multiversion
+  * ui dialogs
+  * fix: version control
+  * checking drivers and dialogs
+
+  [ Pardus ]
+  * drivers separated
+  * feat: downgrade, upgrade
+
+  [ Osman Coskun ]
+  * TODOS completed
+  * Update README.md
+  * Create pull_request_template.md
+  * Create bug_report.md
+  * Create feature_request.md
+
+  [ Fatih Altun ]
+  * Fix about dialog close problem on xfce
+  * Update .gitignore
+  * Fix some spaces, copyright and position on ui
+  * Update about dialog values
+  * Fix Turkish translation file
+
+  [ Osman Coskun ]
+  * feat: build files added to gitignore
+  * fix: missing translations
+  * fix: more debian build file
+  * feat: app icon changed
+  * fix: info github url
+
+  [ Hugo Carvalho ]
+  * Update Portuguese translations
+  * Update Portuguese translation (.desktop) file
+
+  [ Osman Coskun ]
+  * feat: translator credits
+  * feat: controls improved. fix: #3
+
+  [ Fatih Altun ]
+  * Update app icon
+
+ -- Fatih Altun <fatih.altun@pardus.org.tr>  Tue, 16 Jul 2024 15:36:46 +0300
+
 pardus-nvidia-installer (0.0.4) unstable; urgency=medium
 
   * feat: translations are added.
