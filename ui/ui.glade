@@ -48,10 +48,10 @@
     <property name="use-markup">True</property>
     <property name="secondary-text" translatable="yes">Please be informed that the driver installation provided through this app is sourced exclusively from the Pardus and Nvidia repositories. While we strive to ensure the quality and reliability of these drivers, it is crucial to understand that we are not affiliated with Pardus or Nvidia.
 
-&lt;b&gt;Disclaimer: &lt;/b&gt;
-We want to emphasize that we do not accept responsibility for any issues or complications that may arise during or after the installation process. While every effort has been made to provide a seamless experience, unforeseen circumstances can occur.   
+&lt;b&gt;Disclaimer:&lt;/b&gt;
+We want to emphasize that we do not accept responsibility for any issues or complications that may arise during or after the installation process. While every effort has been made to provide a seamless experience, unforeseen circumstances can occur.
 
-&lt;b&gt;Issue Reporting:&lt;/b&gt;  
+&lt;b&gt;Issue Reporting:&lt;/b&gt;
 Feel free to report any issues or concerns via our GitHub repository: &lt;a href="https://github.com/pardus/pardus-nvidia-installer"&gt; Pardus Github &lt;/a&gt;</property>
     <property name="secondary-use-markup">True</property>
     <child internal-child="vbox">
@@ -557,7 +557,7 @@ You can't use this application</property>
     <property name="authors">Osman Coskun &lt;osman.coskun@pardus.org.tr&gt;
 Ali Riza Keskin &lt;aliriza.keskin@pardus.org.tr&gt;
 Fatih Altun &lt;fatih.altun@pardus.org.tr&gt;</property>
-    <property name="translator-credits" translatable="yes">Osman Coskun &lt;osman.coskun@pardus.org.tr&gt;
+    <property name="translator-credits">Osman Coskun &lt;osman.coskun@pardus.org.tr&gt;
 Hugo Carvalho &lt;hugokarvalho@hotmail.com&gt;</property>
     <property name="artists">Yusuf Düzgün &lt;yusuf.duzgun@pardus.org.tr&gt;</property>
     <property name="logo-icon-name">pardus-nvidia-installer</property>

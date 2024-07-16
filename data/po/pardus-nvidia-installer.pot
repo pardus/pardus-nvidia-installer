@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-15 23:25+0300\n"
+"POT-Creation-Date: 2024-07-16 11:16+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -39,15 +39,16 @@ msgid ""
 "to ensure the quality and reliability of these drivers, it is crucial to "
 "understand that we are not affiliated with Pardus or Nvidia.\n"
 "\n"
-"<b>Disclaimer: </b>\n"
+"<b>Disclaimer:</b>\n"
 "We want to emphasize that we do not accept responsibility for any issues or "
 "complications that may arise during or after the installation process. While "
 "every effort has been made to provide a seamless experience, unforeseen "
-"circumstances can occur.   \n"
+"circumstances can occur.\n"
 "\n"
-"<b>Issue Reporting:</b>  \n"
-"Feel free to report any issues or concerns via our GitHub repository: "
-"https://github.com/pardus/pardus-nvidia-installer"
+"<b>Issue Reporting:</b>\n"
+"Feel free to report any issues or concerns via our GitHub repository: <a "
+"href=\"https://github.com/pardus/pardus-nvidia-installer\"> Pardus Github </"
+"a>"
 msgstr ""
 
 #: ui/ui.glade:173
@@ -95,10 +96,6 @@ msgstr ""
 msgid "Pardus Nvidia Installer"
 msgstr ""
 
-#: ui/ui.glade:558
-msgid "translator-credits"
-msgstr ""
-
 #: src/MainWindow.py:181 src/MainWindow.py:183
 msgid "Driver"
 msgstr ""
@@ -124,5 +121,9 @@ msgid "Operation completed successfully"
 msgstr ""
 
 #: src/std_opr.py:86
-msgid "An error occured."
+msgid "Auth or cancellation error"
+msgstr ""
+
+#: src/std_opr.py:88
+msgid "An error occured"
 msgstr ""

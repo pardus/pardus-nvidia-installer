@@ -82,7 +82,8 @@ def on_process_stdext(pid, stat, self):
                     pass
             self.ui_confirm_dialog.destroy()
         self.create_gpu_drivers()
+    if stat == 15 or stat == 32256 or stat == 32512:
+        self.ui_status_progressbar.set_text(_("Auth or cancellation error"))
     else:
-        self.ui_status_progressbar.set_text(_("An error occured."))
-        return False
+        self.ui_status_progressbar.set_text(_("An error occured"))
     self.ui_main_window.set_sensitive(True)
