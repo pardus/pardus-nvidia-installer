@@ -545,17 +545,20 @@ You can't use this application</property>
   </object>
   <object class="GtkAboutDialog" id="ui_about_dialog">
     <property name="can-focus">False</property>
-    <property name="window-position">center-on-parent</property>
+    <property name="window-position">center-always</property>
     <property name="icon-name">pardus-nvidia-installer</property>
     <property name="type-hint">dialog</property>
+    <property name="gravity">center</property>
     <property name="transient-for">ui_main_window</property>
     <property name="program-name">Pardus Nvidia Installer</property>
     <property name="version">0.0.4</property>
     <property name="copyright">© 2024 Pardus</property>
     <property name="website">https://github.com/pardus/pardus-nvidia-installer</property>
     <property name="authors">Osman Coskun &lt;osman.coskun@pardus.org.tr&gt;
-Ali Riza Keskin &lt;aliriza.keskin@pardus.org.tr&gt;</property>
-    <property name="translator-credits" translatable="yes">translator-credits</property>
+Ali Riza Keskin &lt;aliriza.keskin@pardus.org.tr&gt;
+Fatih Altun &lt;fatih.altun@pardus.org.tr&gt;</property>
+    <property name="translator-credits" translatable="yes">Osman Coskun &lt;osman.coskun@pardus.org.tr&gt;
+Hugo Carvalho &lt;hugokarvalho@hotmail.com&gt;</property>
     <property name="artists">Yusuf Düzgün &lt;yusuf.duzgun@pardus.org.tr&gt;</property>
     <property name="logo-icon-name">pardus-nvidia-installer</property>
     <property name="license-type">gpl-3-0</property>
