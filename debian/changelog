@@ -1,3 +1,15 @@
+pardus-nvidia-installer (0.0.6) unstable; urgency=medium
+
+  [ Osman Coskun ]
+  * ULAKBIM > BILGEM
+
+  [ Fatih Altun ]
+  * Update copyright
+  * Update static appversion
+  * Update position of ui_info_dialog as centered
+
+ -- Fatih Altun <fatih.altun@pardus.org.tr>  Thu, 28 Nov 2024 17:20:53 +0300
+
 pardus-nvidia-installer (0.0.5) unstable; urgency=medium
 
   [ Osman Coskun ]
