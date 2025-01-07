@@ -11,9 +11,11 @@ pip-log.txt
 pip-delete-this-directory.txt
 build
 obj-x86_64-linux-gnu
-debian/.debhelper
+debian/.debhelper*
+debian/files
 debian/debhelper*
-debian/pardus-nvidia-installer
+debian/pardus-nvidia-installer*
+debian/debhelper-build-stamp
 
 # ---> Python
 # Byte-compiled / optimized / DLL files

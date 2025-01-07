@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-16 11:16+0300\n"
+"POT-Creation-Date: 2025-01-07 11:20+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,22 +28,27 @@ msgid ""
 "process."
 msgstr ""
 
-#: ui/ui.glade:47
+#: ui/ui.glade:48
 msgid "<span><b>⚠️ Important Notice: ⚠️</b></span>"
 msgstr ""
 
-#: ui/ui.glade:49
+#: ui/ui.glade:50
 msgid ""
-"Please be informed that the driver installation provided through this app is "
-"sourced exclusively from the Pardus and Nvidia repositories. While we strive "
-"to ensure the quality and reliability of these drivers, it is crucial to "
-"understand that we are not affiliated with Pardus or Nvidia.\n"
+"This application is developed and maintained by the Pardus team to "
+"facilitate Nvidia graphics driver installation. The drivers are sourced from "
+"official Pardus and Nvidia repositories.\n"
+"\n"
+"<b>Driver Source and Usage</b>\n"
+"While this is an official Pardus application, the graphics drivers "
+"themselves are developed by Nvidia Corporation. Pardus provides this "
+"installation tool as a convenience for our users, but the drivers remain the "
+"intellectual property of Nvidia Corporation.\n"
 "\n"
 "<b>Disclaimer:</b>\n"
-"We want to emphasize that we do not accept responsibility for any issues or "
-"complications that may arise during or after the installation process. While "
-"every effort has been made to provide a seamless experience, unforeseen "
-"circumstances can occur.\n"
+"Please note that while we strive to ensure a smooth installation process, "
+"Pardus cannot guarantee the performance or compatibility of Nvidia drivers "
+"with all hardware configurations. Users install these drivers at their own "
+"discretion and risk.\n"
 "\n"
 "<b>Issue Reporting:</b>\n"
 "Feel free to report any issues or concerns via our GitHub repository: <a "
@@ -51,48 +56,48 @@ msgid ""
 "a>"
 msgstr ""
 
-#: ui/ui.glade:173
+#: ui/ui.glade:177
 msgid ""
 "This application indicates that your secondary NVIDIA GPU is currently "
 "disabled. To activate it, simply click the 'Enable GPU' button next to this "
 "message."
 msgstr ""
 
-#: ui/ui.glade:185
+#: ui/ui.glade:189
 msgid "Enable GPU"
 msgstr ""
 
-#: ui/ui.glade:202 ui/ui.glade:469
+#: ui/ui.glade:206 ui/ui.glade:473
 msgid "page1"
 msgstr ""
 
-#: ui/ui.glade:230
+#: ui/ui.glade:234
 msgid "Use Nvidia Repository"
 msgstr ""
 
-#: ui/ui.glade:350
+#: ui/ui.glade:354
 msgid "Disable Secondary GPU"
 msgstr ""
 
-#: ui/ui.glade:375
+#: ui/ui.glade:379
 msgid "Apply Changes"
 msgstr ""
 
-#: ui/ui.glade:430
+#: ui/ui.glade:434
 msgid "page2"
 msgstr ""
 
-#: ui/ui.glade:444
+#: ui/ui.glade:448
 msgid "page0"
 msgstr ""
 
-#: ui/ui.glade:456
+#: ui/ui.glade:460
 msgid ""
 "There is no NVIDIA graphics card on your system. \n"
 "You can't use this application"
 msgstr ""
 
-#: ui/ui.glade:525 src/MainWindow.py:103
+#: ui/ui.glade:529 src/MainWindow.py:103
 msgid "Pardus Nvidia Installer"
 msgstr ""
 

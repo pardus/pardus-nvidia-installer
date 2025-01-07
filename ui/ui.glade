@@ -47,10 +47,13 @@
     <property name="buttons">ok-cancel</property>
     <property name="text" translatable="yes">&lt;span&gt;&lt;b&gt;⚠️ Important Notice: ⚠️&lt;/b&gt;&lt;/span&gt;</property>
     <property name="use-markup">True</property>
-    <property name="secondary-text" translatable="yes">Please be informed that the driver installation provided through this app is sourced exclusively from the Pardus and Nvidia repositories. While we strive to ensure the quality and reliability of these drivers, it is crucial to understand that we are not affiliated with Pardus or Nvidia.
+    <property name="secondary-text" translatable="yes">This application is developed and maintained by the Pardus team to facilitate Nvidia graphics driver installation. The drivers are sourced from official Pardus and Nvidia repositories.
+
+&lt;b&gt;Driver Source and Usage&lt;/b&gt;
+While this is an official Pardus application, the graphics drivers themselves are developed by Nvidia Corporation. Pardus provides this installation tool as a convenience for our users, but the drivers remain the intellectual property of Nvidia Corporation.
 
 &lt;b&gt;Disclaimer:&lt;/b&gt;
-We want to emphasize that we do not accept responsibility for any issues or complications that may arise during or after the installation process. While every effort has been made to provide a seamless experience, unforeseen circumstances can occur.
+Please note that while we strive to ensure a smooth installation process, Pardus cannot guarantee the performance or compatibility of Nvidia drivers with all hardware configurations. Users install these drivers at their own discretion and risk.
 
 &lt;b&gt;Issue Reporting:&lt;/b&gt;
 Feel free to report any issues or concerns via our GitHub repository: &lt;a href="https://github.com/pardus/pardus-nvidia-installer"&gt; Pardus Github &lt;/a&gt;</property>
