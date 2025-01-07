@@ -1,0 +1,204 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Hugo Carvalho <hugokarvalho@hotmail.com>, 2024, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: pardus-nvidia-installer\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-01-07 11:20+0300\n"
+"PO-Revision-Date: 2025-01-07 15:12+0000\n"
+"Last-Translator: Hugo Carvalho <hugokarvalho@hotmail.com>\n"
+"Language-Team: Portuguese <hugokarvalho@hotmail.com>\n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.5\n"
+
+#: ui/ui.glade:11
+msgid "<span><b>Warning</b></span>"
+msgstr "<span><b>Aviso</b></span>"
+
+#: ui/ui.glade:13
+msgid ""
+"Changes have been made . To ensure these changes take effect, a system "
+"restart is required. Please save any work and click 'OK' to complete the "
+"process."
+msgstr ""
+"Foram efetuadas alterações . Para que estas alterações tenham efeito, é "
+"necessário reiniciar o sistema. Guarde o trabalho efetuado e clique em 'OK' "
+"para concluir o processo."
+
+#: ui/ui.glade:48
+msgid "<span><b>⚠️ Important Notice: ⚠️</b></span>"
+msgstr "<span><b>⚠️ Aviso importante: ⚠️</b></span>"
+
+#: ui/ui.glade:50
+msgid ""
+"This application is developed and maintained by the Pardus team to "
+"facilitate Nvidia graphics driver installation. The drivers are sourced from "
+"official Pardus and Nvidia repositories.\n"
+"\n"
+"<b>Driver Source and Usage</b>\n"
+"While this is an official Pardus application, the graphics drivers "
+"themselves are developed by Nvidia Corporation. Pardus provides this "
+"installation tool as a convenience for our users, but the drivers remain the "
+"intellectual property of Nvidia Corporation.\n"
+"\n"
+"<b>Disclaimer:</b>\n"
+"Please note that while we strive to ensure a smooth installation process, "
+"Pardus cannot guarantee the performance or compatibility of Nvidia drivers "
+"with all hardware configurations. Users install these drivers at their own "
+"discretion and risk.\n"
+"\n"
+"<b>Issue Reporting:</b>\n"
+"Feel free to report any issues or concerns via our GitHub repository: <a "
+"href=\"https://github.com/pardus/pardus-nvidia-installer\"> Pardus Github </"
+"a>"
+msgstr ""
+"Esta aplicação é desenvolvida e mantida pela equipa do Pardus para facilitar "
+"a instalação do controlador gráfico da Nvidia. Os controladores são obtidos "
+"a partir dos repositórios oficiais do Pardus e da Nvidia.\n"
+"\n"
+"<b>Fonte e utilização dos controladores</b>\n"
+"Embora esta seja um aplicação oficial do Pardus, os controladores gráficos "
+"em si são desenvolvidos pela Nvidia Corporation. O Pardus fornece esta "
+"ferramenta de instalação como uma conveniência para os nossos utilizadores, "
+"mas os controladores continuam a ser propriedade intelectual da Nvidia "
+"Corporation.\n"
+"\n"
+"<b>Isenção de responsabilidade:</b>\n"
+"Tenha em atenção que, embora nos esforcemos por assegurar um processo de "
+"instalação sem problemas, o Pardus não pode garantir o desempenho ou a "
+"compatibilidade dos controladores Nvidia com todas as configurações de "
+"hardware. Os utilizadores instalam estes controladores por sua própria conta "
+"e risco.\n"
+"\n"
+"<b>Comunicação de problemas:</b>\n"
+"Pode comunicar quaisquer problemas ou preocupações através do nosso "
+"repositório GitHub: <a href=\"https://github.com/pardus/pardus-nvidia-"
+"installer\"> GitHub do Pardus </a>"
+
+#: ui/ui.glade:177
+msgid ""
+"This application indicates that your secondary NVIDIA GPU is currently "
+"disabled. To activate it, simply click the 'Enable GPU' button next to this "
+"message."
+msgstr ""
+"Esta aplicação indica que a sua GPU NVIDIA secundária está atualmente "
+"desativada. Para ativá-la, basta clicar no botão 'Ativar GPU' junto a esta "
+"mensagem."
+
+#: ui/ui.glade:189
+msgid "Enable GPU"
+msgstr "Ativar GPU"
+
+#: ui/ui.glade:206 ui/ui.glade:473
+msgid "page1"
+msgstr "página1"
+
+#: ui/ui.glade:234
+msgid "Use Nvidia Repository"
+msgstr "Usar o repositório da Nvidia"
+
+#: ui/ui.glade:354
+msgid "Disable Secondary GPU"
+msgstr "Desativar a GPU secundária"
+
+#: ui/ui.glade:379
+msgid "Apply Changes"
+msgstr "Aplicar alterações"
+
+#: ui/ui.glade:434
+msgid "page2"
+msgstr "página2"
+
+#: ui/ui.glade:448
+msgid "page0"
+msgstr "página0"
+
+#: ui/ui.glade:460
+msgid ""
+"There is no NVIDIA graphics card on your system. \n"
+"You can't use this application"
+msgstr ""
+"Não existe nenhuma placa gráfica NVIDIA no sistema. \n"
+"Não é possível utilizar esta aplicação"
+
+#: ui/ui.glade:529 src/MainWindow.py:103
+msgid "Pardus Nvidia Installer"
+msgstr "Instalador Nvidia Pardus"
+
+#: src/MainWindow.py:181 src/MainWindow.py:183
+msgid "Driver"
+msgstr "Controlador"
+
+#: src/MainWindow.py:187
+msgid "Version"
+msgstr "Versão"
+
+#: src/MainWindow.py:190 src/MainWindow.py:193
+msgid "Description"
+msgstr "Descrição"
+
+#: src/nvidia.py:184
+msgid "Open Source Driver"
+msgstr "Controlador de Código Aberto"
+
+#: src/nvidia.py:201
+msgid "Proprietary Driver"
+msgstr "Controlador Proprietário"
+
+#: src/std_opr.py:65
+msgid "Operation completed successfully"
+msgstr "Operação concluída com sucesso"
+
+#: src/std_opr.py:86
+msgid "Auth or cancellation error"
+msgstr "Erro de autenticação ou cancelamento"
+
+#: src/std_opr.py:88
+msgid "An error occured"
+msgstr "Ocorreu um erro"
+
+#, fuzzy
+#~ msgid ""
+#~ "Please be informed that the driver installation provided through this app "
+#~ "is sourced exclusively from the Pardus and Nvidia repositories. While we "
+#~ "strive to ensure the quality and reliability of these drivers, it is "
+#~ "crucial to understand that we are not affiliated with Pardus or Nvidia.\n"
+#~ "\n"
+#~ "<b>Disclaimer:</b>\n"
+#~ "We want to emphasize that we do not accept responsibility for any issues "
+#~ "or complications that may arise during or after the installation process. "
+#~ "While every effort has been made to provide a seamless experience, "
+#~ "unforeseen circumstances can occur.\n"
+#~ "\n"
+#~ "<b>Issue Reporting:</b>\n"
+#~ "Feel free to report any issues or concerns via our GitHub repository: <a "
+#~ "href=\"https://github.com/pardus/pardus-nvidia-installer\"> Pardus Github "
+#~ "</a>"
+#~ msgstr ""
+#~ "Informamos que a instalação do controlador fornecido através desta "
+#~ "aplicação é obtido exclusivamente a partir dos repositórios Pardus e "
+#~ "Nvidia. Embora nos esforcemos por garantir a qualidade e fiabilidade "
+#~ "destes controladores, é crucial compreender que não somos afiliados do "
+#~ "Pardus ou da Nvidia.\n"
+#~ "\n"
+#~ "<b>Isenção de responsabilidade: </b/>\n"
+#~ "Queremos enfatizar que não aceitamos responsabilidade por quaisquer "
+#~ "problemas ou complicações que possam surgir durante ou após o processo de "
+#~ "instalação. Embora todos os esforços tenham sido feitos para proporcionar "
+#~ "uma experiência perfeita, podem ocorrer circunstâncias imprevistas. \n"
+#~ "\n"
+#~ "<b>Comunicação de problemas:</b>\n"
+#~ "Sinta-se à vontade para relatar quaisquer problemas ou preocupações por "
+#~ "meio do nosso repositório do GitHub: https://github.com/pardus/pardus-"
+#~ "nvidia-installer"
+
+#~ msgid "translator-credits"
+#~ msgstr "Hugo Carvalho <hugokarvalho@hotmail.com>"
