@@ -15,6 +15,7 @@ debian/.debhelper*
 debian/files
 debian/debhelper*
 debian/pardus-nvidia-installer*
+debuab/pardus-nvidia-installer.substvars
 debian/debhelper-build-stamp
 
 # ---> Python
