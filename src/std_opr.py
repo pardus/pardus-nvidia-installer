@@ -83,7 +83,12 @@ def on_process_stdext(pid, stat, self):
             self.ui_confirm_dialog.destroy()
         self.create_gpu_drivers()
     if stat == 15 or stat == 32256 or stat == 32512:
+        if self.apt_opr == "update":
+            self.ui_repo_switch.handler_block_by_func(self.on_nvidia_mirror_changed)  
+            self.ui_repo_switch.set_active(not self.ui_repo_switch.get_active())
+            self.ui_repo_switch.handler_unblock_by_func(self.on_nvidia_mirror_changed)  
         self.ui_status_progressbar.set_text(_("Auth or cancellation error"))
+
     else:
         self.ui_status_progressbar.set_text(_("An error occured"))
     self.ui_main_window.set_sensitive(True)
