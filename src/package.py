@@ -4,7 +4,6 @@ import apt
 import sys
 import subprocess
 import shutil
-import nvidia
 import apt_pkg
 
 apt_pkg.init_system()
@@ -20,6 +19,14 @@ nvidia_disable_gpu_path = "/var/cache/pni-disable-gpu"
 nvidia_src_file = "nvidia-drivers.list"
 dest = "/etc/apt/sources.list.d/nvidia-drivers.list"
 src_list = os.path.dirname(__file__) + "/../" + nvidia_src_file
+cuda_source = """
+if [ -d "/usr/local/cuda" ]; then
+    export PATH=/usr/local/cuda/bin:$PATH
+    export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+
+"""
+HOME = os.path.expanduser("~")
+bashrc_path = os.path.join(HOME, ".bashrc")
 
 
 def sys_source():
@@ -82,6 +89,14 @@ def install_nvidia(nv_drv):
         env={**os.environ},
     )
 
+    subprocess.call(
+        ["systemctl", "enable", "nvidia-suspend"],
+        env={**os.environ},
+    )
+
+    with open(bashrc_path, "a") as f:
+        f.write(cuda_source)
+
 
 def install_nouveau():
     subprocess.call(
@@ -90,7 +105,7 @@ def install_nouveau():
     )
 
 
-def toggle_driver(self):
+def toggle_driver():
     toggle_source_list()
     install_nvidia()
 

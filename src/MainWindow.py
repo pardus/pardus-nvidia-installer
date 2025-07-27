@@ -1,7 +1,6 @@
 import gi
 import os
 import apt
-import signal
 import nvidia
 import std_opr
 import locale

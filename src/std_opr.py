@@ -1,6 +1,4 @@
-import os
 import gi
-import dbus
 import subprocess
 import locale
 
@@ -18,7 +16,7 @@ locale.textdomain(APPNAME_CODE)
 
 def start_prc(self, params):
     print(params)
-    pid, std_in, std_out, std_err = GLib.spawn_async(
+    pid, _, std_out, _ = GLib.spawn_async(
         params,
         flags=GLib.SpawnFlags.DO_NOT_REAP_CHILD,
         standard_output=True,
