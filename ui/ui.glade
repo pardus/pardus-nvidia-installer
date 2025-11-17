@@ -399,18 +399,7 @@ Feel free to report any issues or concerns via our GitHub repository: &lt;a href
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkProgressBar" id="ui_status_progressbar">
-                                <property name="height-request">30</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="double-buffered">False</property>
-                                <property name="pulse-step">0.01</property>
-                              </object>
-                              <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">5</property>
-                              </packing>
+                              <placeholder/>
                             </child>
                           </object>
                           <packing>
@@ -474,9 +463,24 @@ You can't use this application</property>
                 <property name="position">1</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkBox" id="ui_box_vte">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="name">page_vte</property>
+                <property name="title" translatable="yes">page_vte</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">1</property>
           </packing>

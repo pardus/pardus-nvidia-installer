@@ -3,15 +3,14 @@ import os
 import apt
 import signal
 import nvidia
-import std_opr
 import locale
 import package
 
 gi.require_version("Gtk", "3.0")
 gi.require_version("Polkit", "1.0")
+gi.require_version('Vte', '2.91')
 
-
-from gi.repository import Gtk, GObject, GLib
+from gi.repository import Gtk, GObject, GLib, Vte
 from locale import gettext as _
 
 APPNAME_CODE = "pardus-nvidia-installer"
@@ -67,8 +66,6 @@ class MainWindow(object):
         self.ui_apply_chg_button = self.get_ui("ui_apply_chg_button")
         self.ui_disable_check_button = self.get_ui("ui_disable_check_button")
 
-        self.ui_status_label = self.get_ui("ui_status_label")
-        self.ui_status_progressbar = self.get_ui("ui_status_progressbar")
         self.ui_apply_chg_button.connect("clicked", self.on_apply_button_clicked)
         self.ui_repo_switch = self.get_ui("ui_repo_switch")
         self.ui_repo_switch.set_state(self.state)
@@ -99,10 +96,42 @@ class MainWindow(object):
         self.apt_opr = ""
         self.create_gpu_drivers()
 
+        self.vte = Vte.Terminal()
+        self.update_vte_color(self.vte)
+        self.ui_box_vte = self.get_ui("ui_box_vte")
+        vte_scrolled = Gtk.ScrolledWindow()
+        vte_scrolled.add(self.vte)
+        self.ui_box_vte.pack_start(vte_scrolled, True, True, 0)
+
         self.ui_main_window.set_application(application)
         self.ui_main_window.set_title(_("Pardus Nvidia Installer"))
         self.user_disclaimer()
         self.ui_main_window.show_all()
+        #self.vte_start(["/bin/bash"])
+
+    def update_vte_color(self, vte):
+        style_context = self.ui_main_window.get_style_context()
+        background_color= style_context.get_background_color(Gtk.StateFlags.NORMAL);
+        foreground_color= style_context.get_color(Gtk.StateFlags.NORMAL);
+        vte.set_color_background(background_color)
+        vte.set_color_foreground(foreground_color)
+
+
+    def vte_start(self, params):
+        self.ui_main_stack.set_visible_child_name("page_vte")
+        self.vte.spawn_async(
+                Vte.PtyFlags.DEFAULT,
+                os.environ['HOME'],
+                params,
+                None,
+                GLib.SpawnFlags.DO_NOT_REAP_CHILD,
+                None,
+                None,
+                -1,
+                None,
+                None,
+                None
+            )
 
     def user_disclaimer(self):
         response = self.ui_info_dialog.run()
@@ -124,7 +153,7 @@ class MainWindow(object):
                 break
 
     def create_gpu_drivers(self):
-        if len(self.nvidia_devices) == 0:
+        if len(self.nvidia_devices) == 0 and False:
             self.ui_main_stack.set_visible_child(self.ui_novidia_box)
         for toggle in self.drv_arr:
             self.ui_gpu_box.remove(toggle)
@@ -228,7 +257,7 @@ class MainWindow(object):
 
     def on_enable_button_clicked(self, button):
         params = ["/usr/bin/pkexec", cur_path + pkg_file, "enable-sec-gpu"]
-        std_opr.start_prc(self, params)
+        self.vte_start(params)
 
     def on_apply_button_clicked(self, button):
         print("apply button clicked")
@@ -238,12 +267,12 @@ class MainWindow(object):
         if self.initial_sec_gpu_state == self.ui_disable_check_button.get_active():
             self.apt_opr = "disable-sec-gpu"
             params.append(self.apt_opr)
-            std_opr.start_prc(self, params)
+            self.vte_start(params)
 
         else:
             self.apt_opr = "install"
             params += [self.apt_opr, self.toggled_driver.package]
-            std_opr.start_prc(self, params)
+            self.vte_start(params)
 
         # self.ui_apply_chg_button.set_sensitive(False)
 
@@ -269,4 +298,4 @@ class MainWindow(object):
         cur_path = os.path.dirname(os.path.abspath(__file__))
         params = ["/usr/bin/pkexec", cur_path + pkg_file, "update"]
         self.apt_opr = "update"
-        std_opr.start_prc(self, params)
+        self.vte_start(params)
