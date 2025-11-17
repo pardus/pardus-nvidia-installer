@@ -395,8 +395,8 @@ Feel free to report any issues or concerns via our GitHub repository: &lt;a href
                 </child>
               </object>
               <packing>
-                <property name="name">page0</property>
-                <property name="title" translatable="yes">page0</property>
+                <property name="name">page_main</property>
+                <property name="title" translatable="yes">page_main</property>
               </packing>
             </child>
             <child>
@@ -456,8 +456,8 @@ You can't use this application</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="ui_button_exit">
-                        <property name="label" translatable="yes">Kapat</property>
+                      <object class="GtkButton" id="ui_button_ok">
+                        <property name="label" translatable="yes">Tamam</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
@@ -472,6 +472,7 @@ You can't use this application</property>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
+                    <property name="pack-type">end</property>
                     <property name="position">1</property>
                   </packing>
                 </child>

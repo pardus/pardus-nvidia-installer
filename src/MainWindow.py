@@ -2,6 +2,7 @@ import gi
 import os
 import apt
 import signal
+import subprocess
 import nvidia
 import locale
 import package
@@ -104,10 +105,10 @@ class MainWindow(object):
         self.ui_box_vte.pack_start(vte_scrolled, True, True, 0)
         self.vte.connect("child-exited", self.on_vte_done)
 
-        def run_command(widget, command):
-            subprocess.run(command)
-        self.get_ui("ui_button_reboot").connect("clicked", run_command, ["/usr/bin/pkexec", "reboot"])
-        self.get_ui("ui_button_exit").connect("clicked", Gtk.main_quit)
+        self.get_ui("ui_button_reboot").connect("clicked",
+            lambda x: subprocess.run(["/usr/bin/pkexec", "/sbin/reboot"]))
+        self.get_ui("ui_button_ok").connect("clicked",
+            lambda x: self.ui_main_stack.set_visible_child_name("page_main"))
 
         self.ui_main_window.set_application(application)
         self.ui_main_window.set_title(_("Pardus Nvidia Installer"))
