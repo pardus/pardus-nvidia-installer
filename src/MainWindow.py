@@ -102,12 +102,21 @@ class MainWindow(object):
         vte_scrolled = Gtk.ScrolledWindow()
         vte_scrolled.add(self.vte)
         self.ui_box_vte.pack_start(vte_scrolled, True, True, 0)
+        self.vte.connect("child-exited", self.on_vte_done)
+
+        def run_command(widget, command):
+            subprocess.run(command)
+        self.get_ui("ui_button_reboot").connect("clicked", run_command, ["/usr/bin/pkexec", "reboot"])
+        self.get_ui("ui_button_exit").connect("clicked", Gtk.main_quit)
 
         self.ui_main_window.set_application(application)
         self.ui_main_window.set_title(_("Pardus Nvidia Installer"))
         self.user_disclaimer()
         self.ui_main_window.show_all()
         #self.vte_start(["/bin/bash"])
+
+    def on_vte_done(self, vte, status):
+        self.get_ui("ui_box_vte_buttons").show_all()
 
     def update_vte_color(self, vte):
         style_context = self.ui_main_window.get_style_context()
@@ -118,6 +127,7 @@ class MainWindow(object):
 
 
     def vte_start(self, params):
+        self.get_ui("ui_box_vte_buttons").hide()
         self.ui_main_stack.set_visible_child_name("page_vte")
         self.vte.spawn_async(
                 Vte.PtyFlags.DEFAULT,
