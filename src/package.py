@@ -64,27 +64,27 @@ def toggle_source_list():
 def install_nvidia(nv_drv):
     cmds = [
         ["apt", "update", "-yq"],
-        ["apt", "purge", "-yq", "nvidia-*driver"],
+        ["apt", "purge", "-yq", "nvidia-*driver", "nvidia-kernel-*"],
         ["apt", "purge", "-yq", "xserver-xorg-video-nouveau"],
         ["apt", "autoremove", "-yq"],
         ["apt", "install", "-yq", nv_drv],
     ]
     for cmd in cmds:
         rc = subprocess.call(cmd, env={**os.environ})
-        if rc.returncode != 0:
+        if rc != 0:
             return False
     return True
 
 
 def install_nouveau():
     cmds = [
-        ["apt", "purge", "-yq", "nvidia-*driver"],
+        ["apt", "purge", "-yq", "nvidia-*driver", "nvidia-kernel-*"],
         ["apt", "autoremove", "-yq"],
         ["apt", "install", "-yq", "xserver-xorg-video-nouveau"],
     ]
     for cmd in cmds:
         rc = subprocess.call(cmd, env={**os.environ})
-        if rc.returncode != 0:
+        if rc != 0:
             return False
     return True
 
