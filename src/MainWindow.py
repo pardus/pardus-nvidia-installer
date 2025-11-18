@@ -5,6 +5,7 @@ import signal
 import subprocess
 import nvidia
 import locale
+import platform
 import package
 
 gi.require_version("Gtk", "3.0")
@@ -283,6 +284,7 @@ class MainWindow(object):
         else:
             self.apt_opr = "install"
             params += [self.apt_opr, self.toggled_driver.package]
+            params += ["linux-headers-{}".format(platform.uname().release), "linux-headers-amd64"]
             self.vte_start(params)
 
         # self.ui_apply_chg_button.set_sensitive(False)

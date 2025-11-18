@@ -63,29 +63,29 @@ def toggle_source_list():
 
 def install_nvidia(nv_drv):
     subprocess.call(
-        ["apt", "update", "-yq", "-o", "APT::Status-Fd=1"],
+        ["apt", "update", "-yq"],
         env={**os.environ},
     )
 
     subprocess.call(
-        ["apt", "remove", "-yq", "-o", "APT::Status-Fd=1", "nvidia-*"],
+        ["apt", "remove", "-yq", "nvidia-*"],
         env={**os.environ},
     )
 
     subprocess.call(
-        ["apt", "autoremove", "-yq", "-o", "APT::Status-Fd=1"],
+        ["apt", "autoremove", "-yq"],
         env={**os.environ},
     )
 
     subprocess.call(
-        ["apt", "install", "-yq", "-o", "APT::Status-Fd=1", nv_drv],
+        ["apt", "install", "-yq", nv_drv],
         env={**os.environ},
     )
 
 
 def install_nouveau():
     subprocess.call(
-        ["apt", "remove", "-yq", "-o", "APT::Status-Fd=1", "nvidia-*"],
+        ["apt", "remove", "-yq", "nvidia-*"],
         env={**os.environ},
     )
 
@@ -102,7 +102,7 @@ def update():
         shutil.copyfile(src_list, dest)
 
     subprocess.call(
-        ["apt", "update", "-yq", "-o", "APT::Status-Fd=1"], env={**os.environ}
+        ["apt", "update", "-yq"], env={**os.environ}
     )
 
 
