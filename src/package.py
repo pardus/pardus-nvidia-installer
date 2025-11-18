@@ -62,33 +62,31 @@ def toggle_source_list():
 
 
 def install_nvidia(nv_drv):
-    subprocess.call(
+    cmds = [
         ["apt", "update", "-yq"],
-        env={**os.environ},
-    )
-
-    subprocess.call(
-        ["apt", "remove", "-yq", "nvidia-*"],
-        env={**os.environ},
-    )
-
-    subprocess.call(
+        ["apt", "purge", "-yq", "nvidia-*driver"],
+        ["apt", "purge", "-yq", "xserver-xorg-video-nouveau"],
         ["apt", "autoremove", "-yq"],
-        env={**os.environ},
-    )
-
-    subprocess.call(
         ["apt", "install", "-yq", nv_drv],
-        env={**os.environ},
-    )
+    ]
+    for cmd in cmds:
+        rc = subprocess.call(cmd, env={**os.environ})
+        if rc.returncode != 0:
+            return False
+    return True
 
 
 def install_nouveau():
-    subprocess.call(
-        ["apt", "remove", "-yq", "nvidia-*"],
-        env={**os.environ},
-    )
-
+    cmds = [
+        ["apt", "purge", "-yq", "nvidia-*driver"],
+        ["apt", "autoremove", "-yq"],
+        ["apt", "install", "-yq", "xserver-xorg-video-nouveau"],
+    ]
+    for cmd in cmds:
+        rc = subprocess.call(cmd, env={**os.environ})
+        if rc.returncode != 0:
+            return False
+    return True
 
 def toggle_driver(self):
     toggle_source_list()
@@ -130,7 +128,7 @@ if __name__ == "__main__":
     args = sys.argv
     if len(args) > 1:
         param1 = args[1]
-        if param1 == nouveau:
+        if param1 == "nouveau" or param1 == nouveau:
             install_nouveau()
         elif param1 == "update":
             update()
