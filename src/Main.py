@@ -41,7 +41,8 @@ class Application(Gtk.Application):
             self.window = MainWindow(self)
         else:
             self.window.controlArgs()
-        self.window.ui_main_window.present()
+        if self.window.ui_main_window:
+            self.window.ui_main_window.present()
 
     def do_command_line(self, command_line):
         options = command_line.get_options_dict()

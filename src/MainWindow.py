@@ -47,6 +47,20 @@ class MainWindow(object):
             print("Error while creating user interface from glade file")
             return False
         self.application = application
+
+
+        self.get_ui("ui_button_reboot_dlg").connect("clicked",
+            lambda x: subprocess.run(["/usr/bin/pkexec", "/sbin/reboot"]))
+        self.get_ui("ui_button_exit_dlg").connect("clicked",
+            lambda x: exit(0))
+
+        if os.path.isfile("/run/pardus-nvi.reboot"):
+            self.ui_main_window = self.get_ui("ui_window_reboot")
+            self.ui_main_window.set_application(application)
+            self.ui_main_window.show_all()
+            return
+
+
         self.driver_buttons = []
         self.active_driver = ""
         self.toggled_driver = ""
@@ -108,13 +122,15 @@ class MainWindow(object):
 
         self.get_ui("ui_button_reboot").connect("clicked",
             lambda x: subprocess.run(["/usr/bin/pkexec", "/sbin/reboot"]))
-        self.get_ui("ui_button_ok").connect("clicked",
-            lambda x: self.ui_main_stack.set_visible_child_name("page_main"))
+        self.get_ui("ui_button_exit").connect("clicked",
+            lambda x: exit(0))
 
         self.ui_main_window.set_application(application)
         self.ui_main_window.set_title(_("Pardus Nvidia Installer"))
         self.user_disclaimer()
         self.ui_main_window.show_all()
+
+
         #self.vte_start(["/bin/bash"])
 
     def on_vte_done(self, vte, status):
@@ -131,6 +147,7 @@ class MainWindow(object):
     def vte_start(self, params):
         self.get_ui("ui_box_vte_buttons").hide()
         self.ui_main_stack.set_visible_child_name("page_vte")
+        print(params)
         self.vte.spawn_async(
                 Vte.PtyFlags.DEFAULT,
                 os.environ['HOME'],
@@ -303,8 +320,7 @@ class MainWindow(object):
         return sec_gpu_changes or driver_changes
 
     def on_disable_checkbox_checked(self, button):
-        pass
-        # self.ui_apply_chg_button.set_sensitive(self.check_initials())
+        self.ui_apply_chg_button.set_sensitive(self.check_initials())
 
     def on_nvidia_mirror_changed(self, button, state):
         self.state = button.get_active()

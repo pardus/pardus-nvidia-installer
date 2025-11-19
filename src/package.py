@@ -29,6 +29,10 @@ def sys_source():
 compare_version = apt_pkg.version_compare
 
 
+def mark_need_reboot():
+    with open("/run/pardus-nvi.reboot", "w") as f:
+        f.write("1")
+
 def disable_sec_gpu():
     if not os.path.isfile(nvidia_disable_gpu_path):
         with open(nvidia_disable_gpu_path, "a") as f:
@@ -38,6 +42,7 @@ def disable_sec_gpu():
         os.rename(nvidia_modprobe_conf, nvidia_modprobed_conf)
     if os.path.isfile(nouveau_modprobe_conf):
         os.rename(nouveau_modprobe_conf, nouveau_modprobed_conf)
+    mark_need_reboot()
 
 
 def enable_sec_gpu():
@@ -47,7 +52,7 @@ def enable_sec_gpu():
         os.rename(nvidia_modprobed_conf, nvidia_modprobe_conf)
     if os.path.isfile(nouveau_modprobed_conf):
         os.rename(nouveau_modprobed_conf, nouveau_modprobe_conf)
-
+    mark_need_reboot()
 
 def check_sec_state():
     return not os.path.isfile(nvidia_disable_gpu_path)
@@ -62,6 +67,7 @@ def toggle_source_list():
 
 
 def install_nvidia(nv_drv):
+    mark_need_reboot()
     cmds = [
         ["apt", "update", "-yq"],
         ["apt", "purge", "-yq", "nvidia-*driver", "nvidia-kernel-*"],
@@ -77,6 +83,7 @@ def install_nvidia(nv_drv):
 
 
 def install_nouveau():
+    mark_need_reboot()
     cmds = [
         ["apt", "purge", "-yq", "nvidia-*driver", "nvidia-kernel-*"],
         ["apt", "autoremove", "-yq"],
