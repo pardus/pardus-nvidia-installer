@@ -49,8 +49,7 @@ class MainWindow(object):
         self.application = application
 
 
-        self.get_ui("ui_button_reboot_dlg").connect("clicked",
-            lambda x: subprocess.run(["/usr/bin/pkexec", "/sbin/reboot"]))
+        self.get_ui("ui_button_reboot_dlg").connect("clicked", self.do_reboot)
         self.get_ui("ui_button_exit_dlg").connect("clicked",
             lambda x: exit(0))
 
@@ -120,8 +119,8 @@ class MainWindow(object):
         self.ui_box_vte.pack_start(vte_scrolled, True, True, 0)
         self.vte.connect("child-exited", self.on_vte_done)
 
-        self.get_ui("ui_button_reboot").connect("clicked",
-            lambda x: subprocess.run(["/usr/bin/pkexec", "/sbin/reboot"]))
+
+        self.get_ui("ui_button_reboot").connect("clicked", self.do_reboot)
         self.get_ui("ui_button_exit").connect("clicked",
             lambda x: exit(0))
 
@@ -132,6 +131,15 @@ class MainWindow(object):
 
 
         #self.vte_start(["/bin/bash"])
+
+    def do_reboot(self, widget):
+        cmd=[
+            "/usr/bin/dbus-send", "--system", "--print-reply",
+            "--dest=org.freedesktop.login1", "/org/freedesktop/login1",
+            "orf.freedesktop.login1.Manager.Reboot", "boolean:true"]
+        print(cmd)
+        subprocess.run(cmd)
+
 
     def on_vte_done(self, vte, status):
         self.get_ui("ui_box_vte_buttons").show_all()
