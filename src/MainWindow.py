@@ -20,6 +20,7 @@ TRANSLATIONS_PATH = "/usr/share/locale/"
 locale.bindtextdomain(APPNAME_CODE, TRANSLATIONS_PATH)
 locale.textdomain(APPNAME_CODE)
 
+is_debug = os.path.isfile("/etc/pardus-nvi.debug")
 
 cache = apt.Cache()
 
@@ -190,7 +191,7 @@ class MainWindow(object):
                 break
 
     def create_gpu_drivers(self):
-        if len(self.nvidia_devices) == 0 and False:
+        if len(self.nvidia_devices) == 0 and not is_debug:
             self.ui_main_stack.set_visible_child(self.ui_novidia_box)
         for toggle in self.drv_arr:
             self.ui_gpu_box.remove(toggle)
