@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pardus-nvidia-installer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-07 11:20+0300\n"
+"POT-Creation-Date: 2025-11-20 12:50+0300\n"
 "PO-Revision-Date: 2024-07-16 00:16+0100\n"
 "Last-Translator: Hugo Carvalho <hugokarvalho@hotmail.com>\n"
 "Language-Team: Portuguese <hugokarvalho@hotmail.com>\n"
@@ -60,7 +60,7 @@ msgid ""
 "a>"
 msgstr ""
 
-#: ui/ui.glade:177
+#: ui/ui.glade:176
 msgid ""
 "This application indicates that your secondary NVIDIA GPU is currently "
 "disabled. To activate it, simply click the 'Enable GPU' button next to this "
@@ -70,11 +70,11 @@ msgstr ""
 "desativada. Para ativá-la, basta clicar no botão 'Ativar GPU' junto a esta "
 "mensagem."
 
-#: ui/ui.glade:189
+#: ui/ui.glade:188
 msgid "Enable GPU"
 msgstr "Ativar GPU"
 
-#: ui/ui.glade:206 ui/ui.glade:473
+#: ui/ui.glade:205 ui/ui.glade:424
 msgid "page1"
 msgstr "página1"
 
@@ -82,23 +82,23 @@ msgstr "página1"
 msgid "Use Nvidia Repository"
 msgstr "Usar o repositório da Nvidia"
 
-#: ui/ui.glade:354
+#: ui/ui.glade:339
 msgid "Disable Secondary GPU"
 msgstr "Desativar a GPU secundária"
 
-#: ui/ui.glade:379
+#: ui/ui.glade:359
 msgid "Apply Changes"
 msgstr "Aplicar alterações"
 
-#: ui/ui.glade:434
+#: ui/ui.glade:385
 msgid "page2"
 msgstr "página2"
 
-#: ui/ui.glade:448
-msgid "page0"
-msgstr "página0"
+#: ui/ui.glade:399
+msgid "page_main"
+msgstr ""
 
-#: ui/ui.glade:460
+#: ui/ui.glade:411
 msgid ""
 "There is no NVIDIA graphics card on your system. \n"
 "You can't use this application"
@@ -106,19 +106,40 @@ msgstr ""
 "Não existe nenhuma placa gráfica NVIDIA no sistema. \n"
 "Não é possível utilizar esta aplicação"
 
-#: ui/ui.glade:529 src/MainWindow.py:103
+#: ui/ui.glade:447 ui/ui.glade:642
+msgid "Reboot"
+msgstr ""
+
+#: ui/ui.glade:460 ui/ui.glade:657
+msgid "Exit"
+msgstr ""
+
+#: ui/ui.glade:482
+#, fuzzy
+msgid "page_vte"
+msgstr "página1"
+
+#: ui/ui.glade:540 src/MainWindow.py:128
 msgid "Pardus Nvidia Installer"
 msgstr "Instalador Nvidia Pardus"
 
-#: src/MainWindow.py:181 src/MainWindow.py:183
+#: ui/ui.glade:623
+msgid "You must reboot your device before using this application."
+msgstr ""
+
+#: ui/ui.glade:683
+msgid "Reboot required"
+msgstr ""
+
+#: src/MainWindow.py:247 src/MainWindow.py:249
 msgid "Driver"
 msgstr "Controlador"
 
-#: src/MainWindow.py:187
+#: src/MainWindow.py:253
 msgid "Version"
 msgstr "Versão"
 
-#: src/MainWindow.py:190 src/MainWindow.py:193
+#: src/MainWindow.py:256 src/MainWindow.py:259
 msgid "Description"
 msgstr "Descrição"
 
@@ -130,18 +151,15 @@ msgstr "Controlador de Código Aberto"
 msgid "Proprietary Driver"
 msgstr "Controlador Proprietário"
 
-#: src/std_opr.py:65
-msgid "Operation completed successfully"
-msgstr "Operação concluída com sucesso"
+#~ msgid "page0"
+#~ msgstr "página0"
 
-#: src/std_opr.py:86
-msgid "Auth or cancellation error"
-msgstr ""
+#~ msgid "Operation completed successfully"
+#~ msgstr "Operação concluída com sucesso"
 
-#: src/std_opr.py:88
 #, fuzzy
-msgid "An error occured"
-msgstr "Ocorreu um erro."
+#~ msgid "An error occured"
+#~ msgstr "Ocorreu um erro."
 
 #, fuzzy
 #~ msgid ""

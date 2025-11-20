@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-07 11:20+0300\n"
+"POT-Creation-Date: 2025-11-20 12:50+0300\n"
 "PO-Revision-Date: 2024-07-16 11:17+0300\n"
 "Last-Translator: Osman Coskun <osman.coskun@pardus.org.tr>\n"
 "Language-Team: Turkish <dev@pardus.org.tr>\n"
@@ -61,26 +61,27 @@ msgid ""
 "a>"
 msgstr ""
 "Bu uygulama, Nvidia grafik sürücülerinin kurulumunu kolaylaştırmak için "
-"Pardus ekibi tarafından geliştirilmiş ve yönetilmektedir. Sürücüler, "
-"resmi Pardus ve Nvidia depolarından sağlanmaktadır.\n"
+"Pardus ekibi tarafından geliştirilmiş ve yönetilmektedir. Sürücüler, resmi "
+"Pardus ve Nvidia depolarından sağlanmaktadır.\n"
 "\n"
 "<b>Sürücü Kaynağı ve Kullanımı</b>\n"
-"Bu resmi bir Pardus uygulaması olmakla birlikte, grafik sürücüleri "
-"Nvidia Corporation tarafından geliştirilmiştir. Pardus, bu kurulum aracını "
-"kullanıcılarımıza bir kolaylık olarak sunmaktadır, ancak sürücüler "
-"Nvidia Corporation'ın fikri mülkiyeti olarak kalmaktadır.\n"
+"Bu resmi bir Pardus uygulaması olmakla birlikte, grafik sürücüleri Nvidia "
+"Corporation tarafından geliştirilmiştir. Pardus, bu kurulum aracını "
+"kullanıcılarımıza bir kolaylık olarak sunmaktadır, ancak sürücüler Nvidia "
+"Corporation'ın fikri mülkiyeti olarak kalmaktadır.\n"
 "\n"
 "<b>Sorumluluk Reddi:</b>\n"
-"Sorunsuz bir kurulum süreci sağlamak için çaba göstermekle birlikte, "
-"Pardus, Nvidia sürücülerinin tüm donanım yapılandırmalarıyla uyumluluğunu "
-"veya performansını garanti edemez. Kullanıcılar bu sürücüleri kendi "
-"takdirleri ve riskleri altında kurarlar.\n"
+"Sorunsuz bir kurulum süreci sağlamak için çaba göstermekle birlikte, Pardus, "
+"Nvidia sürücülerinin tüm donanım yapılandırmalarıyla uyumluluğunu veya "
+"performansını garanti edemez. Kullanıcılar bu sürücüleri kendi takdirleri ve "
+"riskleri altında kurarlar.\n"
 "\n"
 "<b>Sorun Bildirimi:</b>\n"
-"Her türlü sorun veya endişenizi GitHub depomuz üzerinden bildirebilirsiniz: <a "
-"href=\"https://github.com/pardus/pardus-nvidia-installer\"> Pardus Github </a>"
+"Her türlü sorun veya endişenizi GitHub depomuz üzerinden bildirebilirsiniz: "
+"<a href=\"https://github.com/pardus/pardus-nvidia-installer\"> Pardus Github "
+"</a>"
 
-#: ui/ui.glade:177
+#: ui/ui.glade:176
 msgid ""
 "This application indicates that your secondary NVIDIA GPU is currently "
 "disabled. To activate it, simply click the 'Enable GPU' button next to this "
@@ -89,11 +90,11 @@ msgstr ""
 "Görünüşe göre NVIDIA ekran kartınız şuanda etkin değil. Etkinleştirmek için "
 "'Ekran Kartını Etkinleştir' butonuna basınız."
 
-#: ui/ui.glade:189
+#: ui/ui.glade:188
 msgid "Enable GPU"
 msgstr "Ekran Kartını Etkinleştir"
 
-#: ui/ui.glade:206 ui/ui.glade:473
+#: ui/ui.glade:205 ui/ui.glade:424
 msgid "page1"
 msgstr "sayfa1"
 
@@ -101,23 +102,23 @@ msgstr "sayfa1"
 msgid "Use Nvidia Repository"
 msgstr "Nvidia Deposunu Kullan"
 
-#: ui/ui.glade:354
+#: ui/ui.glade:339
 msgid "Disable Secondary GPU"
 msgstr "İkincil Ekran Kartını Devre Dışı Bırak"
 
-#: ui/ui.glade:379
+#: ui/ui.glade:359
 msgid "Apply Changes"
 msgstr "Değişiklikleri Uygula"
 
-#: ui/ui.glade:434
+#: ui/ui.glade:385
 msgid "page2"
 msgstr "sayfa2"
 
-#: ui/ui.glade:448
-msgid "page0"
-msgstr "sayfa0"
+#: ui/ui.glade:399
+msgid "page_main"
+msgstr "page_main"
 
-#: ui/ui.glade:460
+#: ui/ui.glade:411
 msgid ""
 "There is no NVIDIA graphics card on your system. \n"
 "You can't use this application"
@@ -125,19 +126,39 @@ msgstr ""
 "Sisteminizde NVIDIA ekran kartı bulunmamakta. \n"
 "Uygulamayı kullanamazsınız"
 
-#: ui/ui.glade:529 src/MainWindow.py:103
+#: ui/ui.glade:447 ui/ui.glade:642
+msgid "Reboot"
+msgstr "Yeniden başlat"
+
+#: ui/ui.glade:460 ui/ui.glade:657
+msgid "Exit"
+msgstr "Çıkış"
+
+#: ui/ui.glade:482
+msgid "page_vte"
+msgstr "page_vte"
+
+#: ui/ui.glade:540 src/MainWindow.py:128
 msgid "Pardus Nvidia Installer"
 msgstr "Pardus Nvidia Kurucu"
 
-#: src/MainWindow.py:181 src/MainWindow.py:183
+#: ui/ui.glade:623
+msgid "You must reboot your device before using this application."
+msgstr "Bu uygulamayı kullanmadan önce cihazınızı yeniden başlanız gerekmektedir."
+
+#: ui/ui.glade:683
+msgid "Reboot required"
+msgstr "Yeniden başlatma gerekli"
+
+#: src/MainWindow.py:247 src/MainWindow.py:249
 msgid "Driver"
 msgstr "Sürücü"
 
-#: src/MainWindow.py:187
+#: src/MainWindow.py:253
 msgid "Version"
 msgstr "Sürüm"
 
-#: src/MainWindow.py:190 src/MainWindow.py:193
+#: src/MainWindow.py:256 src/MainWindow.py:259
 msgid "Description"
 msgstr "Açıklama"
 
@@ -149,46 +170,3 @@ msgstr "Açık Kaynaklı Sürücü"
 msgid "Proprietary Driver"
 msgstr "Sahipli Sürücü"
 
-#: src/std_opr.py:65
-msgid "Operation completed successfully"
-msgstr "İşlem başarıyla tamamlandı"
-
-#: src/std_opr.py:86
-msgid "Auth or cancellation error"
-msgstr "Yetkilendirme veya iptal hatası"
-
-#: src/std_opr.py:88
-msgid "An error occured"
-msgstr "Bir hata oluştu"
-
-#~ msgid ""
-#~ "Please be informed that the driver installation provided through this app "
-#~ "is sourced exclusively from the Pardus and Nvidia repositories. While we "
-#~ "strive to ensure the quality and reliability of these drivers, it is "
-#~ "crucial to understand that we are not affiliated with Pardus or Nvidia.\n"
-#~ "\n"
-#~ "<b>Disclaimer:</b>\n"
-#~ "We want to emphasize that we do not accept responsibility for any issues "
-#~ "or complications that may arise during or after the installation process. "
-#~ "While every effort has been made to provide a seamless experience, "
-#~ "unforeseen circumstances can occur.\n"
-#~ "\n"
-#~ "<b>Issue Reporting:</b>\n"
-#~ "Feel free to report any issues or concerns via our GitHub repository: <a "
-#~ "href=\"https://github.com/pardus/pardus-nvidia-installer\"> Pardus Github "
-#~ "</a>"
-#~ msgstr ""
-#~ "Lütfen bu uygulama aracılığıyla sağlanan sürücü kurulumunun yalnızca "
-#~ "Pardus ve Nvidia depolarından alındığını unutmayın. Bu sürücülerin "
-#~ "kalitesini ve güvenilirliğini sağlamaya çalışsak da, Pardus veya Nvidia "
-#~ "ile bir bağlantımız olmadığını anlamak önemlidir.\n"
-#~ "\n"
-#~ "<b>Sorumluluk Reddi:</b>\n"
-#~ "Kurulum süreci sırasında veya sonrasında ortaya çıkabilecek herhangi bir "
-#~ "sorun veya komplikasyondan sorumluluk kabul etmediğimizi vurgulamak "
-#~ "isteriz. Kesintisiz bir deneyim sunmak için her türlü çaba gösterilmiş "
-#~ "olsa da, beklenmedik durumlar ortaya çıkabilir.\n"
-#~ "\n"
-#~ "<b>Sorun Bildirimi:</b>\n"
-#~ "Herhangi bir sorun veya endişenizi GitHub deposumuz aracılığıyla "
-#~ "bildirmekten çekinmeyin: https://github.com/pardus/pardus-nvidia-installer"
