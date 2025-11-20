@@ -136,7 +136,7 @@ class MainWindow(object):
         cmd=[
             "/usr/bin/dbus-send", "--system", "--print-reply",
             "--dest=org.freedesktop.login1", "/org/freedesktop/login1",
-            "orf.freedesktop.login1.Manager.Reboot", "boolean:true"]
+            "org.freedesktop.login1.Manager.Reboot", "boolean:true"]
         print(cmd)
         subprocess.run(cmd)
 
