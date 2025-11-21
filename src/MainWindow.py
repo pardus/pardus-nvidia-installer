@@ -309,8 +309,11 @@ class MainWindow(object):
 
         else:
             self.apt_opr = "install"
-            params += [self.apt_opr, self.toggled_driver.package]
-            params += ["linux-headers-{}".format(platform.uname().release), "linux-headers-amd64"]
+            params += [
+                self.apt_opr,
+                "linux-headers-{}".format(platform.uname().release), "linux-headers-amd64",
+                self.toggled_driver.package
+            ]
             self.vte_start(params)
 
         # self.ui_apply_chg_button.set_sensitive(False)

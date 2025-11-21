@@ -71,7 +71,6 @@ def install_nvidia(nv_drv):
     cmds = [
         ["apt", "update", "-yq"],
         ["apt", "purge", "-yq", "nvidia-*driver", "nvidia-kernel-*"],
-        ["apt", "purge", "-yq", "xserver-xorg-video-nouveau"],
         ["apt", "autoremove", "-yq"],
         ["apt", "install", "-yq", nv_drv],
     ]
@@ -86,8 +85,8 @@ def install_nouveau():
     mark_need_reboot()
     cmds = [
         ["apt", "purge", "-yq", "nvidia-*driver", "nvidia-kernel-*"],
-        ["apt", "autoremove", "-yq"],
-        ["apt", "install", "-yq", "xserver-xorg-video-nouveau"],
+        ["apt", "purge", "-yq", "xserver-xorg-video-nvidia"],
+        ["apt", "autoremove", "-yq"]
     ]
     for cmd in cmds:
         rc = subprocess.call(cmd, env={**os.environ})
@@ -146,9 +145,9 @@ if __name__ == "__main__":
         elif param1 == "toggle":
             toggle_driver()
         elif param1 == "install":
-            driver = args[2]
-            print(driver)
-            install(driver)
+            for driver in args[1:]:
+                print(driver)
+                install(driver)
 
     else:
         print("no argument passed on")
