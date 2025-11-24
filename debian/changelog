@@ -1,3 +1,34 @@
+pardus-nvidia-installer (0.1.0) unstable; urgency=medium
+
+  [ Osman Coskun ]
+  * fix(#7): Legal Notice updated
+  * Files removed to update gitignore
+  * gitignore updated
+
+  [ Ali Riza KESKIN ]
+  * Update nvidia pci list from 580 driver list included legacy cards.
+  * remove status label and progressbar and add vte
+  * gui improvements
+  * fix reboot / ok button
+
+  [ aliriza ]
+  * fix install nvidia installation
+
+  [ Ali Riza KESKIN ]
+  * improve install/remove packages
+  * fix swithing version issue and returncode
+  * need reboot dialog added
+  * reboot function created and It uses logind
+  * typo fix
+  * update translation
+  * debug mode variable added
+  * fix install linux-headers-6.12.48+deb13-amd64 package
+
+  [ Fatih Altun ]
+  * Update app icon
+
+ -- Fatih Altun <fatih.altun@pardus.org.tr>  Mon, 24 Nov 2025 14:40:50 +0300
+
 pardus-nvidia-installer (0.0.6) unstable; urgency=medium
 
   [ Osman Coskun ]
