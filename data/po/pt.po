@@ -1,7 +1,7 @@
-# SOME DESCRIPTIVE TITLE.
+# Portuguese translation for pardus nvidia installer.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# Hugo Carvalho <hugokarvalho@hotmail.com>, 2024.
+# This file is distributed under the same license as the pardus-nvidia-installer package.
+# Hugo Carvalho <hugokarvalho@hotmail.com>, 2024, 2025.
 #
 #, fuzzy
 msgid ""
@@ -9,14 +9,14 @@ msgstr ""
 "Project-Id-Version: pardus-nvidia-installer\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-11-20 12:50+0300\n"
-"PO-Revision-Date: 2024-07-16 00:16+0100\n"
+"PO-Revision-Date: 2025-11-25 12:01+0000\n"
 "Last-Translator: Hugo Carvalho <hugokarvalho@hotmail.com>\n"
 "Language-Team: Portuguese <hugokarvalho@hotmail.com>\n"
 "Language: pt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.4.4\n"
+"X-Generator: Poedit 3.8\n"
 
 #: ui/ui.glade:11
 msgid "<span><b>Warning</b></span>"
@@ -59,6 +59,27 @@ msgid ""
 "href=\"https://github.com/pardus/pardus-nvidia-installer\"> Pardus Github </"
 "a>"
 msgstr ""
+"Esta aplicação é desenvolvida e mantida pela equipa Pardus para facilitar a "
+"instalação dos controladores gráficos Nvidia. Os controladores são obtidos a "
+"partir dos repositórios oficiais do Pardus e da Nvidia.\n"
+"\n"
+"<b>Origem e utilização dos controladores</b>\n"
+"Embora esta seja uma aplicação oficial da Pardus, os controladores gráficos "
+"são desenvolvidos pela Nvidia Corporation. A Pardus fornece esta ferramenta "
+"de instalação para conveniência dos nossos utilizadores, mas os "
+"controladores continuam a ser propriedade intelectual da Nvidia "
+"Corporation.\n"
+"\n"
+"<b>Isenção de responsabilidade:</b>\n"
+"Observe que, embora nos esforcemos para garantir um processo de instalação "
+"tranquilo, o Pardus não pode garantir o desempenho ou a compatibilidade dos "
+"drivers da Nvidia com todas as configurações de hardware. Os utilizadores "
+"instalam esses controladores por sua própria conta e risco.\n"
+"\n"
+"<b>Relato de problemas:</b>\n"
+"Sinta-se à vontade para relatar quaisquer problemas ou preocupações através "
+"do nosso repositório GitHub: <a href=\"https://github.com/pardus/pardus-"
+"nvidia-installer\"> Github do Pardus </a>"
 
 #: ui/ui.glade:176
 msgid ""
@@ -96,7 +117,7 @@ msgstr "página2"
 
 #: ui/ui.glade:399
 msgid "page_main"
-msgstr ""
+msgstr "página_principal"
 
 #: ui/ui.glade:411
 msgid ""
@@ -108,16 +129,15 @@ msgstr ""
 
 #: ui/ui.glade:447 ui/ui.glade:642
 msgid "Reboot"
-msgstr ""
+msgstr "Reiniciar"
 
 #: ui/ui.glade:460 ui/ui.glade:657
 msgid "Exit"
-msgstr ""
+msgstr "Sair"
 
 #: ui/ui.glade:482
-#, fuzzy
 msgid "page_vte"
-msgstr "página1"
+msgstr "página_vte"
 
 #: ui/ui.glade:540 src/MainWindow.py:128
 msgid "Pardus Nvidia Installer"
@@ -125,11 +145,11 @@ msgstr "Instalador Nvidia Pardus"
 
 #: ui/ui.glade:623
 msgid "You must reboot your device before using this application."
-msgstr ""
+msgstr "É necessário reiniciar o dispositivo antes de utilizar esta aplicação."
 
 #: ui/ui.glade:683
 msgid "Reboot required"
-msgstr ""
+msgstr "É necessário reiniciar"
 
 #: src/MainWindow.py:247 src/MainWindow.py:249
 msgid "Driver"
