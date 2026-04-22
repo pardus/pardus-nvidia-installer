@@ -1,6 +1,5 @@
 import gi
 import os
-import apt
 import signal
 import subprocess
 import nvidia
@@ -21,8 +20,6 @@ locale.bindtextdomain(APPNAME_CODE, TRANSLATIONS_PATH)
 locale.textdomain(APPNAME_CODE)
 
 is_debug = os.path.isfile("/etc/pardus-nvi.debug")
-
-cache = apt.Cache()
 
 act_id = "tr.org.pardus.pkexec.pardus-nvidia-installer"
 socket_path = "/tmp/pardus-nvidia-installer"
@@ -200,7 +197,7 @@ class MainWindow(object):
             gpu_info = self.gpu_box(nvidia_device.device_name)
             self.ui_gpu_info_box.pack_start(gpu_info, True, True, 5)
 
-        self.nvidia_drivers = nvidia.drivers()
+        self.nvidia_drivers = nvidia.drivers(gpus=self.nvidia_devices)
         self.filtered_nvidia_drivers = []
         for index, nvidia_driver in enumerate(self.nvidia_drivers):
             print(nvidia_driver)

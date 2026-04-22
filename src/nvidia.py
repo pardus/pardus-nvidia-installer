@@ -134,7 +134,6 @@ def graphics():
 
 
 def get_package_info(package_name):
-    cache = apt.Cache()
     package = cache[package_name]
     versions = package.versions
     ver_list = {}
@@ -163,30 +162,30 @@ def readfile(filepath):
 
 
 def is_pkg_installed(driver, version=None):
-    cache = apt.Cache()
     if version:
         return version in str(cache[driver].installed)
     else:
         return cache[driver].is_installed
 
 
-def drivers():
+def drivers(gpus=None):
     drivers = []
-    gpus = graphics()
+    if gpus is None:
+        gpus = graphics()
     if len(gpus) < 1:
         return drivers
     with open(os.path.dirname(__file__) + nvidia_devices_json_path, "r") as f:
         parsed_nvidia_drivers = json.loads(f.read())
+    nouveau_ver = get_pkg_ver(nouveau)
     drivers.append(
         NvidiaDriver(
             nouveau,
-            get_pkg_ver(nouveau),
+            nouveau_ver,
             _("Open Source Driver"),
-            get_package_origin(nouveau, get_pkg_ver(nouveau)),
-            is_pkg_installed(nouveau, get_pkg_ver(nouveau)),
+            get_package_origin(nouveau, nouveau_ver),
+            is_pkg_installed(nouveau, nouveau_ver),
         ),
     )
-    cache = apt.Cache()
 
     for gpu in gpus:
         for driver in parsed_nvidia_drivers:
@@ -208,7 +207,6 @@ def drivers():
 
 
 def get_package_origin(package_name, package_version=None):
-    cache = apt.Cache()
     pkg = cache[package_name]
     vers = pkg.versions
     if package_version and package_version in str(vers):
@@ -224,7 +222,6 @@ def get_package_origin(package_name, package_version=None):
 
 
 def newest_pkg_ver(pkg):
-    cache = apt.Cache()
     return cache[pkg].versions[0].version
 
 
@@ -233,7 +230,6 @@ def int2hex(num):
 
 
 def get_pkg_ver(pkg):
-    cache = apt.Cache()
     if is_pkg_installed(pkg):
         installed_version = str(cache[pkg].installed)
         if pkg in installed_version:
