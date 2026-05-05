@@ -111,9 +111,8 @@ def graphics():
                 sp = os.path.join(pci_dev_path, dir, "class")
                 sc = readfile(sp)
                 st = False
-                if vc == nvidia_pci_id_int and sc == "0x030000" or sc == "0x030200":
-                    if sc == "0x030200" or sc == "0x030000":
-                        st = True
+                if vc == nvidia_pci_id_int and sc in ("0x030000", "0x030200"):
+                    st = (sc == "0x030200")
                     dp = os.path.join(pci_dev_path, dir, "device")
                     dc = readfile(dp)
                     dc = int(dc, 16)
