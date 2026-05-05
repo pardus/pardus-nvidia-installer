@@ -34,25 +34,35 @@ def mark_need_reboot():
         f.write("1")
 
 def disable_sec_gpu():
+    changed = False
     if not os.path.isfile(nvidia_disable_gpu_path):
         with open(nvidia_disable_gpu_path, "a") as f:
             f.write("Secondary GPU Disabled")
+        changed = True
 
     if os.path.isfile(nvidia_modprobe_conf):
         os.rename(nvidia_modprobe_conf, nvidia_modprobed_conf)
+        changed = True
     if os.path.isfile(nouveau_modprobe_conf):
         os.rename(nouveau_modprobe_conf, nouveau_modprobed_conf)
-    mark_need_reboot()
+        changed = True
+    if changed:
+        mark_need_reboot()
 
 
 def enable_sec_gpu():
+    changed = False
     if os.path.isfile(nvidia_disable_gpu_path):
         os.remove(nvidia_disable_gpu_path)
+        changed = True
     if os.path.isfile(nvidia_modprobed_conf):
         os.rename(nvidia_modprobed_conf, nvidia_modprobe_conf)
+        changed = True
     if os.path.isfile(nouveau_modprobed_conf):
         os.rename(nouveau_modprobed_conf, nouveau_modprobe_conf)
-    mark_need_reboot()
+        changed = True
+    if changed:
+        mark_need_reboot()
 
 def check_sec_state():
     return not os.path.isfile(nvidia_disable_gpu_path)
