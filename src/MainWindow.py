@@ -299,7 +299,11 @@ class MainWindow(object):
         params = ["/usr/bin/pkexec", cur_path + pkg_file]
         self.apt_opr = None
         dlg_res = None
-        if self.initial_sec_gpu_state == self.ui_disable_check_button.get_active():
+        disable_request = (
+            self.initial_sec_gpu_state
+            and self.ui_disable_check_button.get_active()
+        )
+        if disable_request:
             self.apt_opr = "disable-sec-gpu"
             params.append(self.apt_opr)
             self.vte_start(params)
@@ -324,12 +328,11 @@ class MainWindow(object):
         self.ui_about_dialog.hide()
 
     def check_initials(self):
-        sec_gpu_changes = False
-        if self.ui_disable_check_button.get_active() == self.initial_sec_gpu_state:
-            sec_gpu_changes = True
-        driver_changes = False
-        if self.toggled_driver != self.initial_gpu_driver:
-            driver_changes = True
+        sec_gpu_changes = (
+            self.initial_sec_gpu_state
+            and self.ui_disable_check_button.get_active()
+        )
+        driver_changes = self.toggled_driver != self.initial_gpu_driver
         return sec_gpu_changes or driver_changes
 
     def on_disable_checkbox_checked(self, button):
