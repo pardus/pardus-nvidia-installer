@@ -66,23 +66,25 @@ def toggle_source_list():
         shutil.copyfile(src_list, dest)
 
 
-def install_nvidia(nv_drv):
-    mark_need_reboot()
+def install_nvidia(packages):
+    if not packages:
+        print("install_nvidia: no packages provided, aborting", file=sys.stderr)
+        return False
     cmds = [
         ["apt", "update", "-yq"],
         ["apt", "purge", "-yq", "nvidia-*driver", "nvidia-kernel-*"],
         ["apt", "autoremove", "-yq"],
-        ["apt", "install", "-yq", nv_drv],
+        ["apt", "install", "-yq", *packages],
     ]
     for cmd in cmds:
         rc = subprocess.call(cmd, env={**os.environ})
         if rc != 0:
             return False
+    mark_need_reboot()
     return True
 
 
 def install_nouveau():
-    mark_need_reboot()
     cmds = [
         ["apt", "purge", "-yq", "nvidia-*driver", "nvidia-kernel-*"],
         ["apt", "purge", "-yq", "xserver-xorg-video-nvidia"],
@@ -92,6 +94,7 @@ def install_nouveau():
         rc = subprocess.call(cmd, env={**os.environ})
         if rc != 0:
             return False
+    mark_need_reboot()
     return True
 
 def toggle_driver(self):
@@ -108,13 +111,6 @@ def update():
     subprocess.call(
         ["apt", "update", "-yq"], env={**os.environ}
     )
-
-
-def install(driver):
-    if driver != nouveau:
-        install_nvidia(driver)
-    else:
-        install_nouveau()
 
 
 def get_pkg_info(package_name: str):
@@ -144,10 +140,10 @@ if __name__ == "__main__":
             enable_sec_gpu()
         elif param1 == "toggle":
             toggle_driver()
-        elif param1 == "install":
-            for driver in args[1:]:
-                print(driver)
-                install(driver)
+        elif param1 == "install-nvidia":
+            install_nvidia(args[2:])
+        elif param1 == "install-nouveau":
+            install_nouveau()
 
     else:
         print("no argument passed on")

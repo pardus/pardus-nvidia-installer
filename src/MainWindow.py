@@ -305,12 +305,16 @@ class MainWindow(object):
             self.vte_start(params)
 
         else:
-            self.apt_opr = "install"
-            params += [
-                self.apt_opr,
-                "linux-headers-{}".format(platform.uname().release), "linux-headers-amd64",
-                self.toggled_driver.package
-            ]
+            if self.toggled_driver.package == nouveau:
+                self.apt_opr = "install-nouveau"
+                params.append(self.apt_opr)
+            else:
+                self.apt_opr = "install-nvidia"
+                params += [
+                    self.apt_opr,
+                    "linux-headers-{}".format(platform.uname().release), "linux-headers-amd64",
+                    self.toggled_driver.package
+                ]
             self.vte_start(params)
 
         # self.ui_apply_chg_button.set_sensitive(False)
