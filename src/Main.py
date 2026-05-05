@@ -39,8 +39,6 @@ class Application(Gtk.Application):
     def do_activate(self):
         if not self.window:
             self.window = MainWindow(self)
-        else:
-            self.window.controlArgs()
         if self.window.ui_main_window:
             self.window.ui_main_window.present()
 
