@@ -122,6 +122,13 @@ class MainWindow(object):
         self.get_ui("ui_button_exit").connect("clicked",
             lambda x: exit(0))
 
+        self.op_widgets = (
+            self.ui_apply_chg_button,
+            self.ui_repo_switch,
+            self.ui_enable_button,
+            self.ui_disable_check_button,
+        )
+
         self.ui_main_window.set_application(application)
         self.ui_main_window.set_title(_("Pardus Nvidia Installer"))
         self.user_disclaimer()
@@ -141,6 +148,28 @@ class MainWindow(object):
 
     def on_vte_done(self, vte, status):
         self.get_ui("ui_box_vte_buttons").show_all()
+        success = (status == 0)
+        reboot_pending = os.path.isfile("/run/pardus-nvi.reboot")
+        self.get_ui("ui_button_reboot").set_sensitive(success and reboot_pending)
+
+        for w in self.op_widgets:
+            w.set_sensitive(True)
+        if success:
+            self.ui_apply_chg_button.set_sensitive(False)
+        else:
+            self.ui_apply_chg_button.set_sensitive(self.check_initials())
+
+        status_label = self.get_ui("ui_vte_status_label")
+        if status_label is not None:
+            if success:
+                markup = '<span foreground="mediumspringgreen">{}</span>'.format(
+                    _("Operation completed successfully.")
+                )
+            else:
+                markup = '<span foreground="tomato">{}</span>'.format(
+                    _("Operation failed (exit code {code}). Please review the log above.").format(code=status)
+                )
+            status_label.set_markup(markup)
 
     def update_vte_color(self, vte):
         style_context = self.ui_main_window.get_style_context()
@@ -151,7 +180,10 @@ class MainWindow(object):
 
 
     def vte_start(self, params):
+        for w in self.op_widgets:
+            w.set_sensitive(False)
         self.get_ui("ui_box_vte_buttons").hide()
+        self.get_ui("ui_vte_status_label").set_text("")
         self.ui_main_stack.set_visible_child_name("page_vte")
         print(params)
         self.vte.spawn_async(
