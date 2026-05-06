@@ -82,7 +82,9 @@ class MainWindow(object):
         self.ui_apply_chg_button.connect("clicked", self.on_apply_button_clicked)
         self.ui_repo_switch = self.get_ui("ui_repo_switch")
         self.ui_repo_switch.set_state(self.state)
-        self.ui_repo_switch.connect("state-set", self.on_nvidia_mirror_changed)
+        self.mirror_handler_id = self.ui_repo_switch.connect(
+            "state-set", self.on_nvidia_mirror_changed
+        )
 
         self.ui_about_dialog = self.get_ui("ui_about_dialog")
         self.ui_about_button = self.get_ui("ui_about_button")
@@ -170,6 +172,15 @@ class MainWindow(object):
                     _("Operation failed (exit code {code}). Please review the log above.").format(code=status)
                 )
             status_label.set_markup(markup)
+
+        if self.apt_opr == "update":
+            actual = nvidia.source()
+            self.ui_repo_switch.handler_block(self.mirror_handler_id)
+            try:
+                self.ui_repo_switch.set_state(actual)
+            finally:
+                self.ui_repo_switch.handler_unblock(self.mirror_handler_id)
+            self.state = actual
 
     def update_vte_color(self, vte):
         style_context = self.ui_main_window.get_style_context()
@@ -371,7 +382,6 @@ class MainWindow(object):
         self.ui_apply_chg_button.set_sensitive(self.check_initials())
 
     def on_nvidia_mirror_changed(self, button, state):
-        self.state = button.get_active()
         cur_path = os.path.dirname(os.path.abspath(__file__))
         params = ["/usr/bin/pkexec", cur_path + pkg_file, "update"]
         self.apt_opr = "update"
