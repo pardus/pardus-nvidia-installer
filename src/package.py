@@ -107,11 +107,6 @@ def install_nouveau():
     mark_need_reboot()
     return True
 
-def toggle_driver(self):
-    toggle_source_list()
-    install_nvidia()
-
-
 def update():
     if os.path.isfile(dest):
         os.remove(dest)
@@ -148,8 +143,6 @@ if __name__ == "__main__":
             disable_sec_gpu()
         elif param1 == "enable-sec-gpu":
             enable_sec_gpu()
-        elif param1 == "toggle":
-            toggle_driver()
         elif param1 == "install-nvidia":
             install_nvidia(args[2:])
         elif param1 == "install-nouveau":
