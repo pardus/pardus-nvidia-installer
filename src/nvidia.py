@@ -225,7 +225,7 @@ def newest_pkg_ver(pkg):
 
 
 def int2hex(num):
-    return str(hex(num)[2:]).upper()
+    return f"{num:04X}"
 
 
 def get_pkg_ver(pkg):
