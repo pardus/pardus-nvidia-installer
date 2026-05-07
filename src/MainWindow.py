@@ -216,7 +216,7 @@ class MainWindow(object):
         if response != Gtk.ResponseType.OK:
             self.application.quit()
         else:
-            self.ui_info_dialog.close()
+            self.ui_info_dialog.hide()
 
     def check_secondary_gpu(self):
         self.initial_sec_gpu_state = package.check_sec_state()
@@ -236,6 +236,7 @@ class MainWindow(object):
         for toggle in self.drv_arr:
             self.ui_gpu_box.remove(toggle)
         self.drv_arr = []
+        self.driver_buttons = []
         for nvidia_device in self.nvidia_devices:
             gpu_info = self.gpu_box(nvidia_device.device_name)
             self.ui_gpu_info_box.pack_start(gpu_info, True, True, 5)
@@ -266,7 +267,6 @@ class MainWindow(object):
             if nvidia_driver.installed:
                 self.initial_gpu_driver = nvidia_driver
                 self.toggled_driver = nvidia_driver
-                self.ui_apply_chg_button.set_sensitive(True)
             toggle.set_active(nvidia_driver.installed)
             toggle.connect("toggled", self.on_drv_toggled, nvidia_driver)
             self.drv_arr.append(toggle)

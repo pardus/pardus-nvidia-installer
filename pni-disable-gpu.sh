@@ -17,7 +17,6 @@ remove_pci(){
 }
 
 echo 1 > /sys/bus/pci/rescan
-ls /sys/class/drm/card[0-9*]
 for dir in  $(ls /sys/bus/pci/devices/); do
     # 03 Display controlleretc
     # 02 3D controller
