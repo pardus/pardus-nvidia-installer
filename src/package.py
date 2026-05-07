@@ -47,6 +47,7 @@ def disable_sec_gpu():
         changed = True
     if changed:
         mark_need_reboot()
+    return True
 
 
 def enable_sec_gpu():
@@ -62,17 +63,10 @@ def enable_sec_gpu():
         changed = True
     if changed:
         mark_need_reboot()
+    return True
 
 def check_sec_state():
     return not os.path.isfile(nvidia_disable_gpu_path)
-
-
-def toggle_source_list():
-    src_state = sys_source()
-    if src_state:
-        os.remove(dest)
-    else:
-        shutil.copyfile(src_list, dest)
 
 
 def install_nvidia(packages):
@@ -112,9 +106,10 @@ def update():
     else:
         shutil.copyfile(src_list, dest)
 
-    subprocess.call(
+    rc = subprocess.call(
         ["apt", "update", "-yq"], env={**os.environ}
     )
+    return rc == 0
 
 
 def get_pkg_info(package_name: str):
@@ -132,20 +127,23 @@ def get_pkg_info(package_name: str):
 
 if __name__ == "__main__":
     args = sys.argv
-    if len(args) > 1:
-        param1 = args[1]
-        if param1 == "nouveau" or param1 == nouveau:
-            install_nouveau()
-        elif param1 == "update":
-            update()
-        elif param1 == "disable-sec-gpu":
-            disable_sec_gpu()
-        elif param1 == "enable-sec-gpu":
-            enable_sec_gpu()
-        elif param1 == "install-nvidia":
-            install_nvidia(args[2:])
-        elif param1 == "install-nouveau":
-            install_nouveau()
+    if len(args) <= 1:
+        print("no argument passed on", file=sys.stderr)
+        sys.exit(2)
 
+    param1 = args[1]
+    if param1 == "nouveau" or param1 == nouveau or param1 == "install-nouveau":
+        ok = install_nouveau()
+    elif param1 == "update":
+        ok = update()
+    elif param1 == "disable-sec-gpu":
+        ok = disable_sec_gpu()
+    elif param1 == "enable-sec-gpu":
+        ok = enable_sec_gpu()
+    elif param1 == "install-nvidia":
+        ok = install_nvidia(args[2:])
     else:
-        print("no argument passed on")
+        print("unknown subcommand: {}".format(param1), file=sys.stderr)
+        sys.exit(2)
+
+    sys.exit(0 if ok else 1)

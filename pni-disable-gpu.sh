@@ -1,6 +1,6 @@
 #!/bin/bash
 set -ex
-if [[ ! -f /var/cache/pni-disable-gpu ]] &>/dev/null; then
+if [[ ! -f /var/cache/pni-disable-gpu ]]; then
     exit 0
 fi
 if grep "nomodeset" /proc/cmdline ; then
@@ -15,7 +15,7 @@ remove_pci(){
     fi
     echo 1 > /sys/bus/pci/devices/$1/remove
 }
-
+ 
 echo 1 > /sys/bus/pci/rescan
 for dir in  $(ls /sys/bus/pci/devices/); do
     # 03 Display controlleretc

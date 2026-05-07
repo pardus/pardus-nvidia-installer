@@ -46,6 +46,7 @@ class MainWindow(object):
             return False
         self.application = application
 
+        self.ui_confirm_dialog = self.get_ui("ui_confirm_dialog")
 
         self.get_ui("ui_button_reboot_dlg").connect("clicked", self.do_reboot)
         self.get_ui("ui_button_exit_dlg").connect("clicked",
@@ -70,7 +71,6 @@ class MainWindow(object):
         self.ui_drv_box = self.get_ui("ui_drv_box")
         self.ui_main_box = self.get_ui("ui_main_box")
         self.ui_main_window = self.get_ui("ui_main_window")
-        self.ui_confirm_dialog = self.get_ui("ui_confirm_dialog")
 
         self.ui_info_stack = self.get_ui("ui_info_stack")
         self.ui_disabled_gpu_box = self.get_ui("ui_disabled_gpu_box")
@@ -140,7 +140,12 @@ class MainWindow(object):
         #self.vte_start(["/bin/bash"])
 
     def do_reboot(self, widget):
-        cmd=[
+        self.ui_confirm_dialog.set_transient_for(widget.get_toplevel())
+        response = self.ui_confirm_dialog.run()
+        self.ui_confirm_dialog.hide()
+        if response != Gtk.ResponseType.OK:
+            return
+        cmd = [
             "/usr/bin/dbus-send", "--system", "--print-reply",
             "--dest=org.freedesktop.login1", "/org/freedesktop/login1",
             "org.freedesktop.login1.Manager.Reboot", "boolean:true"]

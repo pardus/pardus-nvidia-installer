@@ -15,7 +15,6 @@ nvidia_pci_id = "10DE"
 nvidia_pci_id_int = 0x10DE
 nvidia_devices_yaml_path = "/../data/nvidia-pci.yaml"
 nvidia_devices_json_path = "/../data/nvidia-pci.json"
-drivers = {"current": "nvidia-driver", "470": "nvidia-tesla-470-driver"}
 nouveau = "xserver-xorg-video-nouveau"
 
 dest = "/etc/apt/sources.list.d/nvidia-drivers.list"
@@ -137,7 +136,6 @@ def get_package_info(package_name):
                     )
                     if result < 0:
                         ver_list[orig.origin] = version.version
-    print(ver_list)
     return ver_list
 
 
@@ -204,9 +202,6 @@ def get_package_origin(package_name, package_version=None):
                 for orig in ver.origins:
                     if orig.origin:
                         return orig.origin
-    else:
-        pass
-        print(vers[0].origins[0].origin)
 
 
 def newest_pkg_ver(pkg):
