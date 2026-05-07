@@ -4,7 +4,6 @@ import apt
 import sys
 import subprocess
 import shutil
-import nvidia
 import apt_pkg
 
 apt_pkg.init_system()
