@@ -175,21 +175,21 @@ def drivers(gpus=None):
         ),
     )
 
-    for gpu in gpus:
-        for driver in parsed_nvidia_drivers:
-            if gpu.device_id_str in parsed_nvidia_drivers[driver].keys():
-                driver_lists = get_package_info(driver)
-                for origin in driver_lists:
-                    version = driver_lists[origin]
-                    drivers.append(
-                        NvidiaDriver(
-                            driver,
-                            version,
-                            _("Proprietary Driver"),
-                            origin,
-                            is_pkg_installed(driver, version),
-                        )
+    for driver in parsed_nvidia_drivers:
+        if any(gpu.device_id_str in parsed_nvidia_drivers[driver]
+               for gpu in gpus):
+            driver_lists = get_package_info(driver)
+            for origin in driver_lists:
+                version = driver_lists[origin]
+                drivers.append(
+                    NvidiaDriver(
+                        driver,
+                        version,
+                        _("Proprietary Driver"),
+                        origin,
+                        is_pkg_installed(driver, version),
                     )
+                )
 
     return drivers
 
