@@ -1,6 +1,5 @@
 import gi
 import os
-import apt
 import signal
 import subprocess
 import nvidia
@@ -21,8 +20,6 @@ locale.bindtextdomain(APPNAME_CODE, TRANSLATIONS_PATH)
 locale.textdomain(APPNAME_CODE)
 
 is_debug = os.path.isfile("/etc/pardus-nvi.debug")
-
-cache = apt.Cache()
 
 act_id = "tr.org.pardus.pkexec.pardus-nvidia-installer"
 socket_path = "/tmp/pardus-nvidia-installer"
@@ -49,6 +46,7 @@ class MainWindow(object):
             return False
         self.application = application
 
+        self.ui_confirm_dialog = self.get_ui("ui_confirm_dialog")
 
         self.get_ui("ui_button_reboot_dlg").connect("clicked", self.do_reboot)
         self.get_ui("ui_button_exit_dlg").connect("clicked",
@@ -73,7 +71,6 @@ class MainWindow(object):
         self.ui_drv_box = self.get_ui("ui_drv_box")
         self.ui_main_box = self.get_ui("ui_main_box")
         self.ui_main_window = self.get_ui("ui_main_window")
-        self.ui_confirm_dialog = self.get_ui("ui_confirm_dialog")
 
         self.ui_info_stack = self.get_ui("ui_info_stack")
         self.ui_disabled_gpu_box = self.get_ui("ui_disabled_gpu_box")
@@ -85,7 +82,9 @@ class MainWindow(object):
         self.ui_apply_chg_button.connect("clicked", self.on_apply_button_clicked)
         self.ui_repo_switch = self.get_ui("ui_repo_switch")
         self.ui_repo_switch.set_state(self.state)
-        self.ui_repo_switch.connect("state-set", self.on_nvidia_mirror_changed)
+        self.mirror_handler_id = self.ui_repo_switch.connect(
+            "state-set", self.on_nvidia_mirror_changed
+        )
 
         self.ui_about_dialog = self.get_ui("ui_about_dialog")
         self.ui_about_button = self.get_ui("ui_about_button")
@@ -125,6 +124,13 @@ class MainWindow(object):
         self.get_ui("ui_button_exit").connect("clicked",
             lambda x: exit(0))
 
+        self.op_widgets = (
+            self.ui_apply_chg_button,
+            self.ui_repo_switch,
+            self.ui_enable_button,
+            self.ui_disable_check_button,
+        )
+
         self.ui_main_window.set_application(application)
         self.ui_main_window.set_title(_("Pardus Nvidia Installer"))
         self.user_disclaimer()
@@ -134,7 +140,12 @@ class MainWindow(object):
         #self.vte_start(["/bin/bash"])
 
     def do_reboot(self, widget):
-        cmd=[
+        self.ui_confirm_dialog.set_transient_for(widget.get_toplevel())
+        response = self.ui_confirm_dialog.run()
+        self.ui_confirm_dialog.hide()
+        if response != Gtk.ResponseType.OK:
+            return
+        cmd = [
             "/usr/bin/dbus-send", "--system", "--print-reply",
             "--dest=org.freedesktop.login1", "/org/freedesktop/login1",
             "org.freedesktop.login1.Manager.Reboot", "boolean:true"]
@@ -144,6 +155,37 @@ class MainWindow(object):
 
     def on_vte_done(self, vte, status):
         self.get_ui("ui_box_vte_buttons").show_all()
+        success = (status == 0)
+        reboot_pending = os.path.isfile("/run/pardus-nvi.reboot")
+        self.get_ui("ui_button_reboot").set_sensitive(success and reboot_pending)
+
+        for w in self.op_widgets:
+            w.set_sensitive(True)
+        if success:
+            self.ui_apply_chg_button.set_sensitive(False)
+        else:
+            self.ui_apply_chg_button.set_sensitive(self.check_initials())
+
+        status_label = self.get_ui("ui_vte_status_label")
+        if status_label is not None:
+            if success:
+                markup = '<span foreground="mediumspringgreen">{}</span>'.format(
+                    _("Operation completed successfully.")
+                )
+            else:
+                markup = '<span foreground="tomato">{}</span>'.format(
+                    _("Operation failed (exit code {code}). Please review the log above.").format(code=status)
+                )
+            status_label.set_markup(markup)
+
+        if self.apt_opr == "update":
+            actual = nvidia.source()
+            self.ui_repo_switch.handler_block(self.mirror_handler_id)
+            try:
+                self.ui_repo_switch.set_state(actual)
+            finally:
+                self.ui_repo_switch.handler_unblock(self.mirror_handler_id)
+            self.state = actual
 
     def update_vte_color(self, vte):
         style_context = self.ui_main_window.get_style_context()
@@ -154,7 +196,10 @@ class MainWindow(object):
 
 
     def vte_start(self, params):
+        for w in self.op_widgets:
+            w.set_sensitive(False)
         self.get_ui("ui_box_vte_buttons").hide()
+        self.get_ui("ui_vte_status_label").set_text("")
         self.ui_main_stack.set_visible_child_name("page_vte")
         print(params)
         self.vte.spawn_async(
@@ -176,7 +221,7 @@ class MainWindow(object):
         if response != Gtk.ResponseType.OK:
             self.application.quit()
         else:
-            self.ui_info_dialog.close()
+            self.ui_info_dialog.hide()
 
     def check_secondary_gpu(self):
         self.initial_sec_gpu_state = package.check_sec_state()
@@ -196,11 +241,12 @@ class MainWindow(object):
         for toggle in self.drv_arr:
             self.ui_gpu_box.remove(toggle)
         self.drv_arr = []
+        self.driver_buttons = []
         for nvidia_device in self.nvidia_devices:
             gpu_info = self.gpu_box(nvidia_device.device_name)
             self.ui_gpu_info_box.pack_start(gpu_info, True, True, 5)
 
-        self.nvidia_drivers = nvidia.drivers()
+        self.nvidia_drivers = nvidia.drivers(gpus=self.nvidia_devices)
         self.filtered_nvidia_drivers = []
         for index, nvidia_driver in enumerate(self.nvidia_drivers):
             print(nvidia_driver)
@@ -226,7 +272,6 @@ class MainWindow(object):
             if nvidia_driver.installed:
                 self.initial_gpu_driver = nvidia_driver
                 self.toggled_driver = nvidia_driver
-                self.ui_apply_chg_button.set_sensitive(True)
             toggle.set_active(nvidia_driver.installed)
             toggle.connect("toggled", self.on_drv_toggled, nvidia_driver)
             self.drv_arr.append(toggle)
@@ -302,18 +347,26 @@ class MainWindow(object):
         params = ["/usr/bin/pkexec", cur_path + pkg_file]
         self.apt_opr = None
         dlg_res = None
-        if self.initial_sec_gpu_state == self.ui_disable_check_button.get_active():
+        disable_request = (
+            self.initial_sec_gpu_state
+            and self.ui_disable_check_button.get_active()
+        )
+        if disable_request:
             self.apt_opr = "disable-sec-gpu"
             params.append(self.apt_opr)
             self.vte_start(params)
 
         else:
-            self.apt_opr = "install"
-            params += [
-                self.apt_opr,
-                "linux-headers-{}".format(platform.uname().release), "linux-headers-amd64",
-                self.toggled_driver.package
-            ]
+            if self.toggled_driver.package == nouveau:
+                self.apt_opr = "install-nouveau"
+                params.append(self.apt_opr)
+            else:
+                self.apt_opr = "install-nvidia"
+                params += [
+                    self.apt_opr,
+                    "linux-headers-{}".format(platform.uname().release), "linux-headers-amd64",
+                    self.toggled_driver.package
+                ]
             self.vte_start(params)
 
         # self.ui_apply_chg_button.set_sensitive(False)
@@ -323,19 +376,17 @@ class MainWindow(object):
         self.ui_about_dialog.hide()
 
     def check_initials(self):
-        sec_gpu_changes = False
-        if self.ui_disable_check_button.get_active() == self.initial_sec_gpu_state:
-            sec_gpu_changes = True
-        driver_changes = False
-        if self.toggled_driver != self.initial_gpu_driver:
-            driver_changes = True
+        sec_gpu_changes = (
+            self.initial_sec_gpu_state
+            and self.ui_disable_check_button.get_active()
+        )
+        driver_changes = self.toggled_driver != self.initial_gpu_driver
         return sec_gpu_changes or driver_changes
 
     def on_disable_checkbox_checked(self, button):
         self.ui_apply_chg_button.set_sensitive(self.check_initials())
 
     def on_nvidia_mirror_changed(self, button, state):
-        self.state = button.get_active()
         cur_path = os.path.dirname(os.path.abspath(__file__))
         params = ["/usr/bin/pkexec", cur_path + pkg_file, "update"]
         self.apt_opr = "update"

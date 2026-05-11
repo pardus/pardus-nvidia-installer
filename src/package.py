@@ -4,7 +4,6 @@ import apt
 import sys
 import subprocess
 import shutil
-import nvidia
 import apt_pkg
 
 apt_pkg.init_system()
@@ -34,55 +33,61 @@ def mark_need_reboot():
         f.write("1")
 
 def disable_sec_gpu():
+    changed = False
     if not os.path.isfile(nvidia_disable_gpu_path):
         with open(nvidia_disable_gpu_path, "a") as f:
             f.write("Secondary GPU Disabled")
+        changed = True
 
     if os.path.isfile(nvidia_modprobe_conf):
         os.rename(nvidia_modprobe_conf, nvidia_modprobed_conf)
+        changed = True
     if os.path.isfile(nouveau_modprobe_conf):
         os.rename(nouveau_modprobe_conf, nouveau_modprobed_conf)
-    mark_need_reboot()
+        changed = True
+    if changed:
+        mark_need_reboot()
+    return True
 
 
 def enable_sec_gpu():
+    changed = False
     if os.path.isfile(nvidia_disable_gpu_path):
         os.remove(nvidia_disable_gpu_path)
+        changed = True
     if os.path.isfile(nvidia_modprobed_conf):
         os.rename(nvidia_modprobed_conf, nvidia_modprobe_conf)
+        changed = True
     if os.path.isfile(nouveau_modprobed_conf):
         os.rename(nouveau_modprobed_conf, nouveau_modprobe_conf)
-    mark_need_reboot()
+        changed = True
+    if changed:
+        mark_need_reboot()
+    return True
 
 def check_sec_state():
     return not os.path.isfile(nvidia_disable_gpu_path)
 
 
-def toggle_source_list():
-    src_state = sys_source()
-    if src_state:
-        os.remove(dest)
-    else:
-        shutil.copyfile(src_list, dest)
-
-
-def install_nvidia(nv_drv):
-    mark_need_reboot()
+def install_nvidia(packages):
+    if not packages:
+        print("install_nvidia: no packages provided, aborting", file=sys.stderr)
+        return False
     cmds = [
         ["apt", "update", "-yq"],
         ["apt", "purge", "-yq", "nvidia-*driver", "nvidia-kernel-*"],
         ["apt", "autoremove", "-yq"],
-        ["apt", "install", "-yq", nv_drv],
+        ["apt", "install", "-yq", *packages],
     ]
     for cmd in cmds:
         rc = subprocess.call(cmd, env={**os.environ})
         if rc != 0:
             return False
+    mark_need_reboot()
     return True
 
 
 def install_nouveau():
-    mark_need_reboot()
     cmds = [
         ["apt", "purge", "-yq", "nvidia-*driver", "nvidia-kernel-*"],
         ["apt", "purge", "-yq", "xserver-xorg-video-nvidia"],
@@ -92,12 +97,8 @@ def install_nouveau():
         rc = subprocess.call(cmd, env={**os.environ})
         if rc != 0:
             return False
+    mark_need_reboot()
     return True
-
-def toggle_driver(self):
-    toggle_source_list()
-    install_nvidia()
-
 
 def update():
     if os.path.isfile(dest):
@@ -105,16 +106,10 @@ def update():
     else:
         shutil.copyfile(src_list, dest)
 
-    subprocess.call(
+    rc = subprocess.call(
         ["apt", "update", "-yq"], env={**os.environ}
     )
-
-
-def install(driver):
-    if driver != nouveau:
-        install_nvidia(driver)
-    else:
-        install_nouveau()
+    return rc == 0
 
 
 def get_pkg_info(package_name: str):
@@ -132,22 +127,23 @@ def get_pkg_info(package_name: str):
 
 if __name__ == "__main__":
     args = sys.argv
-    if len(args) > 1:
-        param1 = args[1]
-        if param1 == "nouveau" or param1 == nouveau:
-            install_nouveau()
-        elif param1 == "update":
-            update()
-        elif param1 == "disable-sec-gpu":
-            disable_sec_gpu()
-        elif param1 == "enable-sec-gpu":
-            enable_sec_gpu()
-        elif param1 == "toggle":
-            toggle_driver()
-        elif param1 == "install":
-            for driver in args[1:]:
-                print(driver)
-                install(driver)
+    if len(args) <= 1:
+        print("no argument passed on", file=sys.stderr)
+        sys.exit(2)
 
+    param1 = args[1]
+    if param1 == "nouveau" or param1 == nouveau or param1 == "install-nouveau":
+        ok = install_nouveau()
+    elif param1 == "update":
+        ok = update()
+    elif param1 == "disable-sec-gpu":
+        ok = disable_sec_gpu()
+    elif param1 == "enable-sec-gpu":
+        ok = enable_sec_gpu()
+    elif param1 == "install-nvidia":
+        ok = install_nvidia(args[2:])
     else:
-        print("no argument passed on")
+        print("unknown subcommand: {}".format(param1), file=sys.stderr)
+        sys.exit(2)
+
+    sys.exit(0 if ok else 1)
