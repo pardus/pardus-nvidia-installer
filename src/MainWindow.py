@@ -2,6 +2,7 @@ import gi
 import os
 import signal
 import subprocess
+import sys
 import nvidia
 import locale
 import platform
@@ -41,9 +42,12 @@ class MainWindow(object):
         try:
             self.gtk_builder = Gtk.Builder.new_from_file(self.ui_interface_file)
             self.gtk_builder.connect_signals(self)
-        except GObject.GError:
-            print("Error while creating user interface from glade file")
-            return False
+        except GLib.Error as e:
+            print(
+                "Failed to load UI from {}: {}".format(self.ui_interface_file, e),
+                file=sys.stderr,
+            )
+            sys.exit(1)
         self.application = application
 
         self.ui_confirm_dialog = self.get_ui("ui_confirm_dialog")

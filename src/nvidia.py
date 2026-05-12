@@ -148,10 +148,12 @@ def readfile(filepath):
 
 
 def is_pkg_installed(driver, version=None):
-    if version:
-        return version in str(cache[driver].installed)
-    else:
-        return cache[driver].is_installed
+    installed = cache[driver].installed
+    if installed is None:
+        return False
+    if version is None:
+        return True
+    return installed.version == version
 
 
 def drivers(gpus=None):
@@ -193,15 +195,16 @@ def drivers(gpus=None):
 
 
 def get_package_origin(package_name, package_version=None):
+    if not package_version:
+        return None
     pkg = cache[package_name]
-    vers = pkg.versions
-    if package_version and package_version in str(vers):
-        for ver in vers:
-
-            if package_version in str(ver):
-                for orig in ver.origins:
-                    if orig.origin:
-                        return orig.origin
+    for ver in pkg.versions:
+        if ver.version != package_version:
+            continue
+        for orig in ver.origins:
+            if orig.origin:
+                return orig.origin
+    return None
 
 
 def newest_pkg_ver(pkg):
@@ -213,11 +216,7 @@ def int2hex(num):
 
 
 def get_pkg_ver(pkg):
-    if is_pkg_installed(pkg):
-        installed_version = str(cache[pkg].installed)
-        if pkg in installed_version:
-            return installed_version.split(f"{pkg}=")[1]
-        return installed_version
-
-    else:
-        return str(cache[pkg].versions[0].version)
+    installed = cache[pkg].installed
+    if installed is not None:
+        return installed.version
+    return cache[pkg].versions[0].version
