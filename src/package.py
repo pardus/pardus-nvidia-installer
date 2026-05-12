@@ -74,10 +74,9 @@ def install_nvidia(packages):
         print("install_nvidia: no packages provided, aborting", file=sys.stderr)
         return False
     cmds = [
-        ["apt", "update", "-yq"],
-        ["apt", "purge", "-yq", "nvidia-*driver", "nvidia-kernel-*"],
-        ["apt", "autoremove", "-yq"],
-        ["apt", "install", "-yq", *packages],
+        ["apt-get", "update", "-yq"],
+        ["apt-get", "install", "-yq", *packages],
+        ["apt-get", "autoremove", "-yq"],
     ]
     for cmd in cmds:
         rc = subprocess.call(cmd, env={**os.environ})
