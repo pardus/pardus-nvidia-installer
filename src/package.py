@@ -118,6 +118,7 @@ def install_nouveau():
         cmds.append(["apt", "purge", "-yq", *nvidia_pkgs])
     cmds.append(["apt", "purge", "-yq", "xserver-xorg-video-nvidia"])
     cmds.append(["apt", "autoremove", "-yq"])
+    cmds.append(["apt", "install", "-yq", nouveau])
 
     for cmd in cmds:
         rc = subprocess.call(cmd, env={**os.environ})
