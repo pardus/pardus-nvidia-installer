@@ -65,9 +65,9 @@ class MainWindow(object):
 
         self.driver_buttons = []
         self.active_driver = ""
-        self.toggled_driver = ""
+        self.toggled_driver = None
         self.drv_arr = []
-        self.initial_gpu_driver = ""
+        self.initial_gpu_driver = None
         self.initial_sec_gpu_state = False
         self.state = nvidia.source()
         self.ui_gpu_info_box = self.get_ui("ui_gpu_info_box")
@@ -406,7 +406,10 @@ class MainWindow(object):
             self.initial_sec_gpu_state
             and self.ui_disable_check_button.get_active()
         )
-        driver_changes = self.toggled_driver != self.initial_gpu_driver
+        if self.toggled_driver is None:
+            driver_changes = False
+        else:
+            driver_changes = self.toggled_driver != self.initial_gpu_driver
         return sec_gpu_changes or driver_changes
 
     def on_disable_checkbox_checked(self, button):

@@ -45,6 +45,16 @@ class NvidiaDriver:
     def __str__(self) -> str:
         return f"package:{self.package}, version:{self.version}, type:{self.type}, repo:{self.repo}, installed:{self.installed}"
 
+    def __eq__(self, other):
+        if not isinstance(other, NvidiaDriver):
+            return NotImplemented
+        return (self.package, self.version, self.repo) == (
+            other.package, other.version, other.repo
+        )
+
+    def __hash__(self):
+        return hash((self.package, self.version, self.repo))
+
 
 class NvidiaDevice:
     def __init__(
