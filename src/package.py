@@ -100,15 +100,36 @@ def install_nouveau():
     return True
 
 def update():
-    if os.path.isfile(dest):
-        os.remove(dest)
-    else:
-        shutil.copyfile(src_list, dest)
+    backup = dest + ".prev"
+    had = os.path.isfile(dest)
+    try:
+        if had:
+            os.replace(dest, backup)
+        else:
+            shutil.copyfile(src_list, dest)
 
-    rc = subprocess.call(
-        ["apt", "update", "-yq"], env={**os.environ}
-    )
-    return rc == 0
+        rc = subprocess.call(
+            ["apt", "update", "-yq"], env={**os.environ}
+        )
+        if rc != 0:
+            raise RuntimeError("apt update failed with rc={}".format(rc))
+
+        if had and os.path.isfile(backup):
+            os.remove(backup)
+        return True
+
+    except Exception as e:
+        print(
+            "update: rolling back due to error: {}".format(e),
+            file=sys.stderr,
+        )
+        if had:
+            if os.path.isfile(backup):
+                os.replace(backup, dest)
+        else:
+            if os.path.isfile(dest):
+                os.remove(dest)
+        return False
 
 
 def get_pkg_info(package_name: str):
