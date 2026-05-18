@@ -164,7 +164,10 @@ def graphics():
 
 
 def get_package_info(package_name):
-    package = _cache()[package_name]
+    cache = _cache()
+    if package_name not in cache:
+        return {}
+    package = cache[package_name]
     versions = package.versions
     ver_list = {}
     for version in versions:
@@ -191,7 +194,10 @@ def readfile(filepath):
 
 
 def is_pkg_installed(driver, version=None):
-    installed = _cache()[driver].installed
+    cache = _cache()
+    if driver not in cache:
+        return False
+    installed = cache[driver].installed
     if installed is None:
         return False
     if version is None:
