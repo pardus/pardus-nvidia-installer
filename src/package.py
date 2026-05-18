@@ -86,12 +86,39 @@ def install_nvidia(packages):
     return True
 
 
+def _installed_nvidia_packages():
+    """
+    Names of currently-installed packages whose name starts with
+    'nvidia-'. apt does not glob argv (no shell), so we must pass a
+    concrete list.
+    """
+    try:
+        cache = apt.Cache()
+    except Exception as e:
+        print(
+            "install_nouveau: failed to open apt cache: {}".format(e),
+            file=sys.stderr,
+        )
+        return []
+    names = []
+    for pkg in cache:
+        try:
+            if pkg.is_installed and pkg.name.startswith("nvidia-"):
+                names.append(pkg.name)
+        except Exception:
+            continue
+    return names
+
+
 def install_nouveau():
-    cmds = [
-        ["apt", "purge", "-yq", "nvidia-*driver", "nvidia-kernel-*"],
-        ["apt", "purge", "-yq", "xserver-xorg-video-nvidia"],
-        ["apt", "autoremove", "-yq"]
-    ]
+    nvidia_pkgs = _installed_nvidia_packages()
+
+    cmds = []
+    if nvidia_pkgs:
+        cmds.append(["apt", "purge", "-yq", *nvidia_pkgs])
+    cmds.append(["apt", "purge", "-yq", "xserver-xorg-video-nvidia"])
+    cmds.append(["apt", "autoremove", "-yq"])
+
     for cmd in cmds:
         rc = subprocess.call(cmd, env={**os.environ})
         if rc != 0:
