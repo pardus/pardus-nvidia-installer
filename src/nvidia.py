@@ -18,7 +18,20 @@ nvidia_devices_json_path = "/../data/nvidia-pci.json"
 nouveau = "xserver-xorg-video-nouveau"
 
 dest = "/etc/apt/sources.list.d/nvidia-drivers.list"
-cache = apt.Cache()
+
+_cache_instance = None
+
+
+def _cache():
+    global _cache_instance
+    if _cache_instance is None:
+        _cache_instance = apt.Cache()
+    return _cache_instance
+
+
+def reopen_cache():
+    global _cache_instance
+    _cache_instance = apt.Cache()
 
 
 class NvidiaDriver:
@@ -62,7 +75,10 @@ def source():
 
 
 def get_pci_ids():
-    with open("/usr/share/misc/pci.ids", "r") as f:
+    pci_ids_path = "/usr/share/misc/pci.ids"
+    if not os.path.isfile(pci_ids_path):
+        return {}
+    with open(pci_ids_path, "r") as f:
         pci_ids = f.readlines()
     devices = {}
     cur_vendor = None
@@ -70,8 +86,12 @@ def get_pci_ids():
         if line.startswith("#") or line.strip() == "":
             continue
         if not line.startswith("\t"):
-            vendor_id, vendor_name = line.strip().split(" ", 1)
-            vendor_id = int(vendor_id, 16)
+            try:
+                vendor_id, vendor_name = line.strip().split(" ", 1)
+                vendor_id = int(vendor_id, 16)
+            except ValueError:
+                cur_vendor = None
+                continue
             devices[vendor_id] = {
                 "vendor_id": vendor_id,
                 "vendor_name": vendor_name.strip(),
@@ -79,8 +99,13 @@ def get_pci_ids():
             }
             cur_vendor = vendor_id
         else:
-            device_id, device_name = line.strip().split(" ", 1)
-            device_id = int(device_id, 16)
+            if cur_vendor is None:
+                continue
+            try:
+                device_id, device_name = line.strip().split(" ", 1)
+                device_id = int(device_id, 16)
+            except ValueError:
+                continue
             devices[cur_vendor]["devices"][device_id] = device_name.strip()
     return devices
 
@@ -93,35 +118,53 @@ def graphics():
         if dirs:
             for dir in dirs:
                 vp = os.path.join(pci_dev_path, dir, "vendor")
-                vc = readfile(vp)
-                vc = int(vc, 16)
-                vn = pci_ids[vc]["vendor_name"]
+                vc_raw = readfile(vp)
+                if vc_raw is None:
+                    continue
+                try:
+                    vc = int(vc_raw, 16)
+                except (TypeError, ValueError):
+                    continue
+                if vc != nvidia_pci_id_int:
+                    continue
+
                 sp = os.path.join(pci_dev_path, dir, "class")
                 sc = readfile(sp)
-                st = False
-                if vc == nvidia_pci_id_int and sc in ("0x030000", "0x030200"):
-                    st = (sc == "0x030200")
-                    dp = os.path.join(pci_dev_path, dir, "device")
-                    dc = readfile(dp)
-                    dc = int(dc, 16)
-                    dn = pci_ids[vc]["devices"][dc]
+                if sc not in ("0x030000", "0x030200"):
+                    continue
+                st = (sc == "0x030200")
 
-                    drv_c = None
-                    drv_ver_c = None
+                dp = os.path.join(pci_dev_path, dir, "device")
+                dc_raw = readfile(dp)
+                if dc_raw is None:
+                    continue
+                try:
+                    dc = int(dc_raw, 16)
+                except (TypeError, ValueError):
+                    continue
 
-                    drv_p = os.path.join(pci_dev_path, dir, "driver", "module")
-                    if os.path.isfile(drv_p):
-                        orig_drv_p = os.readlink(drv_p)
-                        drv_c = os.path.basename(orig_drv_p)
-                        drv_ver_p = os.path.join(drv_p, "version")
-                        drv_ver_c = readfile(drv_ver_p)
-                    devices.append(NvidiaDevice(vc, vn, dc, dn, drv_c, drv_ver_c, st))
+                vendor_entry = pci_ids.get(vc, {})
+                vn = vendor_entry.get("vendor_name", "NVIDIA")
+                dn = vendor_entry.get("devices", {}).get(
+                    dc, f"NVIDIA Device {dc:04X}"
+                )
+
+                drv_c = None
+                drv_ver_c = None
+
+                drv_p = os.path.join(pci_dev_path, dir, "driver", "module")
+                if os.path.isfile(drv_p):
+                    orig_drv_p = os.readlink(drv_p)
+                    drv_c = os.path.basename(orig_drv_p)
+                    drv_ver_p = os.path.join(drv_p, "version")
+                    drv_ver_c = readfile(drv_ver_p)
+                devices.append(NvidiaDevice(vc, vn, dc, dn, drv_c, drv_ver_c, st))
 
     return devices
 
 
 def get_package_info(package_name):
-    package = cache[package_name]
+    package = _cache()[package_name]
     versions = package.versions
     ver_list = {}
     for version in versions:
@@ -148,7 +191,7 @@ def readfile(filepath):
 
 
 def is_pkg_installed(driver, version=None):
-    installed = cache[driver].installed
+    installed = _cache()[driver].installed
     if installed is None:
         return False
     if version is None:
@@ -197,7 +240,7 @@ def drivers(gpus=None):
 def get_package_origin(package_name, package_version=None):
     if not package_version:
         return None
-    pkg = cache[package_name]
+    pkg = _cache()[package_name]
     for ver in pkg.versions:
         if ver.version != package_version:
             continue
@@ -208,7 +251,7 @@ def get_package_origin(package_name, package_version=None):
 
 
 def newest_pkg_ver(pkg):
-    return cache[pkg].versions[0].version
+    return _cache()[pkg].versions[0].version
 
 
 def int2hex(num):
@@ -216,7 +259,8 @@ def int2hex(num):
 
 
 def get_pkg_ver(pkg):
-    installed = cache[pkg].installed
+    pkg_obj = _cache()[pkg]
+    installed = pkg_obj.installed
     if installed is not None:
         return installed.version
-    return cache[pkg].versions[0].version
+    return pkg_obj.versions[0].version

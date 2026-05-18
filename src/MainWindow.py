@@ -182,6 +182,9 @@ class MainWindow(object):
                 )
             status_label.set_markup(markup)
 
+        if self.apt_opr in ("install-nvidia", "install-nouveau", "update"):
+            nvidia.reopen_cache()
+
         if self.apt_opr == "update":
             actual = nvidia.source()
             self.ui_repo_switch.handler_block(self.mirror_handler_id)
