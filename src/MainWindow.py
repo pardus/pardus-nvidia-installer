@@ -110,10 +110,24 @@ class MainWindow(object):
         self.ui_enable_button = self.get_ui("ui_enable_button")
         self.ui_enable_button.connect("clicked", self.on_enable_button_clicked)
 
+        # When the boot script PCI-removes the secondary GPU, nvidia.graphics()
+        # is empty but the disable marker is the ground truth that re-enable
+        # is supported. Computed before check_secondary_gpu so that helper
+        # can drop the now-meaningless disable checkbox.
+        marker_present = not package.check_sec_state()
+        self.disabled_no_devices = (
+            not self.nvidia_devices and marker_present and not is_debug
+        )
+
         self.check_secondary_gpu()
 
         self.apt_opr = ""
-        self.create_gpu_drivers()
+        if self.disabled_no_devices:
+            self.ui_main_stack.set_visible_child(self.ui_nvidia_box)
+            self.ui_apply_chg_button.set_sensitive(False)
+            self.ui_repo_switch.set_sensitive(False)
+        else:
+            self.create_gpu_drivers()
 
         self.vte = Vte.Terminal()
         self.update_vte_color(self.vte)
@@ -236,6 +250,11 @@ class MainWindow(object):
             self.ui_info_stack.set_visible_child(self.ui_enabled_gpu_box)
         else:
             self.ui_info_stack.set_visible_child(self.ui_disabled_gpu_box)
+
+        if getattr(self, "disabled_no_devices", False):
+            if self.ui_disable_check_button.get_parent() is not None:
+                self.ui_controller_box.remove(self.ui_disable_check_button)
+            return
 
         for dev in self.nvidia_devices:
             if not dev.is_secondary_gpu:
