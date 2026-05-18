@@ -110,7 +110,42 @@ def _installed_nvidia_packages():
     return names
 
 
+def _restore_modprobe_baks_if_enabled():
+    """If the secondary GPU is not currently disabled (marker absent),
+    restore modprobe .bak files left over from a previous disable. Each
+    rename is independently guarded and idempotent; failures degrade to
+    a stderr diagnostic so the apt sequence still runs."""
+    if os.path.isfile(nvidia_disable_gpu_path):
+        return
+
+    if (os.path.isfile(nvidia_modprobed_conf)
+            and not os.path.isfile(nvidia_modprobe_conf)):
+        try:
+            os.replace(nvidia_modprobed_conf, nvidia_modprobe_conf)
+        except OSError as e:
+            print(
+                "install_nouveau: failed to restore {}: {}".format(
+                    nvidia_modprobe_conf, e
+                ),
+                file=sys.stderr,
+            )
+
+    if (os.path.isfile(nouveau_modprobed_conf)
+            and not os.path.isfile(nouveau_modprobe_conf)):
+        try:
+            os.replace(nouveau_modprobed_conf, nouveau_modprobe_conf)
+        except OSError as e:
+            print(
+                "install_nouveau: failed to restore {}: {}".format(
+                    nouveau_modprobe_conf, e
+                ),
+                file=sys.stderr,
+            )
+
+
 def install_nouveau():
+    _restore_modprobe_baks_if_enabled()
+
     nvidia_pkgs = _installed_nvidia_packages()
 
     cmds = []
