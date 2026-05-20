@@ -1,5 +1,4 @@
 import os
-from os.path import isfile
 import apt
 import json
 import locale

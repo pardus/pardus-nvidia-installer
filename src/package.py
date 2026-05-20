@@ -1,4 +1,4 @@
-#!//usr/bin/env python3
+#!/usr/bin/env python3
 import os
 import apt
 import sys
@@ -74,7 +74,8 @@ def install_nvidia(packages):
         print("install_nvidia: no packages provided, aborting", file=sys.stderr)
         return False
     cmds = [
-        ["apt-get", "update", "-yq"],
+        ["apt-get", "update", "-yq",
+         "-o", "APT::Update::Error-Mode=any"],
         ["apt-get", "install", "-yq", *packages],
         ["apt-get", "autoremove", "-yq"],
     ]
@@ -150,10 +151,10 @@ def install_nouveau():
 
     cmds = []
     if nvidia_pkgs:
-        cmds.append(["apt", "purge", "-yq", *nvidia_pkgs])
-    cmds.append(["apt", "purge", "-yq", "xserver-xorg-video-nvidia"])
-    cmds.append(["apt", "autoremove", "-yq"])
-    cmds.append(["apt", "install", "-yq", nouveau])
+        cmds.append(["apt-get", "purge", "-yq", *nvidia_pkgs])
+    cmds.append(["apt-get", "purge", "-yq", "xserver-xorg-video-nvidia"])
+    cmds.append(["apt-get", "autoremove", "-yq"])
+    cmds.append(["apt-get", "install", "-yq", nouveau])
 
     for cmd in cmds:
         rc = subprocess.call(cmd, env={**os.environ})
@@ -172,7 +173,9 @@ def update():
             shutil.copyfile(src_list, dest)
 
         rc = subprocess.call(
-            ["apt", "update", "-yq"], env={**os.environ}
+            ["apt-get", "update", "-yq",
+             "-o", "APT::Update::Error-Mode=any"],
+            env={**os.environ},
         )
         if rc != 0:
             raise RuntimeError("apt update failed with rc={}".format(rc))

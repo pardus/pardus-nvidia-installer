@@ -167,7 +167,6 @@ class MainWindow(object):
             "/usr/bin/dbus-send", "--system", "--print-reply",
             "--dest=org.freedesktop.login1", "/org/freedesktop/login1",
             "org.freedesktop.login1.Manager.Reboot", "boolean:true"]
-        print(cmd)
         subprocess.run(cmd)
 
 
@@ -222,7 +221,6 @@ class MainWindow(object):
         self.get_ui("ui_box_vte_buttons").hide()
         self.get_ui("ui_vte_status_label").set_text("")
         self.ui_main_stack.set_visible_child_name("page_vte")
-        print(params)
         self.vte.spawn_async(
                 Vte.PtyFlags.DEFAULT,
                 os.environ['HOME'],
@@ -275,7 +273,6 @@ class MainWindow(object):
         self.nvidia_drivers = nvidia.drivers(gpus=self.nvidia_devices)
         self.filtered_nvidia_drivers = []
         for index, nvidia_driver in enumerate(self.nvidia_drivers):
-            print(nvidia_driver)
             if index == 0:
                 self.filtered_nvidia_drivers.append(nvidia_driver)
             else:
