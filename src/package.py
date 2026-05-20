@@ -1,5 +1,6 @@
-#!//usr/bin/env python3
+#!/usr/bin/env python3
 import os
+import re
 import apt
 import sys
 import subprocess
@@ -69,15 +70,47 @@ def check_sec_state():
     return not os.path.isfile(nvidia_disable_gpu_path)
 
 
+# install_nvidia runs under pkexec with root privileges. Restrict the
+# packages it will install to what this tool legitimately manages:
+# kernel headers, NVIDIA proprietary drivers, and the nouveau fallback.
+# Anything else (option-injection like "--reinstall", path traversal,
+# arbitrary repository packages) must be refused before reaching apt.
+_LINUX_HEADERS_RE = re.compile(r"^linux-headers-[a-zA-Z0-9\.\-_+]+$")
+_NVIDIA_DRIVER_RE = re.compile(r"^nvidia-[a-zA-Z0-9\-_]+$")
+
+
+def _is_allowed_package(name):
+    if not name or len(name) > 100:
+        return False
+    if name.startswith("-"):
+        return False
+    if name == nouveau:
+        return True
+    if _LINUX_HEADERS_RE.match(name):
+        return True
+    if _NVIDIA_DRIVER_RE.match(name):
+        return True
+    return False
+
+
 def install_nvidia(packages):
     if not packages:
         print("install_nvidia: no packages provided, aborting", file=sys.stderr)
         return False
+    for pkg in packages:
+        if not _is_allowed_package(pkg):
+            print(
+                "install_nvidia: refusing unsafe package name: {!r}".format(pkg),
+                file=sys.stderr,
+            )
+            return False
     cmds = [
-        ["apt", "update", "-yq"],
-        ["apt", "purge", "-yq", "nvidia-*driver", "nvidia-kernel-*"],
-        ["apt", "autoremove", "-yq"],
-        ["apt", "install", "-yq", *packages],
+        ["apt-get", "update", "-yq",
+         "-o", "APT::Update::Error-Mode=any"],
+        # "--" stops apt from parsing any later argv as an option
+        # belt-and-suspenders next to the whitelist above.
+        ["apt-get", "install", "-yq", "--", *packages],
+        ["apt-get", "autoremove", "-yq"],
     ]
     for cmd in cmds:
         rc = subprocess.call(cmd, env={**os.environ})
@@ -87,12 +120,75 @@ def install_nvidia(packages):
     return True
 
 
+def _installed_nvidia_packages():
+    """
+    Names of currently-installed packages whose name starts with
+    'nvidia-'. apt does not glob argv (no shell), so we must pass a
+    concrete list.
+    """
+    try:
+        cache = apt.Cache()
+    except Exception as e:
+        print(
+            "install_nouveau: failed to open apt cache: {}".format(e),
+            file=sys.stderr,
+        )
+        return []
+    names = []
+    for pkg in cache:
+        try:
+            if pkg.is_installed and pkg.name.startswith("nvidia-"):
+                names.append(pkg.name)
+        except Exception:
+            continue
+    return names
+
+
+def _restore_modprobe_baks_if_enabled():
+    """If the secondary GPU is not currently disabled (marker absent),
+    restore modprobe .bak files left over from a previous disable. Each
+    rename is independently guarded and idempotent; failures degrade to
+    a stderr diagnostic so the apt sequence still runs."""
+    if os.path.isfile(nvidia_disable_gpu_path):
+        return
+
+    if (os.path.isfile(nvidia_modprobed_conf)
+            and not os.path.isfile(nvidia_modprobe_conf)):
+        try:
+            os.replace(nvidia_modprobed_conf, nvidia_modprobe_conf)
+        except OSError as e:
+            print(
+                "install_nouveau: failed to restore {}: {}".format(
+                    nvidia_modprobe_conf, e
+                ),
+                file=sys.stderr,
+            )
+
+    if (os.path.isfile(nouveau_modprobed_conf)
+            and not os.path.isfile(nouveau_modprobe_conf)):
+        try:
+            os.replace(nouveau_modprobed_conf, nouveau_modprobe_conf)
+        except OSError as e:
+            print(
+                "install_nouveau: failed to restore {}: {}".format(
+                    nouveau_modprobe_conf, e
+                ),
+                file=sys.stderr,
+            )
+
+
 def install_nouveau():
-    cmds = [
-        ["apt", "purge", "-yq", "nvidia-*driver", "nvidia-kernel-*"],
-        ["apt", "purge", "-yq", "xserver-xorg-video-nvidia"],
-        ["apt", "autoremove", "-yq"]
-    ]
+    _restore_modprobe_baks_if_enabled()
+
+    nvidia_pkgs = _installed_nvidia_packages()
+
+    cmds = []
+    if nvidia_pkgs:
+        cmds.append(["apt-get", "purge", "-yq", *nvidia_pkgs])
+    cmds.append(["apt-get", "purge", "-yq", "xserver-xorg-video-nvidia"])
+    cmds.append(["apt-get", "autoremove", "-yq"])
+    cmds.append(["apt-get", "install", "-yq", nouveau])
+
     for cmd in cmds:
         rc = subprocess.call(cmd, env={**os.environ})
         if rc != 0:
@@ -101,15 +197,38 @@ def install_nouveau():
     return True
 
 def update():
-    if os.path.isfile(dest):
-        os.remove(dest)
-    else:
-        shutil.copyfile(src_list, dest)
+    backup = dest + ".prev"
+    had = os.path.isfile(dest)
+    try:
+        if had:
+            os.replace(dest, backup)
+        else:
+            shutil.copyfile(src_list, dest)
 
-    rc = subprocess.call(
-        ["apt", "update", "-yq"], env={**os.environ}
-    )
-    return rc == 0
+        rc = subprocess.call(
+            ["apt-get", "update", "-yq",
+             "-o", "APT::Update::Error-Mode=any"],
+            env={**os.environ},
+        )
+        if rc != 0:
+            raise RuntimeError("apt update failed with rc={}".format(rc))
+
+        if had and os.path.isfile(backup):
+            os.remove(backup)
+        return True
+
+    except Exception as e:
+        print(
+            "update: rolling back due to error: {}".format(e),
+            file=sys.stderr,
+        )
+        if had:
+            if os.path.isfile(backup):
+                os.replace(backup, dest)
+        else:
+            if os.path.isfile(dest):
+                os.remove(dest)
+        return False
 
 
 def get_pkg_info(package_name: str):
