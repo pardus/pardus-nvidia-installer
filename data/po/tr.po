@@ -87,7 +87,7 @@ msgid ""
 "disabled. To activate it, simply click the 'Enable GPU' button next to this "
 "message."
 msgstr ""
-"Görünüşe göre NVIDIA ekran kartınız şuanda etkin değil. Etkinleştirmek için "
+"Görünüşe göre NVIDIA ekran kartınız şu anda etkin değil. Etkinleştirmek için "
 "'Ekran Kartını Etkinleştir' butonuna basınız."
 
 #: ui/ui.glade:188
