@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import re
 import apt
 import sys
 import subprocess
@@ -69,14 +70,46 @@ def check_sec_state():
     return not os.path.isfile(nvidia_disable_gpu_path)
 
 
+# install_nvidia runs under pkexec with root privileges. Restrict the
+# packages it will install to what this tool legitimately manages:
+# kernel headers, NVIDIA proprietary drivers, and the nouveau fallback.
+# Anything else (option-injection like "--reinstall", path traversal,
+# arbitrary repository packages) must be refused before reaching apt.
+_LINUX_HEADERS_RE = re.compile(r"^linux-headers-[a-zA-Z0-9\.\-_+]+$")
+_NVIDIA_DRIVER_RE = re.compile(r"^nvidia-[a-zA-Z0-9\-_]+$")
+
+
+def _is_allowed_package(name):
+    if not name or len(name) > 100:
+        return False
+    if name.startswith("-"):
+        return False
+    if name == nouveau:
+        return True
+    if _LINUX_HEADERS_RE.match(name):
+        return True
+    if _NVIDIA_DRIVER_RE.match(name):
+        return True
+    return False
+
+
 def install_nvidia(packages):
     if not packages:
         print("install_nvidia: no packages provided, aborting", file=sys.stderr)
         return False
+    for pkg in packages:
+        if not _is_allowed_package(pkg):
+            print(
+                "install_nvidia: refusing unsafe package name: {!r}".format(pkg),
+                file=sys.stderr,
+            )
+            return False
     cmds = [
         ["apt-get", "update", "-yq",
          "-o", "APT::Update::Error-Mode=any"],
-        ["apt-get", "install", "-yq", *packages],
+        # "--" stops apt from parsing any later argv as an option
+        # belt-and-suspenders next to the whitelist above.
+        ["apt-get", "install", "-yq", "--", *packages],
         ["apt-get", "autoremove", "-yq"],
     ]
     for cmd in cmds:
