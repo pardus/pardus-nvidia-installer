@@ -29,7 +29,7 @@ msgid ""
 "restart is required. Please save any work and click 'OK' to complete the "
 "process."
 msgstr ""
-"Değişiklikler yapıldı . Bu değişikliklerin etkin olması için, sisteminizi "
+"Değişiklikler yapıldı. Bu değişikliklerin etkin olması için sisteminizi "
 "yeniden başlatmanız gerekmektedir. Lütfen bütün işlerinizi kaydedin ve "
 "'Tamam' butonuna basarak işlemi tamamlayın."
 
@@ -87,8 +87,8 @@ msgid ""
 "disabled. To activate it, simply click the 'Enable GPU' button next to this "
 "message."
 msgstr ""
-"Görünüşe göre NVIDIA ekran kartınız şu anda etkin değil. Etkinleştirmek için "
-"'Ekran Kartını Etkinleştir' butonuna basınız."
+"Görünüşe göre ikincil NVIDIA ekran kartınız şu anda etkin değil. "
+"Etkinleştirmek için 'Ekran Kartını Etkinleştir' butonuna basınız."
 
 #: ui/ui.glade:188
 msgid "Enable GPU"
@@ -123,8 +123,8 @@ msgid ""
 "There is no NVIDIA graphics card on your system. \n"
 "You can't use this application"
 msgstr ""
-"Sisteminizde NVIDIA ekran kartı bulunmamakta. \n"
-"Uygulamayı kullanamazsınız"
+"Sisteminizde NVIDIA ekran kartı bulunmuyor.\n"
+"Bu uygulamayı kullanamazsınız."
 
 #: ui/ui.glade:447 ui/ui.glade:642
 msgid "Reboot"
@@ -144,7 +144,7 @@ msgstr "Pardus Nvidia Kurucu"
 
 #: ui/ui.glade:623
 msgid "You must reboot your device before using this application."
-msgstr "Bu uygulamayı kullanmadan önce cihazınızı yeniden başlanız gerekmektedir."
+msgstr "Bu uygulamayı kullanmadan önce cihazınızı yeniden başlatmanız gerekmektedir."
 
 #: ui/ui.glade:683
 msgid "Reboot required"
@@ -168,5 +168,5 @@ msgstr "Açık Kaynaklı Sürücü"
 
 #: src/nvidia.py:201
 msgid "Proprietary Driver"
-msgstr "Sahipli Sürücü"
+msgstr "Tescilli Sürücü"
 
