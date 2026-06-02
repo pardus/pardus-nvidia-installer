@@ -93,6 +93,15 @@ class MainWindow(object):
         self.ui_about_dialog = self.get_ui("ui_about_dialog")
         self.ui_about_button = self.get_ui("ui_about_button")
 
+        # Set version from __version__ file
+        try:
+            version = open(
+                os.path.dirname(os.path.abspath(__file__)) + "/__version__"
+                ).readline()
+            self.ui_about_dialog.set_version(version)
+        except:
+            pass
+
         self.ui_info_dialog = self.get_ui("ui_info_dialog")
 
         self.ui_about_button.connect("clicked", self.on_about_button_clicked)
