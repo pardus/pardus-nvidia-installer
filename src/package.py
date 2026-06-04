@@ -4,7 +4,6 @@ import re
 import apt
 import sys
 import subprocess
-import shutil
 import apt_pkg
 
 apt_pkg.init_system()
@@ -17,13 +16,216 @@ nvidia_modprobed_conf = "/etc/modprobe.d/nvidia.conf.bak"
 nouveau_modprobe_conf = "/etc/modprobe.d/nvidia-blacklists-nouveau.conf"
 nouveau_modprobed_conf = "/etc/modprobe.d/nvidia-blacklists-nouveau.conf.bak"
 nvidia_disable_gpu_path = "/var/cache/pni-disable-gpu"
-nvidia_src_file = "nvidia-drivers.list"
 dest = "/etc/apt/sources.list.d/nvidia-drivers.list"
-src_list = os.path.dirname(__file__) + "/../" + nvidia_src_file
+
+# Keyring shipped/dearmored by the package (see debian/postinst) and the
+# armored source used to (re)build it on demand.
+nvidia_keyring = "/usr/share/keyrings/nvidia-drivers.gpg"
+nvidia_pub_src = os.path.dirname(__file__) + "/../nvidia.pub"
+
+cuda_repo_base = "https://developer.download.nvidia.com/compute/cuda/repos"
+
+# NVIDIA signs each CUDA repository with a per-distribution key:
+#   debian12 -> "cudatools"                 (A4B469963BF863CC, SHA1 self-sig)
+#   debian13 -> "Kitmaker (Debian 13 ...)"  (...97A5D4CB8793F200, SHA256)
+# Both public keys MUST live in nvidia.pub (postinst dearmors it into the
+# keyring); this maps the distro we point apt at to the fingerprint its
+# Release file is signed with, so we can verify the keyring before apt runs.
+#
+# To add a new release (e.g. debian14) you only touch TWO places that must
+# stay in sync: add the fingerprint here AND its armored key to nvidia.pub.
+# _SUPPORTED_CUDA_MAJORS is derived from this map so it can never drift.
+_CUDA_REPO_KEY_FPR = {
+    "debian12": "EB693B3035CD5710E231E123A4B469963BF863CC",
+    "debian13": "02182E60104FCDC26EAE1B8597A5D4CB8793F200",
+}
+
+# Major versions this tool can target, ascending, derived from the key map
+# above so there is a single source of truth. Used to clamp the detected
+# Debian release onto something NVIDIA actually publishes.
+_SUPPORTED_CUDA_MAJORS = tuple(
+    sorted(int(d[len("debian"):]) for d in _CUDA_REPO_KEY_FPR)
+)
+
+_DEBIAN_CODENAME_MAJOR = {
+    "bullseye": 11,
+    "bookworm": 12,
+    "trixie": 13,
+    "forky": 14,
+}
+
+
+def readfile(filepath):
+    if not os.path.isfile(filepath):
+        return None
+    try:
+        with open(filepath, "r") as f:
+            return f.read().strip()
+    except OSError:
+        return None
 
 
 def sys_source():
     return os.path.isfile(dest)
+
+
+def _debian_major():
+    """
+    Detection of the Debian base major version.
+
+    Pardus carries its own VERSION_CODENAME (e.g. "yirmibes"), so os-release
+    is unreliable for this; /etc/debian_version ("13.5", "trixie/sid", ...)
+    is the ground truth for the apt base and is checked first.
+    Returns an int, or None when nothing usable is found.
+    """
+    raw = readfile("/etc/debian_version")
+    if raw:
+        m = re.match(r"^(\d+)", raw)
+        if m:
+            return int(m.group(1))
+        codename = raw.split("/", 1)[0].strip().lower()
+        major = _DEBIAN_CODENAME_MAJOR.get(codename)
+        if major:
+            return major
+
+    for path in ("/etc/os-release", "/usr/lib/os-release"):
+        content = readfile(path)
+        if not content:
+            continue
+        for line in content.splitlines():
+            if "=" not in line:
+                continue
+            key, val = line.split("=", 1)
+            if key.strip() in ("DEBIAN_CODENAME", "VERSION_CODENAME"):
+                codename = val.strip().strip('"').strip("'").lower()
+                major = _DEBIAN_CODENAME_MAJOR.get(codename)
+                if major:
+                    return major
+    return None
+
+
+def cuda_repo_distro():
+    """
+    Pick the CUDA repo slug ("debian12"/"debian13") for this machine,
+    clamped to what NVIDIA actually ships so an unknown future release still
+    resolves to the closest available repository instead of a 404.
+    """
+    major = _debian_major()
+    if major is None:
+        # Detection failed. "Unknown" almost always means "newer than us"
+        # (and older systems carry a readable /etc/debian_version), so bias
+        # to the newest supported release: its key uses a modern digest that
+        # trixie+ accept, avoiding the SHA1 wall of the oldest repo.
+        major = _SUPPORTED_CUDA_MAJORS[-1]
+        print(
+            "cuda_repo_distro: could not detect Debian base; "
+            "defaulting to debian{}".format(major),
+            file=sys.stderr,
+        )
+    elif major < _SUPPORTED_CUDA_MAJORS[0]:
+        major = _SUPPORTED_CUDA_MAJORS[0]
+    elif major > _SUPPORTED_CUDA_MAJORS[-1]:
+        major = _SUPPORTED_CUDA_MAJORS[-1]
+    return "debian{}".format(major)
+
+
+def _nvidia_source_line(distro=None):
+    if distro is None:
+        distro = cuda_repo_distro()
+    return (
+        "deb [signed-by={keyring}] {base}/{distro}/x86_64/ /\n".format(
+            keyring=nvidia_keyring, base=cuda_repo_base, distro=distro
+        )
+    )
+
+
+def _keyring_has_fingerprint(keyring, fingerprint):
+    """
+    True when `keyring` contains a key with the given fingerprint.
+    """
+    if not os.path.isfile(keyring):
+        return False
+    try:
+        out = subprocess.run(
+            ["gpg", "--no-default-keyring", "--show-keys",
+             "--with-colons", "--with-fingerprint", keyring],
+            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+        ).stdout.decode("utf-8", "replace")
+    except (OSError, ValueError):
+        return False
+    for line in out.splitlines():
+        parts = line.split(":")
+        if parts and parts[0] == "fpr" and len(parts) >= 10:
+            if parts[9].upper() == fingerprint.upper():
+                return True
+    return False
+
+
+def _build_keyring_from_pub():
+    """
+    (Re)create the apt keyring by dearmoring the shipped nvidia.pub.
+
+    nvidia.pub holds every CUDA signing key this tool supports, so the
+    resulting keyring can verify whichever debianNN repo we enable. Written
+    atomically with 0644 so apt will actually read it.
+    """
+    if not os.path.isfile(nvidia_pub_src):
+        print(
+            "ensure_keyring: armored key source missing: {}".format(
+                nvidia_pub_src
+            ),
+            file=sys.stderr,
+        )
+        return False
+    try:
+        with open(nvidia_pub_src, "rb") as src:
+            proc = subprocess.run(
+                ["gpg", "--dearmor"],
+                stdin=src, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            )
+        if proc.returncode != 0 or not proc.stdout:
+            print(
+                "ensure_keyring: gpg --dearmor failed: {}".format(
+                    proc.stderr.decode("utf-8", "replace").strip()
+                ),
+                file=sys.stderr,
+            )
+            return False
+        os.makedirs(os.path.dirname(nvidia_keyring), exist_ok=True)
+        tmp = nvidia_keyring + ".tmp"
+        with open(tmp, "wb") as out:
+            out.write(proc.stdout)
+        os.chmod(tmp, 0o644)
+        os.replace(tmp, nvidia_keyring)
+        return True
+    except OSError as e:
+        print(
+            "ensure_keyring: failed to build {}: {}".format(
+                nvidia_keyring, e
+            ),
+            file=sys.stderr,
+        )
+        return False
+
+
+def ensure_keyring(distro):
+    """
+    Guarantee the keyring can verify `distro` before apt touches the repo.
+
+    This is what stops the "cuda-keyring"/NO_PUBKEY failure: enabling the
+    Debian 13 repo needs the Kitmaker key, which older installs' keyrings
+    lack. If the required key is absent we rebuild the keyring from the
+    shipped, fully-populated nvidia.pub.
+    """
+    fpr = _CUDA_REPO_KEY_FPR.get(distro)
+    if fpr is None:
+        # Unknown distro: nothing to assert, leave the keyring untouched.
+        return True
+    if _keyring_has_fingerprint(nvidia_keyring, fpr):
+        return True
+    if not _build_keyring_from_pub():
+        return False
+    return _keyring_has_fingerprint(nvidia_keyring, fpr)
 
 
 compare_version = apt_pkg.version_compare
@@ -203,7 +405,15 @@ def update():
         if had:
             os.replace(dest, backup)
         else:
-            shutil.copyfile(src_list, dest)
+            distro = cuda_repo_distro()
+            if not ensure_keyring(distro):
+                raise RuntimeError(
+                    "missing signing key for {} repo".format(distro)
+                )
+            tmp = dest + ".tmp"
+            with open(tmp, "w") as f:
+                f.write(_nvidia_source_line(distro))
+            os.replace(tmp, dest)
 
         rc = subprocess.call(
             ["apt-get", "update", "-yq",

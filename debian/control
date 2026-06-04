@@ -15,4 +15,5 @@ Architecture: any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
+ gnupg,
 Description: Install Nvidia drivers without suffering.
