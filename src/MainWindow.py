@@ -262,11 +262,10 @@ class MainWindow(object):
             if self.ui_disable_check_button.get_parent() is not None:
                 self.ui_controller_box.remove(self.ui_disable_check_button)
             return
-
-        for dev in self.nvidia_devices:
-            if not dev.is_secondary_gpu:
-                self.ui_controller_box.remove(self.ui_disable_check_button)
-                break
+        # Show the toggle if any secondary GPU exists (only ui)
+        # and the boot script never removes the boot_vga=1 card
+        if not any(dev.is_secondary_gpu for dev in self.nvidia_devices):
+            self.ui_controller_box.remove(self.ui_disable_check_button)
 
     def create_gpu_drivers(self):
         if len(self.nvidia_devices) == 0 and not is_debug:
