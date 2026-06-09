@@ -9,11 +9,13 @@ fi
 
 remove_pci(){
     if [[ -d "/sys/bus/pci/devices/$1/driver" ]] ; then
-        module=$(basename $(readlink /sys/bus/pci/devices/$1/driver/module))
-        echo "Disabled: $module ($1)"
-        rmmod -f $module || true
+        module=$(basename "$(readlink -f "/sys/bus/pci/devices/$1/driver/module" 2>/dev/null)" 2>/dev/null || true)
+        if [[ -n "$module" ]]; then
+            echo "Disabled: $module ($1)"
+            rmmod -f "$module" || true
+        fi
     fi
-    echo 1 > /sys/bus/pci/devices/$1/remove || true
+    echo 1 > "/sys/bus/pci/devices/$1/remove" || true
 }
  
 has_primary=0
@@ -46,4 +48,4 @@ for dir in $(ls /sys/bus/pci/devices/); do
     echo "Found secondary GPU: $dir"
     remove_pci "$dir"
 done
-udevadm settle --timeout=30
+udevadm settle --timeout=30 || true
