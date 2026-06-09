@@ -16,6 +16,7 @@ nvidia_modprobed_conf = "/etc/modprobe.d/nvidia.conf.bak"
 nouveau_modprobe_conf = "/etc/modprobe.d/nvidia-blacklists-nouveau.conf"
 nouveau_modprobed_conf = "/etc/modprobe.d/nvidia-blacklists-nouveau.conf.bak"
 nvidia_disable_gpu_path = "/var/cache/pni-disable-gpu"
+pci_rescan_path = "/sys/bus/pci/rescan"
 dest = "/etc/apt/sources.list.d/nvidia-drivers.list"
 
 # Keyring shipped/dearmored by the package (see debian/postinst) and the
@@ -235,6 +236,26 @@ def mark_need_reboot():
     with open("/run/pardus-nvi.reboot", "w") as f:
         f.write("1")
 
+
+def move_conf_if_dest_absent(src, dst):
+    """
+    Move `src` to `dst`, but only if `dst` doesn't already exist, so we
+    never clobber what's there: a hand-edited conf when enabling, or an
+    earlier pre-disable backup when disabling. Returns True if it moved
+    """
+    if not (os.path.isfile(src) and not os.path.isfile(dst)):
+        return False
+    try:
+        os.replace(src, dst)
+        return True
+    except OSError as e:
+        print(
+            "move conf: failed to move {} -> {}: {}".format(src, dst, e),
+            file=sys.stderr,
+        )
+        return False
+
+
 def disable_sec_gpu():
     changed = False
     if not os.path.isfile(nvidia_disable_gpu_path):
@@ -242,15 +263,32 @@ def disable_sec_gpu():
             f.write("Secondary GPU Disabled")
         changed = True
 
-    if os.path.isfile(nvidia_modprobe_conf):
-        os.rename(nvidia_modprobe_conf, nvidia_modprobed_conf)
+    if move_conf_if_dest_absent(nvidia_modprobe_conf, nvidia_modprobed_conf):
         changed = True
-    if os.path.isfile(nouveau_modprobe_conf):
-        os.rename(nouveau_modprobe_conf, nouveau_modprobed_conf)
+    if move_conf_if_dest_absent(nouveau_modprobe_conf, nouveau_modprobed_conf):
         changed = True
     if changed:
         mark_need_reboot()
     return True
+
+
+def rescan_pci():
+    """
+    Re-add the GPU in the running session without waiting for a reboot
+
+    Clearing the marker only stops the boot script's future removals; the
+    device the script already hot-removed stays gone until the bus is
+    rescanned. (A reboot brings it back too, since firmware re-enumerates
+    from scratch.) Best-effort; failures are non-fatal.
+    """
+    try:
+        with open(pci_rescan_path, "w") as f:
+            f.write("1")
+    except OSError as e:
+        print(
+            "enable_sec_gpu: pci rescan failed: {}".format(e),
+            file=sys.stderr,
+        )
 
 
 def enable_sec_gpu():
@@ -258,12 +296,14 @@ def enable_sec_gpu():
     if os.path.isfile(nvidia_disable_gpu_path):
         os.remove(nvidia_disable_gpu_path)
         changed = True
-    if os.path.isfile(nvidia_modprobed_conf):
-        os.rename(nvidia_modprobed_conf, nvidia_modprobe_conf)
+    if move_conf_if_dest_absent(nvidia_modprobed_conf, nvidia_modprobe_conf):
         changed = True
-    if os.path.isfile(nouveau_modprobed_conf):
-        os.rename(nouveau_modprobed_conf, nouveau_modprobe_conf)
+    if move_conf_if_dest_absent(nouveau_modprobed_conf, nouveau_modprobe_conf):
         changed = True
+    # Symmetric inverse of the boot-time PCI hot-remove. Done unconditionally
+    # (not gated on `changed`) so a previously removed device is recovered
+    # even when the marker/confs were already cleaned up out of band.
+    rescan_pci()
     if changed:
         mark_need_reboot()
     return True
@@ -346,41 +386,20 @@ def _installed_nvidia_packages():
     return names
 
 
-def _restore_modprobe_baks_if_enabled():
-    """If the secondary GPU is not currently disabled (marker absent),
-    restore modprobe .bak files left over from a previous disable. Each
-    rename is independently guarded and idempotent; failures degrade to
-    a stderr diagnostic so the apt sequence still runs."""
+def restore_modprobe_baks_if_enabled():
+    """
+    When GPU isn't disabled, put back any modprobe .bak files left
+    over from an earlier disable. Skips files the user already restored
+    """
     if os.path.isfile(nvidia_disable_gpu_path):
         return
 
-    if (os.path.isfile(nvidia_modprobed_conf)
-            and not os.path.isfile(nvidia_modprobe_conf)):
-        try:
-            os.replace(nvidia_modprobed_conf, nvidia_modprobe_conf)
-        except OSError as e:
-            print(
-                "install_nouveau: failed to restore {}: {}".format(
-                    nvidia_modprobe_conf, e
-                ),
-                file=sys.stderr,
-            )
-
-    if (os.path.isfile(nouveau_modprobed_conf)
-            and not os.path.isfile(nouveau_modprobe_conf)):
-        try:
-            os.replace(nouveau_modprobed_conf, nouveau_modprobe_conf)
-        except OSError as e:
-            print(
-                "install_nouveau: failed to restore {}: {}".format(
-                    nouveau_modprobe_conf, e
-                ),
-                file=sys.stderr,
-            )
+    move_conf_if_dest_absent(nvidia_modprobed_conf, nvidia_modprobe_conf)
+    move_conf_if_dest_absent(nouveau_modprobed_conf, nouveau_modprobe_conf)
 
 
 def install_nouveau():
-    _restore_modprobe_baks_if_enabled()
+    restore_modprobe_baks_if_enabled()
 
     nvidia_pkgs = _installed_nvidia_packages()
 
