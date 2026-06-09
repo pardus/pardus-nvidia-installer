@@ -54,7 +54,7 @@ class MainWindow(object):
 
         self.get_ui("ui_button_reboot_dlg").connect("clicked", self.do_reboot)
         self.get_ui("ui_button_exit_dlg").connect("clicked",
-            lambda x: exit(0))
+            lambda x: self.application.quit())
 
         if os.path.isfile("/run/pardus-nvi.reboot"):
             self.ui_main_window = self.get_ui("ui_window_reboot")
@@ -149,7 +149,7 @@ class MainWindow(object):
 
         self.get_ui("ui_button_reboot").connect("clicked", self.do_reboot)
         self.get_ui("ui_button_exit").connect("clicked",
-            lambda x: exit(0))
+            lambda x: self.application.quit())
 
         self.op_widgets = (
             self.ui_apply_chg_button,
@@ -181,7 +181,12 @@ class MainWindow(object):
 
     def on_vte_done(self, vte, status):
         self.get_ui("ui_box_vte_buttons").show_all()
-        success = (status == 0)
+
+        try:
+            exit_code = os.waitstatus_to_exitcode(status)
+        except ValueError:
+            exit_code = status
+        success = (exit_code == 0)
         reboot_pending = os.path.isfile("/run/pardus-nvi.reboot")
         self.get_ui("ui_button_reboot").set_sensitive(success and reboot_pending)
 
@@ -200,7 +205,7 @@ class MainWindow(object):
                 )
             else:
                 markup = '<span foreground="tomato">{}</span>'.format(
-                    _("Operation failed (exit code {code}). Please review the log above.").format(code=status)
+                    _("Operation failed (exit code {code}). Please review the log above.").format(code=exit_code)
                 )
             status_label.set_markup(markup)
 
@@ -322,8 +327,6 @@ class MainWindow(object):
 
         name = b.get_object("ui_name_label")
         markup = self.lbl_markup(_("Driver"), drv_name)
-        if drv_name == nouveau:
-            markup = self.lbl_markup(_("Driver"), drv_name)
         name.set_markup(markup)
 
         ver = b.get_object("ui_version_label")
@@ -374,7 +377,6 @@ class MainWindow(object):
         self.vte_start(params)
 
     def on_apply_button_clicked(self, button):
-        print("apply button clicked")
         params = ["/usr/bin/pkexec", cur_path + pkg_file]
         self.apt_opr = None
         dlg_res = None
