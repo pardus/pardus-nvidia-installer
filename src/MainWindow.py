@@ -290,7 +290,7 @@ class MainWindow(object):
                 self.filtered_nvidia_drivers.append(nvidia_driver)
             else:
                 if self.state:
-                    if nvidia_driver.repo == "NVIDIA":
+                    if nvidia_driver.repo == "NVIDIA" or nvidia_driver.installed:
                         self.filtered_nvidia_drivers.append(nvidia_driver)
                 else:
                     self.filtered_nvidia_drivers.append(nvidia_driver)
