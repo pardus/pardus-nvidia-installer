@@ -335,6 +335,45 @@ def _is_allowed_package(name):
     return False
 
 
+def _stale_nvidia_libs(driver):
+    """
+    Driver libraries left over from another repo that would clash with
+    `driver`: installed nvidia-graphics-drivers* binaries whose version can't
+    match what apt would install for `driver` now. Restricting to that source
+    skips independently versioned bits like libnvidia-egl-wayland1 or the cuda
+    toolkit's libnvidia-ml-dev. Run after "apt-get update" so versions are current.
+    """
+    try:
+        cache = apt.Cache()
+    except Exception as e:
+        print(
+            "install_nvidia: couldn't open the apt cache: {}".format(e),
+            file=sys.stderr,
+        )
+        return []
+    if driver not in cache or cache[driver].candidate is None:
+        return []
+    wanted = cache[driver].candidate.version
+    leftovers = []
+    for pkg in cache:
+        try:
+            if not pkg.is_installed:
+                continue
+            installed = pkg.installed
+            source = (installed.source_name or "") if installed else ""
+            if not source.startswith("nvidia-graphics-drivers"):
+                continue
+            name = pkg.name
+            if not (name.startswith("libnvidia-")
+                    or name == "xserver-xorg-video-nvidia"):
+                continue
+            if not any(v.version == wanted for v in pkg.versions):
+                leftovers.append(name)
+        except Exception:
+            continue
+    return leftovers
+
+
 def install_nvidia(packages):
     if not packages:
         print("install_nvidia: no packages provided, aborting", file=sys.stderr)
@@ -346,12 +385,22 @@ def install_nvidia(packages):
                 file=sys.stderr,
             )
             return False
+    # Update the lists first so the versions we read below are current.
+    if subprocess.call(
+        ["apt-get", "update", "-yq", "-o", "APT::Update::Error-Mode=any"],
+        env={**os.environ},
+    ) != 0:
+        return False
+    # Switching repos leaves old libnvidia libraries behind that block the new
+    # driver, so drop them in the same apt call as the install (all-or-nothing,
+    # no driverless state). Compare against the driver we're actually installing,
+    # which may be a tesla or legacy metapackage, not the mainline one.
+    driver = next((p for p in packages if p.startswith("nvidia-")), None)
+    drop = [
+        "{}-".format(name) for name in _stale_nvidia_libs(driver)
+    ] if driver else []
     cmds = [
-        ["apt-get", "update", "-yq",
-         "-o", "APT::Update::Error-Mode=any"],
-        # "--" stops apt from parsing any later argv as an option
-        # belt-and-suspenders next to the whitelist above.
-        ["apt-get", "install", "-yq", "--", *packages],
+        ["apt-get", "install", "-yq", "--", *packages, *drop],
         ["apt-get", "autoremove", "-yq"],
     ]
     for cmd in cmds:
