@@ -218,6 +218,17 @@ def is_pkg_installed(driver, version=None):
     return installed.version == version
 
 
+def has_pkg_version(pkg, version):
+    """
+    True if `pkg` offers exactly `version` right now. Lets us catch a stale
+    selection before kicking off the privileged install.
+    """
+    cache = _cache()
+    if pkg not in cache:
+        return False
+    return any(v.version == version for v in cache[pkg].versions)
+
+
 def drivers(gpus=None):
     drivers = []
     if gpus is None:

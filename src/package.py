@@ -319,6 +319,17 @@ def check_sec_state():
 # arbitrary repository packages) must be refused before reaching apt.
 _LINUX_HEADERS_RE = re.compile(r"^linux-headers-[a-zA-Z0-9\.\-_+]+$")
 _NVIDIA_DRIVER_RE = re.compile(r"^nvidia-[a-zA-Z0-9\-_]+$")
+# Debian version chars, must start with a digit. Validates the "=version" pin
+# so it can't sneak into apt as an option.
+_VERSION_RE = re.compile(r"^[0-9][A-Za-z0-9.+~:-]*$")
+
+
+def _split_pkg(arg):
+    """
+    Split "name=version" into (name, version); (name, None) if there's no pin
+    """
+    name, sep, ver = arg.partition("=")
+    return (name, ver) if sep else (name, None)
 
 
 def _is_allowed_package(name):
@@ -326,6 +337,12 @@ def _is_allowed_package(name):
         return False
     if name.startswith("-"):
         return False
+    pkg, sep, ver = name.partition("=")
+    if sep:
+        # Only nvidia drivers can be pinned; headers and nouveau stay bare.
+        if not ver or not _VERSION_RE.match(ver):
+            return False
+        return bool(_NVIDIA_DRIVER_RE.match(pkg))
     if name == nouveau:
         return True
     if _LINUX_HEADERS_RE.match(name):
@@ -335,13 +352,17 @@ def _is_allowed_package(name):
     return False
 
 
-def _stale_nvidia_libs(driver):
+def _stale_nvidia_libs(driver, pinned_version=None):
     """
     Driver libraries left over from another repo that would clash with
     `driver`: installed nvidia-graphics-drivers* binaries whose version can't
     match what apt would install for `driver` now. Restricting to that source
     skips independently versioned bits like libnvidia-egl-wayland1 or the cuda
     toolkit's libnvidia-ml-dev. Run after "apt-get update" so versions are current.
+
+    `pinned_version`, when set, is what we're actually installing. The user can
+    pick 550 while the repo's candidate is 610, so we compare against the pin,
+    not the candidate, or a downgrade would flag the wrong orphans.
     """
     try:
         cache = apt.Cache()
@@ -351,9 +372,15 @@ def _stale_nvidia_libs(driver):
             file=sys.stderr,
         )
         return []
-    if driver not in cache or cache[driver].candidate is None:
+    if driver not in cache:
         return []
-    wanted = cache[driver].candidate.version
+    if pinned_version:
+        wanted = pinned_version
+    else:
+        candidate = cache[driver].candidate
+        if candidate is None:
+            return []
+        wanted = candidate.version
     leftovers = []
     for pkg in cache:
         try:
@@ -395,12 +422,18 @@ def install_nvidia(packages):
     # driver, so drop them in the same apt call as the install (all-or-nothing,
     # no driverless state). Compare against the driver we're actually installing,
     # which may be a tesla or legacy metapackage, not the mainline one.
-    driver = next((p for p in packages if p.startswith("nvidia-")), None)
-    drop = [
-        "{}-".format(name) for name in _stale_nvidia_libs(driver)
-    ] if driver else []
+    driver_spec = next((p for p in packages if p.startswith("nvidia-")), None)
+    drop = []
+    if driver_spec:
+        driver_name, pinned = _split_pkg(driver_spec)
+        drop = [
+            "{}-".format(name)
+            for name in _stale_nvidia_libs(driver_name, pinned)
+        ]
+    # --allow-downgrades is needed for 610 -> 550. Safe here: packages are
+    # whitelisted, the version is pinned, and stale libs are dropped together.
     cmds = [
-        ["apt-get", "install", "-yq", "--", *packages, *drop],
+        ["apt-get", "install", "-yq", "--allow-downgrades", "--", *packages, *drop],
         ["apt-get", "autoremove", "-yq"],
     ]
     for cmd in cmds:
