@@ -67,6 +67,7 @@ class MainWindow(object):
         self.active_driver = ""
         self.toggled_driver = None
         self.drv_arr = []
+        self.gpu_info_arr = []
         self.initial_gpu_driver = None
         self.initial_sec_gpu_state = False
         self.state = nvidia.source()
@@ -221,6 +222,16 @@ class MainWindow(object):
                 self.ui_repo_switch.handler_unblock(self.mirror_handler_id)
             self.state = actual
 
+        # Refresh the list so the new state shows right away (cache was just
+        # reopened; devices don't change from a driver swap). Only on success:
+        # a failed install is atomic and changed nothing, so we keep the
+        # selection and leave Apply armed for a retry. disable/enable reboot
+        # anyway, and the no-devices screen has no list.
+        if (success
+                and self.apt_opr in ("install-nvidia", "install-nouveau", "update")
+                and not self.disabled_no_devices):
+            self.create_gpu_drivers()
+
     def update_vte_color(self, vte):
         style_context = self.ui_main_window.get_style_context()
         background_color= style_context.get_background_color(Gtk.StateFlags.NORMAL);
@@ -277,10 +288,14 @@ class MainWindow(object):
             self.ui_main_stack.set_visible_child(self.ui_novidia_box)
         for toggle in self.drv_arr:
             self.ui_gpu_box.remove(toggle)
+        for gpu_info in self.gpu_info_arr:
+            self.ui_gpu_info_box.remove(gpu_info)
         self.drv_arr = []
+        self.gpu_info_arr = []
         self.driver_buttons = []
         for nvidia_device in self.nvidia_devices:
             gpu_info = self.gpu_box(nvidia_device.device_name)
+            self.gpu_info_arr.append(gpu_info)
             self.ui_gpu_info_box.pack_start(gpu_info, True, True, 5)
 
         self.nvidia_drivers = nvidia.drivers(gpus=self.nvidia_devices)
@@ -312,6 +327,8 @@ class MainWindow(object):
             toggle.connect("toggled", self.on_drv_toggled, nvidia_driver)
             self.drv_arr.append(toggle)
             self.ui_gpu_box.pack_start(toggle, True, True, 5)
+        self.ui_gpu_info_box.show_all()
+        self.ui_gpu_box.show_all()
         self.ui_apply_chg_button.set_sensitive(self.check_initials())
 
     def get_ui(self, object_name: str):
@@ -395,12 +412,42 @@ class MainWindow(object):
                 params.append(self.apt_opr)
             else:
                 self.apt_opr = "install-nvidia"
+                # Pin the chosen version, or apt just installs the highest one
+                # (pick 550 with the NVIDIA repo on and you'd get 610)
+                driver_arg = self.toggled_driver.package
+                version = self.toggled_driver.version
+                if version:
+                    nvidia.reopen_cache()
+                    if not nvidia.has_pkg_version(
+                        self.toggled_driver.package, version
+                    ):
+                        self._notify_version_gone()
+                        self.create_gpu_drivers()
+                        return
+                    driver_arg = "{}={}".format(
+                        self.toggled_driver.package, version
+                    )
                 params += [
                     self.apt_opr,
                     "linux-headers-{}".format(platform.uname().release), "linux-headers-amd64",
-                    self.toggled_driver.package
+                    driver_arg
                 ]
             self.vte_start(params)
+
+    def _notify_version_gone(self):
+        dialog = Gtk.MessageDialog(
+            transient_for=self.ui_main_window,
+            modal=True,
+            message_type=Gtk.MessageType.WARNING,
+            buttons=Gtk.ButtonsType.OK,
+            text=_("Selected version is no longer available"),
+        )
+        dialog.format_secondary_text(
+            _("The package list has been refreshed. "
+              "Please choose a driver again.")
+        )
+        dialog.run()
+        dialog.destroy()
 
         # self.ui_apply_chg_button.set_sensitive(False)
 
