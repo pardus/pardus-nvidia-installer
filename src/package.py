@@ -429,11 +429,28 @@ def install_nvidia(packages):
     return True
 
 
-def _installed_nvidia_packages():
+# Stack members whose name doesn't start with "nvidia-", so the name match
+# alone would miss them. Listed explicitly so teardown never hinges on the
+# installed version's Source field (which can differ between the Pardus and
+# NVIDIA repos). glx-diversions is left out on purpose: mesa needs it.
+_NVIDIA_EXTRA_PKGS = (
+    "xserver-xorg-video-nvidia",
+    "libgl1-nvidia-glvnd-glx",
+    "glx-alternative-nvidia",
+)
+
+
+def _nvidia_stack_packages():
     """
-    Names of currently-installed packages whose name starts with
-    'nvidia-'. apt does not glob argv (no shell), so we must pass a
-    concrete list.
+    All installed packages of the proprietary NVIDIA stack, so we can
+    remove the whole thing in one go (apt takes a concrete list, no globs).
+
+    Matching only 'nvidia-*' names misses the runtime libs (libcuda1,
+    libnvidia-*, libegl-nvidia0, libglx-nvidia0, xserver-xorg-video-nvidia,
+    ...). Leaving them behind let apt upgrade them mid-purge when the NVIDIA
+    repo was on, which broke glx-diversions and aborted the switch to
+    nouveau. So we also match the 'nvidia-graphics-drivers' source plus a few
+    known names, and pull everything in one purge.
     """
     try:
         cache = apt.Cache()
@@ -446,7 +463,13 @@ def _installed_nvidia_packages():
     names = []
     for pkg in cache:
         try:
-            if pkg.is_installed and pkg.name.startswith("nvidia-"):
+            if not pkg.is_installed:
+                continue
+            installed = pkg.installed
+            source = (installed.source_name or "") if installed else ""
+            if (pkg.name.startswith("nvidia-")
+                    or source.startswith("nvidia-graphics-drivers")
+                    or pkg.name in _NVIDIA_EXTRA_PKGS):
                 names.append(pkg.name)
         except Exception:
             continue
@@ -468,12 +491,11 @@ def restore_modprobe_baks_if_enabled():
 def install_nouveau():
     restore_modprobe_baks_if_enabled()
 
-    nvidia_pkgs = _installed_nvidia_packages()
+    nvidia_pkgs = _nvidia_stack_packages()
 
     cmds = []
     if nvidia_pkgs:
         cmds.append(["apt-get", "purge", "-yq", *nvidia_pkgs])
-    cmds.append(["apt-get", "purge", "-yq", "xserver-xorg-video-nvidia"])
     cmds.append(["apt-get", "autoremove", "-yq"])
     cmds.append(["apt-get", "install", "-yq", nouveau])
 
