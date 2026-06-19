@@ -139,9 +139,13 @@ def graphics():
 
                 sp = os.path.join(pci_dev_path, dir, "class")
                 sc = readfile(sp)
-                if sc not in ("0x030000", "0x030200"):
+
+                if sc is None or not sc.startswith("0x03"):
                     continue
-                st = (sc == "0x030200")
+                # Secondary boot_vga is "1" only on the primary
+                # and absent on 3D controllers
+                bv = readfile(os.path.join(pci_dev_path, dir, "boot_vga"))
+                st = (bv != "1")
 
                 dp = os.path.join(pci_dev_path, dir, "device")
                 dc_raw = readfile(dp)
@@ -162,7 +166,7 @@ def graphics():
                 drv_ver_c = None
 
                 drv_p = os.path.join(pci_dev_path, dir, "driver", "module")
-                if os.path.isfile(drv_p):
+                if os.path.islink(drv_p):
                     orig_drv_p = os.readlink(drv_p)
                     drv_c = os.path.basename(orig_drv_p)
                     drv_ver_p = os.path.join(drv_p, "version")
@@ -212,6 +216,17 @@ def is_pkg_installed(driver, version=None):
     if version is None:
         return True
     return installed.version == version
+
+
+def has_pkg_version(pkg, version):
+    """
+    True if `pkg` offers exactly `version` right now. Lets us catch a stale
+    selection before kicking off the privileged install.
+    """
+    cache = _cache()
+    if pkg not in cache:
+        return False
+    return any(v.version == version for v in cache[pkg].versions)
 
 
 def drivers(gpus=None):
@@ -270,6 +285,8 @@ def newest_pkg_ver(pkg):
 
 
 def int2hex(num):
+    if num is None:
+        return None
     return f"{num:04X}"
 
 

@@ -54,7 +54,7 @@ class MainWindow(object):
 
         self.get_ui("ui_button_reboot_dlg").connect("clicked", self.do_reboot)
         self.get_ui("ui_button_exit_dlg").connect("clicked",
-            lambda x: exit(0))
+            lambda x: self.application.quit())
 
         if os.path.isfile("/run/pardus-nvi.reboot"):
             self.ui_main_window = self.get_ui("ui_window_reboot")
@@ -67,6 +67,7 @@ class MainWindow(object):
         self.active_driver = ""
         self.toggled_driver = None
         self.drv_arr = []
+        self.gpu_info_arr = []
         self.initial_gpu_driver = None
         self.initial_sec_gpu_state = False
         self.state = nvidia.source()
@@ -92,6 +93,15 @@ class MainWindow(object):
 
         self.ui_about_dialog = self.get_ui("ui_about_dialog")
         self.ui_about_button = self.get_ui("ui_about_button")
+
+        # Set version from __version__ file
+        try:
+            version = open(
+                os.path.dirname(os.path.abspath(__file__)) + "/__version__"
+                ).readline()
+            self.ui_about_dialog.set_version(version)
+        except:
+            pass
 
         self.ui_info_dialog = self.get_ui("ui_info_dialog")
 
@@ -140,7 +150,7 @@ class MainWindow(object):
 
         self.get_ui("ui_button_reboot").connect("clicked", self.do_reboot)
         self.get_ui("ui_button_exit").connect("clicked",
-            lambda x: exit(0))
+            lambda x: self.application.quit())
 
         self.op_widgets = (
             self.ui_apply_chg_button,
@@ -172,7 +182,12 @@ class MainWindow(object):
 
     def on_vte_done(self, vte, status):
         self.get_ui("ui_box_vte_buttons").show_all()
-        success = (status == 0)
+
+        try:
+            exit_code = os.waitstatus_to_exitcode(status)
+        except ValueError:
+            exit_code = status
+        success = (exit_code == 0)
         reboot_pending = os.path.isfile("/run/pardus-nvi.reboot")
         self.get_ui("ui_button_reboot").set_sensitive(success and reboot_pending)
 
@@ -191,7 +206,7 @@ class MainWindow(object):
                 )
             else:
                 markup = '<span foreground="tomato">{}</span>'.format(
-                    _("Operation failed (exit code {code}). Please review the log above.").format(code=status)
+                    _("Operation failed (exit code {code}). Please review the log above.").format(code=exit_code)
                 )
             status_label.set_markup(markup)
 
@@ -206,6 +221,16 @@ class MainWindow(object):
             finally:
                 self.ui_repo_switch.handler_unblock(self.mirror_handler_id)
             self.state = actual
+
+        # Refresh the list so the new state shows right away (cache was just
+        # reopened; devices don't change from a driver swap). Only on success:
+        # a failed install is atomic and changed nothing, so we keep the
+        # selection and leave Apply armed for a retry. disable/enable reboot
+        # anyway, and the no-devices screen has no list.
+        if (success
+                and self.apt_opr in ("install-nvidia", "install-nouveau", "update")
+                and not self.disabled_no_devices):
+            self.create_gpu_drivers()
 
     def update_vte_color(self, vte):
         style_context = self.ui_main_window.get_style_context()
@@ -253,21 +278,24 @@ class MainWindow(object):
             if self.ui_disable_check_button.get_parent() is not None:
                 self.ui_controller_box.remove(self.ui_disable_check_button)
             return
-
-        for dev in self.nvidia_devices:
-            if not dev.is_secondary_gpu:
-                self.ui_controller_box.remove(self.ui_disable_check_button)
-                break
+        # Show the toggle if any secondary GPU exists (only ui)
+        # and the boot script never removes the boot_vga=1 card
+        if not any(dev.is_secondary_gpu for dev in self.nvidia_devices):
+            self.ui_controller_box.remove(self.ui_disable_check_button)
 
     def create_gpu_drivers(self):
         if len(self.nvidia_devices) == 0 and not is_debug:
             self.ui_main_stack.set_visible_child(self.ui_novidia_box)
         for toggle in self.drv_arr:
             self.ui_gpu_box.remove(toggle)
+        for gpu_info in self.gpu_info_arr:
+            self.ui_gpu_info_box.remove(gpu_info)
         self.drv_arr = []
+        self.gpu_info_arr = []
         self.driver_buttons = []
         for nvidia_device in self.nvidia_devices:
             gpu_info = self.gpu_box(nvidia_device.device_name)
+            self.gpu_info_arr.append(gpu_info)
             self.ui_gpu_info_box.pack_start(gpu_info, True, True, 5)
 
         self.nvidia_drivers = nvidia.drivers(gpus=self.nvidia_devices)
@@ -277,7 +305,7 @@ class MainWindow(object):
                 self.filtered_nvidia_drivers.append(nvidia_driver)
             else:
                 if self.state:
-                    if nvidia_driver.repo == "NVIDIA":
+                    if nvidia_driver.repo == "NVIDIA" or nvidia_driver.installed:
                         self.filtered_nvidia_drivers.append(nvidia_driver)
                 else:
                     self.filtered_nvidia_drivers.append(nvidia_driver)
@@ -299,6 +327,8 @@ class MainWindow(object):
             toggle.connect("toggled", self.on_drv_toggled, nvidia_driver)
             self.drv_arr.append(toggle)
             self.ui_gpu_box.pack_start(toggle, True, True, 5)
+        self.ui_gpu_info_box.show_all()
+        self.ui_gpu_box.show_all()
         self.ui_apply_chg_button.set_sensitive(self.check_initials())
 
     def get_ui(self, object_name: str):
@@ -314,8 +344,6 @@ class MainWindow(object):
 
         name = b.get_object("ui_name_label")
         markup = self.lbl_markup(_("Driver"), drv_name)
-        if drv_name == nouveau:
-            markup = self.lbl_markup(_("Driver"), drv_name)
         name.set_markup(markup)
 
         ver = b.get_object("ui_version_label")
@@ -366,7 +394,6 @@ class MainWindow(object):
         self.vte_start(params)
 
     def on_apply_button_clicked(self, button):
-        print("apply button clicked")
         params = ["/usr/bin/pkexec", cur_path + pkg_file]
         self.apt_opr = None
         dlg_res = None
@@ -385,12 +412,42 @@ class MainWindow(object):
                 params.append(self.apt_opr)
             else:
                 self.apt_opr = "install-nvidia"
+                # Pin the chosen version, or apt just installs the highest one
+                # (pick 550 with the NVIDIA repo on and you'd get 610)
+                driver_arg = self.toggled_driver.package
+                version = self.toggled_driver.version
+                if version:
+                    nvidia.reopen_cache()
+                    if not nvidia.has_pkg_version(
+                        self.toggled_driver.package, version
+                    ):
+                        self._notify_version_gone()
+                        self.create_gpu_drivers()
+                        return
+                    driver_arg = "{}={}".format(
+                        self.toggled_driver.package, version
+                    )
                 params += [
                     self.apt_opr,
                     "linux-headers-{}".format(platform.uname().release), "linux-headers-amd64",
-                    self.toggled_driver.package
+                    driver_arg
                 ]
             self.vte_start(params)
+
+    def _notify_version_gone(self):
+        dialog = Gtk.MessageDialog(
+            transient_for=self.ui_main_window,
+            modal=True,
+            message_type=Gtk.MessageType.WARNING,
+            buttons=Gtk.ButtonsType.OK,
+            text=_("Selected version is no longer available"),
+        )
+        dialog.format_secondary_text(
+            _("The package list has been refreshed. "
+              "Please choose a driver again.")
+        )
+        dialog.run()
+        dialog.destroy()
 
         # self.ui_apply_chg_button.set_sensitive(False)
 

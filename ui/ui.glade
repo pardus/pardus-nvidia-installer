@@ -19,6 +19,10 @@
         <child internal-child="action_area">
           <object class="GtkButtonBox">
             <property name="can-focus">False</property>
+            <property name="margin-start">3</property>
+            <property name="margin-end">3</property>
+            <property name="margin-top">3</property>
+            <property name="margin-bottom">3</property>
             <property name="homogeneous">True</property>
             <property name="layout-style">end</property>
             <child>
@@ -60,12 +64,21 @@ Feel free to report any issues or concerns via our GitHub repository: &lt;a href
     <property name="secondary-use-markup">True</property>
     <child internal-child="vbox">
       <object class="GtkBox">
-        <property name="can-focus">False</property>
+        <property name="can-focus">True</property>
+        <property name="has-focus">True</property>
+        <property name="has-default">True</property>
+        <property name="receives-default">True</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
           <object class="GtkButtonBox">
-            <property name="can-focus">False</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <property name="margin-start">2</property>
+            <property name="margin-end">2</property>
+            <property name="margin-top">1</property>
+            <property name="margin-bottom">1</property>
             <property name="layout-style">end</property>
             <child>
               <placeholder/>
@@ -104,6 +117,8 @@ Feel free to report any issues or concerns via our GitHub repository: &lt;a href
             <property name="can-focus">False</property>
             <property name="halign">center</property>
             <property name="valign">start</property>
+            <property name="margin-start">3</property>
+            <property name="margin-end">3</property>
             <property name="margin-top">13</property>
             <property name="margin-bottom">13</property>
             <property name="spacing">21</property>
@@ -127,6 +142,8 @@ Feel free to report any issues or concerns via our GitHub repository: &lt;a href
               <object class="GtkBox" id="ui_gpu_info_box">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="margin-start">3</property>
+                <property name="margin-end">3</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <placeholder/>
@@ -149,6 +166,8 @@ Feel free to report any issues or concerns via our GitHub repository: &lt;a href
           <object class="GtkStack" id="ui_main_stack">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="margin-start">5</property>
+            <property name="margin-end">5</property>
             <property name="margin-top">7</property>
             <child>
               <object class="GtkBox" id="ui_nvidia_box">
@@ -161,6 +180,8 @@ Feel free to report any issues or concerns via our GitHub repository: &lt;a href
                   <object class="GtkStack" id="ui_info_stack">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
+                    <property name="margin-start">10</property>
+                    <property name="margin-end">10</property>
                     <child>
                       <object class="GtkBox" id="ui_disabled_gpu_box">
                         <property name="visible">True</property>
@@ -403,6 +424,8 @@ Feel free to report any issues or concerns via our GitHub repository: &lt;a href
               <object class="GtkBox" id="ui_novidia_box">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="margin-start">10</property>
+                <property name="margin-end">10</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkLabel">
@@ -429,26 +452,11 @@ You can't use this application</property>
               <object class="GtkBox" id="ui_box_vte">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="margin-start">20</property>
+                <property name="margin-end">20</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <placeholder/>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="ui_vte_status_label">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">center</property>
-                    <property name="margin-top">5</property>
-                    <property name="margin-bottom">5</property>
-                    <property name="use-markup">True</property>
-                    <property name="label"></property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="pack-type">end</property>
-                    <property name="position">2</property>
-                  </packing>
                 </child>
                 <child>
                   <object class="GtkBox" id="ui_box_vte_buttons">
@@ -456,8 +464,10 @@ You can't use this application</property>
                     <property name="can-focus">False</property>
                     <property name="halign">center</property>
                     <property name="valign">center</property>
+                    <property name="margin-start">3</property>
+                    <property name="margin-end">3</property>
                     <property name="margin-top">5</property>
-                    <property name="margin-bottom">5</property>
+                    <property name="margin-bottom">10</property>
                     <property name="homogeneous">True</property>
                     <child>
                       <object class="GtkButton" id="ui_button_reboot">
@@ -465,6 +475,7 @@ You can't use this application</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <property name="margin-end">5</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -478,6 +489,7 @@ You can't use this application</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <property name="margin-end">5</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -491,6 +503,22 @@ You can't use this application</property>
                     <property name="fill">True</property>
                     <property name="pack-type">end</property>
                     <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="ui_vte_status_label">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">center</property>
+                    <property name="margin-top">5</property>
+                    <property name="margin-bottom">5</property>
+                    <property name="use-markup">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="pack-type">end</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
@@ -583,7 +611,7 @@ You can't use this application</property>
     <property name="gravity">center</property>
     <property name="transient-for">ui_main_window</property>
     <property name="program-name">Pardus Nvidia Installer</property>
-    <property name="version">0.0.6</property>
+    <property name="version">0.1.0</property>
     <property name="copyright">© TÜBİTAK BİLGEM</property>
     <property name="website">https://github.com/pardus/pardus-nvidia-installer</property>
     <property name="authors">Osman Coskun &lt;osman.coskun@pardus.org.tr&gt;
@@ -649,8 +677,8 @@ Hugo Carvalho &lt;hugokarvalho@hotmail.com&gt;</property>
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="margin-start">13</property>
-            <property name="margin-end">13</property>
+            <property name="margin-start">30</property>
+            <property name="margin-end">30</property>
             <property name="margin-bottom">13</property>
             <property name="spacing">13</property>
             <property name="homogeneous">True</property>
@@ -661,6 +689,7 @@ Hugo Carvalho &lt;hugokarvalho@hotmail.com&gt;</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
                 <property name="valign">start</property>
+                <property name="margin-start">1</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -676,6 +705,7 @@ Hugo Carvalho &lt;hugokarvalho@hotmail.com&gt;</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
                 <property name="valign">start</property>
+                <property name="margin-end">1</property>
               </object>
               <packing>
                 <property name="expand">True</property>

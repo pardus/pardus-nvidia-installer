@@ -1,6 +1,6 @@
 [Unit]
 Description=Disable secondary graphic card on boot
-Before=dbus.service
+Before=display-manager.service graphical.target
 
 [Service]
 Type=oneshot
@@ -9,5 +9,4 @@ User=root
 ExecStart=/usr/share/pardus/pardus-nvidia-installer/pni-disable-gpu.sh
 
 [Install]
-RequiredBy=multi-user.target
-
+WantedBy=multi-user.target
