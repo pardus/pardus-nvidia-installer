@@ -1,6 +1,0 @@
-[Pardus Nvidia Installer]
-Identity=unix-group:pardus-nvidia-installer
-Action=tr.org.pardus.pkexec.pardus-nvidia-installer
-ResultAny=yes
-ResultInactive=yes
-ResultActive=yes
