@@ -1,3 +1,10 @@
+pardus-nvidia-installer (2.0.1) unstable; urgency=medium
+
+  * Remove pkla and purge it on upgrade - #ZA-26072117001 - #PARDUS-1736
+  * Del unused line - #PARDUS-1736
+
+ -- Emel Öztürk <emel.ozturk@pardus.org.tr>  Fri, 24 Jul 2026 12:39:01 +0300
+
 pardus-nvidia-installer (2.0.0) unstable; urgency=medium
 
   [ Hugo Carvalho ]
