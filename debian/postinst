@@ -4,5 +4,4 @@ set -e
 systemctl daemon-reload || true
 systemctl enable pni-disable-gpu.service || true
 cat /usr/share/pardus/pardus-nvidia-installer/nvidia.pub | gpg --dearmor --yes | tee /usr/share/keyrings/nvidia-drivers.gpg > /dev/null 2>&1
-rm -f /var/lib/polkit-1/localauthority/50-local.d/pardus-nvidia-installer-group.pkla
 exit 0
