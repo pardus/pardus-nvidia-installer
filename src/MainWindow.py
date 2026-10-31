@@ -231,6 +231,9 @@ class MainWindow(object):
                 and self.apt_opr in ("install-nvidia", "install-nouveau", "update")
                 and not self.disabled_no_devices):
             self.create_gpu_drivers()
+            # A repo switch needs no reboot and this page has no way back
+            if self.apt_opr == "update":
+                self.ui_main_stack.set_visible_child(self.ui_nvidia_box)
 
     def update_vte_color(self, vte):
         style_context = self.ui_main_window.get_style_context()
